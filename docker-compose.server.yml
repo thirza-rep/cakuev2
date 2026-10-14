@@ -1,0 +1,41 @@
+services:
+  # 1. DATABASE POSTGRESQL (100% ACID & ZERO-HALLUCINATION LEDGER)
+  postgres:
+    image: postgres:16-alpine
+    container_name: cakue-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: cakue_db
+      POSTGRES_USER: cakue_user
+      POSTGRES_PASSWORD: cakue_password_secure2026
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backend/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cakue_user -d cakue_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 2. BAILEYS WHATSAPP GATEWAY (SELF-HOSTED $0 COST)
+  wa-gateway:
+    build:
+      context: ./wa-gateway
+      dockerfile: Dockerfile
+    container_name: cakue-wa-gateway
+    restart: unless-stopped
+    ports:
+      - "3333:3333"
+    volumes:
+      - wa_auth:/app/auth_info_baileys
+    environment:
+      - PORT=3333
+      - NODE_ENV=production
+
+volumes:
+  pgdata:
+    name: cakue_postgres_data
+  wa_auth:
+    name: cakue_baileys_auth
