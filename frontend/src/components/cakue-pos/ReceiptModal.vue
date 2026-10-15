@@ -173,7 +173,8 @@ async function sendWhatsAppReceipt() {
 
   try {
     // Coba kirim langsung melalui Baileys Gateway (port 3333)
-    const response = await fetch('http://localhost:3333/api/send-receipt', {
+    const gatewayHost = window.location.hostname || 'localhost'
+    const response = await fetch(`http://${gatewayHost}:3333/api/send-receipt`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
