@@ -6,7 +6,7 @@
       :class="[
         'fixed inset-y-0 left-0 z-40 bg-white border-r border-slate-200 flex flex-col transition-all duration-300 ease-in-out shadow-xs select-none',
         isSidebarCollapsed ? 'w-20' : 'w-64 sm:w-72',
-        isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+        isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       ]"
     >
       <!-- Sidebar Brand Header -->
@@ -61,17 +61,17 @@
           v-if="!isSidebarCollapsed"
           @click="toggleSidebar" 
           type="button" 
-          class="hidden md:flex w-8 h-8 rounded-lg items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
+          class="hidden lg:flex w-8 h-8 rounded-lg items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
           title="Tutup Sidebar"
         >
           <Icon name="chevron-left" custom-class="w-4 h-4" />
         </button>
 
-        <!-- Close Button (Mobile) -->
+        <!-- Close Button (Mobile & Tablet) -->
         <button 
           @click="isMobileSidebarOpen = false" 
           type="button" 
-          class="md:hidden w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer shrink-0"
+          class="lg:hidden w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer shrink-0"
         >
           <Icon name="close" custom-class="w-4 h-4" />
         </button>
@@ -164,7 +164,7 @@
       </div>
 
       <!-- Sidebar Bottom Toggle Action Bar (Desktop) -->
-      <div class="p-2 border-t border-slate-200 hidden md:block bg-white">
+      <div class="p-2 border-t border-slate-200 hidden lg:block bg-white">
         <button 
           @click="toggleSidebar" 
           type="button" 
@@ -204,30 +204,30 @@
       </div>
     </aside>
 
-    <!-- Mobile Backdrop -->
+    <!-- Mobile & Tablet Backdrop -->
     <div 
       v-if="isMobileSidebarOpen" 
       @click="isMobileSidebarOpen = false" 
-      class="fixed inset-0 z-30 bg-slate-900/40 backdrop-blur-xs md:hidden"
+      class="fixed inset-0 z-30 bg-slate-900/40 backdrop-blur-xs lg:hidden"
     ></div>
 
-    <!-- 2. MAIN CONTENT AREA (Offset by sidebar width) -->
+    <!-- 2. MAIN CONTENT AREA (Offset by sidebar width on Desktop) -->
     <div 
       :class="[
         'flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out min-w-0',
-        isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64 sm:md:ml-72'
+        isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64 sm:lg:ml-72'
       ]"
     >
       <!-- Top Header Navbar -->
       <header class="bg-white border-b border-slate-200 sticky top-0 z-20 shadow-xs h-16 flex items-center px-4 sm:px-6 lg:px-8">
         <div class="w-full flex items-center justify-between gap-4">
-          <!-- Left: Mobile Hamburger Toggle + Breadcrumb Title -->
+          <!-- Left: Mobile/Tablet Hamburger Toggle + Breadcrumb Title -->
           <div class="flex items-center gap-3">
-            <!-- Mobile Hamburger Toggle -->
+            <!-- Mobile/Tablet Hamburger Toggle -->
             <button 
               @click="isMobileSidebarOpen = true" 
               type="button" 
-              class="md:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 cursor-pointer"
+              class="lg:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 cursor-pointer"
               title="Buka Menu"
             >
               <Icon name="menu" custom-class="w-5 h-5" />
@@ -383,32 +383,32 @@
       </header>
 
       <!-- Main Workspace (Screen-filling, generous width) -->
-      <main class="flex-1 max-w-[1600px] w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6 pb-24 md:pb-8">
+      <main class="flex-1 max-w-[1600px] w-full mx-auto p-3.5 sm:p-5 lg:p-8 space-y-5 sm:space-y-6 pb-24 lg:pb-8">
         
         <!-- ========================================== -->
         <!-- TAB 1: TAMPILAN DEPAN (HOME RINGKASAN DOMPET) -->
         <!-- Hanya data keuangan secara bulat & shortcut cepat yang sering digunakan -->
         <!-- ========================================== -->
-        <div v-if="activeTab === 'overview'" class="space-y-6">
+        <div v-if="activeTab === 'overview'" class="space-y-5 sm:space-y-6">
           
           <!-- 1. DATA KEUANGAN SECARA BULAT (Kartu Digital Saldo Utama & Cashflow) -->
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-stretch">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-3.5 sm:gap-5 items-stretch">
             
             <!-- Kartu Digital Utama (Col 7 / 12) - Sleek & Compact -->
-            <div class="lg:col-span-7 p-5 sm:p-7 bg-gradient-to-br from-emerald-800 via-emerald-900 to-slate-900 text-white rounded-2xl sm:rounded-3xl relative overflow-hidden bank-card-shadow flex flex-col justify-between">
+            <div class="lg:col-span-7 p-4 sm:p-6 lg:p-7 bg-gradient-to-br from-emerald-800 via-emerald-900 to-slate-900 text-white rounded-2xl sm:rounded-3xl relative overflow-hidden bank-card-shadow flex flex-col justify-between min-w-0">
               <!-- Decorative subtle glow circle -->
               <div class="absolute -right-12 -bottom-12 w-48 h-48 rounded-full bg-emerald-500/15 blur-2xl pointer-events-none"></div>
 
               <div class="relative z-10 space-y-3 sm:space-y-4">
                 <!-- Top Header: Chip Rekening & Hide Toggle -->
                 <div class="flex items-center justify-between gap-2">
-                  <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 backdrop-blur-xs text-[11px] font-medium text-emerald-200 border border-white/10">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 backdrop-blur-xs text-[11px] font-medium text-emerald-200 border border-white/10 truncate">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
                     <span class="truncate">Terverifikasi • {{ authStore.personalUser.accountNumber }}</span>
                   </div>
                   <button 
                     @click="isBalanceHidden = !isBalanceHidden"
-                    class="p-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-emerald-200 hover:text-white transition-colors cursor-pointer"
+                    class="p-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-emerald-200 hover:text-white transition-colors cursor-pointer shrink-0"
                     title="Sembunyikan/Tampilkan Saldo"
                   >
                     <svg v-if="!isBalanceHidden" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
@@ -416,10 +416,10 @@
                   </button>
                 </div>
 
-                <!-- Main Balance Display (Clean Sans-Serif, Proper Kerning) -->
-                <div class="pt-1">
-                  <div class="text-[11px] sm:text-xs uppercase tracking-wider text-emerald-200/80 font-bold">Total Saldo Kas Pribadi</div>
-                  <div class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white mt-0.5">
+                <!-- Main Balance Display (Fluid Responsive Typography) -->
+                <div class="pt-1 min-w-0">
+                  <div class="text-[11px] sm:text-xs uppercase tracking-wider text-emerald-200/80 font-bold truncate">Total Saldo Kas Pribadi</div>
+                  <div class="text-xl sm:text-2xl md:text-3xl xl:text-4xl font-extrabold tracking-tight text-white mt-0.5 tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">
                     {{ isBalanceHidden ? 'Rp ••••••••••' : `Rp ${formatNumber(financeStore.totalBalance)}` }}
                   </div>
                 </div>
@@ -427,22 +427,22 @@
 
               <!-- Snapshot Kas Masuk vs Kas Keluar (Clean Inline Split) -->
               <div class="relative z-10 grid grid-cols-2 divide-x divide-white/15 pt-3.5 mt-4 border-t border-white/15">
-                <div class="pr-3">
-                  <div class="flex items-center gap-1.5 text-emerald-200 text-[11px] font-medium">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                    <span>Pemasukan Bulan Ini</span>
+                <div class="pr-2.5 sm:pr-4 min-w-0">
+                  <div class="flex items-center gap-1.5 text-emerald-200 text-[11px] font-medium truncate">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
+                    <span class="truncate">Pemasukan Bulan Ini</span>
                   </div>
-                  <div class="font-bold text-sm sm:text-base text-white tracking-tight mt-0.5">
+                  <div class="font-bold text-xs sm:text-sm md:text-base text-white tracking-tight mt-0.5 tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">
                     +Rp {{ formatNumber(financeStore.totalIncome) }}
                   </div>
                 </div>
 
-                <div class="pl-3 sm:pl-4">
-                  <div class="flex items-center gap-1.5 text-rose-200 text-[11px] font-medium">
-                    <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
-                    <span>Pengeluaran Bulan Ini</span>
+                <div class="pl-2.5 sm:pl-4 min-w-0">
+                  <div class="flex items-center gap-1.5 text-rose-200 text-[11px] font-medium truncate">
+                    <span class="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0"></span>
+                    <span class="truncate">Pengeluaran Bulan Ini</span>
                   </div>
-                  <div class="font-bold text-sm sm:text-base text-white tracking-tight mt-0.5">
+                  <div class="font-bold text-xs sm:text-sm md:text-base text-white tracking-tight mt-0.5 tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">
                     -Rp {{ formatNumber(financeStore.totalExpense) }}
                   </div>
                 </div>
@@ -452,117 +452,126 @@
             <!-- Ringkasan Angka Bulat Tambahan: 2 Kolom Sejajar Rapi di Mobile (Col 5 / 12) -->
             <div class="lg:col-span-5 grid grid-cols-2 lg:grid-cols-1 gap-3 sm:gap-4">
               <!-- Card 1: Surplus Tabungan -->
-              <div class="saas-card p-4 sm:p-5 flex flex-col justify-between">
-                <div class="flex items-center justify-between text-slate-500 text-[11px] font-bold uppercase tracking-wider">
+              <div class="saas-card p-3.5 sm:p-5 flex flex-col justify-between min-w-0">
+                <div class="flex items-center justify-between text-slate-500 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider">
                   <span class="truncate">Surplus Tabungan</span>
                   <div class="w-6 h-6 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
                     <Icon name="income" custom-class="w-3.5 h-3.5" />
                   </div>
                 </div>
-                <div class="my-1.5 sm:my-2">
-                  <div class="text-base sm:text-2xl font-extrabold text-emerald-700 tracking-tight">
+                <div class="my-1.5 sm:my-2 min-w-0">
+                  <div class="text-sm sm:text-lg md:text-xl xl:text-2xl font-extrabold text-emerald-700 tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">
                     Rp {{ formatNumber(financeStore.netSavings) }}
                   </div>
                 </div>
-                <div class="text-[11px] text-emerald-700 font-semibold flex items-center gap-1 truncate">
+                <div class="text-[10px] sm:text-[11px] text-emerald-700 font-semibold flex items-center gap-1 truncate">
                   <Icon name="check" custom-class="w-3.5 h-3.5 shrink-0" />
                   <span class="truncate">Rasio Sehat (39.9%)</span>
                 </div>
               </div>
 
               <!-- Card 2: Kewajiban Utang -->
-              <div class="saas-card p-4 sm:p-5 flex flex-col justify-between">
-                <div class="flex items-center justify-between text-slate-500 text-[11px] font-bold uppercase tracking-wider">
+              <div class="saas-card p-3.5 sm:p-5 flex flex-col justify-between min-w-0">
+                <div class="flex items-center justify-between text-slate-500 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider">
                   <span class="truncate">Kewajiban Utang</span>
                   <div class="w-6 h-6 rounded-md bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
                     <Icon name="debt" custom-class="w-3.5 h-3.5" />
                   </div>
                 </div>
-                <div class="my-1.5 sm:my-2">
-                  <div class="text-base sm:text-2xl font-extrabold text-amber-800 tracking-tight">
+                <div class="my-1.5 sm:my-2 min-w-0">
+                  <div class="text-sm sm:text-lg md:text-xl xl:text-2xl font-extrabold text-amber-800 tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">
                     Rp {{ formatNumber(financeStore.totalUtang) }}
                   </div>
                 </div>
-                <div class="text-[11px] text-slate-500 font-medium truncate">
-                  Piutang: <strong class="text-slate-800">Rp {{ formatNumber(financeStore.totalPiutang) }}</strong>
+                <div class="text-[10px] sm:text-[11px] text-slate-500 font-medium truncate">
+                  Piutang: <strong class="text-slate-800 tabular-nums">Rp {{ formatNumber(financeStore.totalPiutang) }}</strong>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- 2. SHORTCUT CEPAT OPERASIONAL (Modern 5-Column Quick Action Bar) -->
-          <div class="space-y-2.5">
-            <div class="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Shortcut Cepat yang Sering Digunakan
+          <!-- 2. SHORTCUT CEPAT OPERASIONAL (Spacious 4-Grid Action Bar) -->
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400">
+                Shortcut Cepat & Transaksi
+              </span>
+              <span class="text-[11px] text-slate-400 hidden sm:inline">Sentuh cepat untuk aksi instan</span>
             </div>
-            <div class="grid grid-cols-5 gap-2 sm:gap-3">
-              <!-- Shortcut 1: Catat Cepat -->
+            
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <!-- Shortcut 1: Catat Cepat (Elevated Green Primary) -->
               <button 
                 @click="showQrisModal = true"
                 type="button"
-                class="saas-card p-2 sm:p-3.5 flex flex-col items-center justify-center text-center gap-1.5 hover:border-emerald-500 hover:shadow-xs transition-all cursor-pointer group bg-gradient-to-b from-emerald-50/60 to-white"
+                class="p-3.5 sm:p-4 md:p-5 min-h-[96px] sm:min-h-[110px] rounded-2xl bg-gradient-to-br from-emerald-700 to-teal-800 text-white shadow-md shadow-emerald-900/10 hover:shadow-lg hover:from-emerald-800 hover:to-teal-900 active:scale-[0.98] transition-all cursor-pointer flex flex-col justify-between text-left group"
               >
-                <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-emerald-700 text-white flex items-center justify-center group-hover:scale-105 transition-transform shadow-xs">
-                  <Icon name="plus" custom-class="w-5 h-5 text-white" stroke-width="2.5" />
+                <div class="flex items-center justify-between w-full">
+                  <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white/15 backdrop-blur-xs flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <Icon name="plus" custom-class="w-5 h-5 text-white" stroke-width="2.5" />
+                  </div>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20 text-emerald-100 uppercase tracking-wider">
+                    Instan
+                  </span>
                 </div>
-                <span class="text-[10px] sm:text-xs font-bold text-slate-800 group-hover:text-emerald-700 truncate w-full">Catat Cepat</span>
+                <div>
+                  <div class="text-xs sm:text-sm md:text-base font-extrabold text-white leading-tight">Catat Cepat</div>
+                  <div class="text-[11px] text-emerald-100/80 mt-0.5 hidden sm:block">Input kilat / Nota</div>
+                </div>
               </button>
 
-              <!-- Shortcut 2: Catat Masuk -->
+              <!-- Shortcut 2: Pemasukan (+ Masuk) -->
               <button 
                 @click="openTransactionModal('income')"
                 type="button"
-                class="saas-card p-2 sm:p-3.5 flex flex-col items-center justify-center text-center gap-1.5 hover:border-emerald-500 hover:shadow-xs transition-all cursor-pointer group"
+                class="p-3.5 sm:p-4 md:p-5 min-h-[96px] sm:min-h-[110px] rounded-2xl bg-white hover:bg-emerald-50/40 border border-slate-200/90 hover:border-emerald-300 shadow-xs hover:shadow-sm active:scale-[0.98] transition-all cursor-pointer flex flex-col justify-between text-left group"
               >
-                <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-xs">
+                <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center group-hover:scale-105 transition-transform">
                   <Icon name="income" custom-class="w-5 h-5" />
                 </div>
-                <span class="text-[10px] sm:text-xs font-bold text-slate-800 group-hover:text-emerald-700 truncate w-full">Pemasukan</span>
+                <div>
+                  <div class="text-xs sm:text-sm md:text-base font-extrabold text-slate-800 group-hover:text-emerald-800 leading-tight">Pemasukan</div>
+                  <div class="text-[11px] text-slate-500 mt-0.5 hidden sm:block">Gaji & Hasil Usaha</div>
+                </div>
               </button>
 
-              <!-- Shortcut 3: Catat Keluar -->
+              <!-- Shortcut 3: Pengeluaran (- Keluar) -->
               <button 
                 @click="openTransactionModal('expense')"
                 type="button"
-                class="saas-card p-2 sm:p-3.5 flex flex-col items-center justify-center text-center gap-1.5 hover:border-rose-500 hover:shadow-xs transition-all cursor-pointer group"
+                class="p-3.5 sm:p-4 md:p-5 min-h-[96px] sm:min-h-[110px] rounded-2xl bg-white hover:bg-rose-50/40 border border-slate-200/90 hover:border-rose-300 shadow-xs hover:shadow-sm active:scale-[0.98] transition-all cursor-pointer flex flex-col justify-between text-left group"
               >
-                <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-rose-50 text-rose-700 flex items-center justify-center group-hover:bg-rose-600 group-hover:text-white transition-all shadow-xs">
+                <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-rose-50 text-rose-700 flex items-center justify-center group-hover:scale-105 transition-transform">
                   <Icon name="expense" custom-class="w-5 h-5" />
                 </div>
-                <span class="text-[10px] sm:text-xs font-bold text-slate-800 group-hover:text-rose-700 truncate w-full">Pengeluaran</span>
-              </button>
-
-              <!-- Shortcut 4: Statistik Keuangan -->
-              <button 
-                @click="activeTab = 'analytics'"
-                type="button"
-                class="saas-card p-2 sm:p-3.5 flex flex-col items-center justify-center text-center gap-1.5 hover:border-teal-500 hover:shadow-xs transition-all cursor-pointer group"
-              >
-                <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center group-hover:bg-teal-600 group-hover:text-white transition-all shadow-xs">
-                  <Icon name="chart" custom-class="w-5 h-5" />
+                <div>
+                  <div class="text-xs sm:text-sm md:text-base font-extrabold text-slate-800 group-hover:text-rose-800 leading-tight">Pengeluaran</div>
+                  <div class="text-[11px] text-slate-500 mt-0.5 hidden sm:block">Belanja & Biaya Hidup</div>
                 </div>
-                <span class="text-[10px] sm:text-xs font-bold text-slate-800 group-hover:text-teal-700 truncate w-full">Statistik</span>
               </button>
 
-              <!-- Shortcut 5: Buku Utang & Piutang -->
+              <!-- Shortcut 4: Utang & Piutang -->
               <button 
                 @click="activeTab = 'debts'"
                 type="button"
-                class="saas-card p-2 sm:p-3.5 flex flex-col items-center justify-center text-center gap-1.5 hover:border-amber-500 hover:shadow-xs transition-all cursor-pointer group"
+                class="p-3.5 sm:p-4 md:p-5 min-h-[96px] sm:min-h-[110px] rounded-2xl bg-white hover:bg-amber-50/40 border border-slate-200/90 hover:border-amber-300 shadow-xs hover:shadow-sm active:scale-[0.98] transition-all cursor-pointer flex flex-col justify-between text-left group"
               >
-                <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition-all shadow-xs">
+                <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center group-hover:scale-105 transition-transform">
                   <Icon name="debt" custom-class="w-5 h-5" />
                 </div>
-                <span class="text-[10px] sm:text-xs font-bold text-slate-800 group-hover:text-amber-700 truncate w-full">Utang Piutang</span>
+                <div>
+                  <div class="text-xs sm:text-sm md:text-base font-extrabold text-slate-800 group-hover:text-amber-800 leading-tight">Utang Piutang</div>
+                  <div class="text-[11px] text-slate-500 mt-0.5 hidden sm:block">Kewajiban & Tagihan</div>
+                </div>
               </button>
             </div>
           </div>
 
           <!-- 3. MINI PRATINJAU MUTASI TERKINI (Hanya 3 Transaksi Terakhir, Bebas Clutter) -->
-          <div class="saas-card p-5 sm:p-6 space-y-4">
+          <div class="saas-card p-4 sm:p-6 space-y-4">
             <div class="flex items-center justify-between pb-3 border-b border-slate-100">
               <div>
-                <h3 class="text-base font-bold text-slate-900">Transaksi Kas Terakhir</h3>
+                <h3 class="text-sm sm:text-base font-bold text-slate-900">Transaksi Kas Terakhir</h3>
                 <p class="text-xs text-slate-500">Pratinjau mutasi singkat dompet pribadi</p>
               </div>
               <button 
@@ -579,18 +588,18 @@
               <div 
                 v-for="tx in financeStore.transactions.slice(0, 3)" 
                 :key="tx.id"
-                class="py-3 flex items-center justify-between gap-4 text-xs sm:text-sm"
+                class="py-3 sm:py-3.5 flex items-center justify-between gap-3 sm:gap-4 text-xs sm:text-sm min-w-0"
               >
-                <div class="flex items-center gap-3">
-                  <div :class="['w-9 h-9 rounded-xl flex items-center justify-center shrink-0', tx.type === 'income' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-700']">
+                <div class="flex items-center gap-3 min-w-0">
+                  <div :class="['w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-2xs', tx.type === 'income' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-700']">
                     <Icon :name="tx.type === 'income' ? 'income' : 'expense'" custom-class="w-4 h-4" />
                   </div>
-                  <div>
-                    <div class="font-bold text-slate-900">{{ tx.desc }}</div>
-                    <div class="text-[11px] text-slate-500">{{ tx.date }} • {{ tx.category }} • {{ tx.account }}</div>
+                  <div class="min-w-0">
+                    <div class="font-bold text-slate-900 truncate">{{ tx.desc }}</div>
+                    <div class="text-[11px] text-slate-500 truncate">{{ tx.date }} • {{ tx.category }} • {{ tx.account }}</div>
                   </div>
                 </div>
-                <div :class="['font-bold text-sm sm:text-base text-right tracking-tight', tx.type === 'income' ? 'text-emerald-700' : 'text-slate-900']">
+                <div :class="['font-extrabold text-xs sm:text-sm md:text-base text-right tracking-tight tabular-nums whitespace-nowrap shrink-0', tx.type === 'income' ? 'text-emerald-700' : 'text-slate-900']">
                   {{ tx.type === 'income' ? '+' : '-' }}Rp {{ formatNumber(tx.amount) }}
                 </div>
               </div>
@@ -614,20 +623,20 @@
           </div>
 
           <!-- 3 Analytical Cards -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <div class="saas-card p-6 space-y-2">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-5">
+            <div class="saas-card p-5 sm:p-6 space-y-2 min-w-0">
               <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Rasio Tabungan (Savings Rate)</div>
-              <div class="text-2xl sm:text-3xl font-extrabold text-emerald-700 tracking-tight">39.9%</div>
+              <div class="text-2xl sm:text-3xl font-extrabold text-emerald-700 tracking-tight tabular-nums">39.9%</div>
               <p class="text-xs text-slate-500">Persentase surplus yang berhasil disisihkan dari total penghasilan</p>
             </div>
 
-            <div class="saas-card p-6 space-y-2">
+            <div class="saas-card p-5 sm:p-6 space-y-2 min-w-0">
               <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Rata-rata Pengeluaran Harian</div>
-              <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Rp {{ formatNumber(92600) }}</div>
+              <div class="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">Rp {{ formatNumber(92600) }}</div>
               <p class="text-xs text-slate-500">Estimasi konsumsi harian untuk kebutuhan primer</p>
             </div>
 
-            <div class="saas-card p-6 space-y-2">
+            <div class="saas-card p-5 sm:p-6 space-y-2 min-w-0">
               <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Kesehatan Finansial</div>
               <div class="text-2xl sm:text-3xl font-extrabold text-teal-700 tracking-tight">PRIMA (A+)</div>
               <p class="text-xs text-slate-500">Bebas dari defisit dan utang konsumtif yang berlebihan</p>
@@ -724,6 +733,22 @@
               <!-- Action & Filter Pills -->
               <div class="flex flex-wrap items-center gap-2">
                 <button 
+                  @click="showExcelReportModal = true"
+                  type="button"
+                  class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
+                  title="Lihat & Download Laporan Mutasi Harian / Bulanan Excel"
+                >
+                  <svg class="w-3.5 h-3.5 fill-none stroke-current" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                  </svg>
+                  <span>Laporan Mutasi Excel</span>
+                </button>
+
+                <button 
                   @click="openTransactionModal('expense')"
                   type="button"
                   class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
@@ -777,7 +802,7 @@
                 </div>
 
                 <div class="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-100">
-                  <div :class="['font-extrabold text-base tracking-tight', tx.type === 'income' ? 'text-emerald-700' : 'text-slate-900']">
+                  <div :class="['font-extrabold text-sm sm:text-base tracking-tight tabular-nums whitespace-nowrap', tx.type === 'income' ? 'text-emerald-700' : 'text-slate-900']">
                     {{ tx.type === 'income' ? '+' : '-' }}Rp {{ formatNumber(tx.amount) }}
                   </div>
                   <div class="flex items-center gap-1.5">
@@ -820,7 +845,7 @@
                 class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm shadow-xs transition-all cursor-pointer self-start sm:self-auto"
               >
                 <Icon name="plus" custom-class="w-4 h-4" />
-                <span>+ Tambah Kantong</span>
+                <span>Tambah Kantong</span>
               </button>
             </div>
 
@@ -834,7 +859,7 @@
                 </div>
                 <div class="flex items-baseline gap-1.5 shrink-0 text-right">
                   <span class="text-[11px] uppercase font-bold text-slate-600">Subtotal</span>
-                  <span class="text-sm sm:text-base font-extrabold text-slate-900 font-mono tracking-tight">
+                  <span class="text-sm sm:text-base font-extrabold text-slate-900 font-mono tracking-tight tabular-nums whitespace-nowrap">
                     Rp {{ formatNumber(financeStore.totalCash) }}
                   </span>
                 </div>
@@ -857,7 +882,7 @@
                   </div>
                   <div>
                     <div class="text-[10px] uppercase font-semibold text-slate-600 tracking-wider">Saldo</div>
-                    <div class="text-base sm:text-lg font-black text-slate-900 tracking-tight font-mono break-all sm:break-normal">
+                    <div class="text-base sm:text-lg font-black text-slate-900 tracking-tight font-mono tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">
                       Rp {{ formatNumber(acc.balance) }}
                     </div>
                   </div>
@@ -882,7 +907,7 @@
                   v-if="financeStore.cashAccounts.length === 0" 
                   class="col-span-full p-4 border border-dashed border-slate-200 rounded-xl text-center text-xs text-slate-400"
                 >
-                  Belum ada kantong kas tunai. <button @click="openAddAccountModal('cash')" class="text-emerald-700 font-bold underline cursor-pointer">+ Tambah Kas Tunai</button>
+                  Belum ada kantong kas tunai. <button @click="openAddAccountModal('cash')" class="text-emerald-700 font-bold underline cursor-pointer">Tambah Kas Tunai</button>
                 </div>
               </div>
             </div>
@@ -897,7 +922,7 @@
                 </div>
                 <div class="flex items-baseline gap-1.5 shrink-0 text-right">
                   <span class="text-[11px] uppercase font-bold text-slate-600">Subtotal</span>
-                  <span class="text-sm sm:text-base font-extrabold text-slate-900 font-mono tracking-tight">
+                  <span class="text-sm sm:text-base font-extrabold text-slate-900 font-mono tracking-tight tabular-nums whitespace-nowrap">
                     Rp {{ formatNumber(financeStore.totalBank) }}
                   </span>
                 </div>
@@ -920,7 +945,7 @@
                   </div>
                   <div>
                     <div class="text-[10px] uppercase font-semibold text-slate-600 tracking-wider">Saldo</div>
-                    <div class="text-base sm:text-lg font-black text-slate-900 tracking-tight font-mono break-all sm:break-normal">
+                    <div class="text-base sm:text-lg font-black text-slate-900 tracking-tight font-mono tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">
                       Rp {{ formatNumber(acc.balance) }}
                     </div>
                   </div>
@@ -945,7 +970,7 @@
                   v-if="financeStore.bankAccounts.length === 0" 
                   class="col-span-full p-4 border border-dashed border-slate-200 rounded-xl text-center text-xs text-slate-400"
                 >
-                  Belum ada rekening bank. <button @click="openAddAccountModal('bank')" class="text-sky-700 font-bold underline cursor-pointer">+ Tambah Rekening Bank</button>
+                  Belum ada rekening bank. <button @click="openAddAccountModal('bank')" class="text-sky-700 font-bold underline cursor-pointer">Tambah Rekening Bank</button>
                 </div>
               </div>
             </div>
@@ -960,7 +985,7 @@
                 </div>
                 <div class="flex items-baseline gap-1.5 shrink-0 text-right">
                   <span class="text-[11px] uppercase font-bold text-slate-600">Subtotal</span>
-                  <span class="text-sm sm:text-base font-extrabold text-slate-900 font-mono tracking-tight">
+                  <span class="text-sm sm:text-base font-extrabold text-slate-900 font-mono tracking-tight tabular-nums whitespace-nowrap">
                     Rp {{ formatNumber(financeStore.totalEwallet) }}
                   </span>
                 </div>
@@ -983,7 +1008,7 @@
                   </div>
                   <div>
                     <div class="text-[10px] uppercase font-semibold text-slate-600 tracking-wider">Saldo</div>
-                    <div class="text-base sm:text-lg font-black text-slate-900 tracking-tight font-mono break-all sm:break-normal">
+                    <div class="text-base sm:text-lg font-black text-slate-900 tracking-tight font-mono tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">
                       Rp {{ formatNumber(acc.balance) }}
                     </div>
                   </div>
@@ -1008,7 +1033,7 @@
                   v-if="financeStore.ewalletAccounts.length === 0" 
                   class="col-span-full p-4 border border-dashed border-slate-200 rounded-xl text-center text-xs text-slate-400"
                 >
-                  Belum ada akun e-wallet. <button @click="openAddAccountModal('ewallet')" class="text-violet-700 font-bold underline cursor-pointer">+ Tambah E-Wallet</button>
+                  Belum ada akun e-wallet. <button @click="openAddAccountModal('ewallet')" class="text-violet-700 font-bold underline cursor-pointer">Tambah E-Wallet</button>
                 </div>
               </div>
             </div>
@@ -1035,7 +1060,7 @@
                   class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs sm:text-sm shadow-xs transition-all cursor-pointer"
                 >
                   <Icon name="plus" custom-class="w-4 h-4" />
-                  <span>+ Catat Utang Saya</span>
+                  <span>Catat Utang Saya</span>
                 </button>
                 <button 
                   @click="openAddDebtModal('piutang')"
@@ -1043,32 +1068,32 @@
                   class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs sm:text-sm shadow-xs transition-all cursor-pointer"
                 >
                   <Icon name="plus" custom-class="w-4 h-4" />
-                  <span>+ Catat Piutang</span>
+                  <span>Catat Piutang</span>
                 </button>
               </div>
             </div>
 
             <!-- 3 Kartu Ringkasan Posisi Keuangan -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-              <div class="p-4 bg-amber-50/60 border border-amber-200 rounded-xl space-y-1">
+              <div class="p-4 bg-amber-50/60 border border-amber-200 rounded-xl space-y-1 min-w-0">
                 <div class="text-[10px] font-bold uppercase text-amber-800">Total Utang Saya (Kewajiban)</div>
-                <div class="text-xl sm:text-2xl font-black text-amber-950 tracking-tight">
+                <div class="text-lg sm:text-xl lg:text-2xl font-black text-amber-950 tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">
                   Rp {{ formatNumber(financeStore.totalUtang) }}
                 </div>
                 <div class="text-[11px] text-amber-700 font-medium">Uang yang harus segera Anda bayarkan</div>
               </div>
 
-              <div class="p-4 bg-sky-50/60 border border-sky-200 rounded-xl space-y-1">
+              <div class="p-4 bg-sky-50/60 border border-sky-200 rounded-xl space-y-1 min-w-0">
                 <div class="text-[10px] font-bold uppercase text-sky-800">Total Piutang (Hak Tagih)</div>
-                <div class="text-xl sm:text-2xl font-black text-sky-950 tracking-tight">
+                <div class="text-lg sm:text-xl lg:text-2xl font-black text-sky-950 tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">
                   Rp {{ formatNumber(financeStore.totalPiutang) }}
                 </div>
                 <div class="text-[11px] text-sky-700 font-medium">Uang Anda yang dipinjam pihak lain</div>
               </div>
 
-              <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+              <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-1 min-w-0">
                 <div class="text-[10px] font-bold uppercase text-slate-500">Posisi Bersih (Piutang - Utang)</div>
-                <div :class="['text-xl sm:text-2xl font-black tracking-tight', financeStore.totalPiutang >= financeStore.totalUtang ? 'text-emerald-700' : 'text-rose-600']">
+                <div :class="['text-lg sm:text-xl lg:text-2xl font-black tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-ellipsis', financeStore.totalPiutang >= financeStore.totalUtang ? 'text-emerald-700' : 'text-rose-600']">
                   {{ financeStore.totalPiutang >= financeStore.totalUtang ? '+' : '' }}Rp {{ formatNumber(financeStore.totalPiutang - financeStore.totalUtang) }}
                 </div>
                 <div class="text-[11px] text-slate-500 font-medium">Selisih klaim tagihan vs pinjaman</div>
@@ -1147,12 +1172,12 @@
                     </div>
                   </div>
 
-                  <div class="sm:text-right space-y-1">
+                  <div class="sm:text-right space-y-1 min-w-0">
                     <div class="text-[11px] uppercase font-bold text-slate-400">Sisa Tagihan / Kewajiban</div>
-                    <div :class="['text-2xl font-black tracking-tight', d.type === 'utang' ? 'text-amber-950' : 'text-sky-950']">
+                    <div :class="['text-xl sm:text-2xl font-black tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-ellipsis', d.type === 'utang' ? 'text-amber-950' : 'text-sky-950']">
                       Rp {{ formatNumber(Math.max(0, d.total - d.paid)) }}
                     </div>
-                    <div class="text-xs text-slate-500">
+                    <div class="text-xs text-slate-500 tabular-nums">
                       Total Pokok: <strong>Rp {{ formatNumber(d.total) }}</strong> (Terbayar: Rp {{ formatNumber(d.paid) }})
                     </div>
                   </div>
@@ -1268,14 +1293,10 @@
         </div>
       </main>
 
-      <!-- Dedicated Personal Footer -->
-      <footer class="py-4 px-6 bg-white border-t border-slate-200 text-center text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2 mt-auto">
-        <div>{{ settingsStore.appName }} Banking Pribadi &copy; 2026 — 100% Free Open-Source Architecture</div>
-        <div class="flex items-center gap-4 text-xs font-medium">
-          <span class="text-emerald-700 font-semibold">• Akun Perorangan Terenkripsi</span>
-          <span>• Database PostgreSQL</span>
-          <span>• AI Financial Advisor</span>
-        </div>
+      <!-- Minimalist Desktop Footer (Hidden on Mobile & Tablet to prevent clutter) -->
+      <footer class="hidden lg:flex py-3 px-6 bg-white border-t border-slate-200/80 text-xs text-slate-400 items-center justify-between mt-auto select-none">
+        <div>{{ settingsStore.appName }} &copy; 2026</div>
+        <div class="text-[11px] font-medium text-slate-400">Dompet & Keuangan Terenkripsi</div>
       </footer>
     </div>
 
@@ -1753,25 +1774,26 @@
       </div>
     </div>
 
-    <div class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.06)] border-t border-slate-200/80 text-slate-500 px-3 py-1.5 flex items-center justify-between pb-4">
+    <!-- 3. MODERN MOBILE & TABLET BOTTOM NAVIGATION BAR (Khusus Mobile & Tablet di Bawah 1024px) -->
+    <div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.06)] border-t border-slate-200/80 text-slate-500 px-3 py-1.5 flex items-center justify-around pb-4">
       <!-- 1. Beranda -->
       <button 
         @click="activeTab = 'overview'" 
         type="button" 
         :class="['flex flex-col items-center gap-1 w-14 transition-all cursor-pointer', activeTab === 'overview' ? 'text-emerald-700 font-bold scale-105' : 'text-slate-400 hover:text-slate-700']"
       >
-        <Icon name="home" custom-class="w-5 h-5" />
-        <span class="text-[10px] tracking-tight">Beranda</span>
+        <Icon name="wallet" custom-class="w-5 h-5" />
+        <span class="text-[10px] tracking-tight">Dompet</span>
       </button>
 
-      <!-- 2. Aktivitas -->
+      <!-- 2. Aktivitas Mutasi -->
       <button 
         @click="activeTab = 'mutations'" 
         type="button" 
         :class="['flex flex-col items-center gap-1 w-14 transition-all cursor-pointer', activeTab === 'mutations' ? 'text-emerald-700 font-bold scale-105' : 'text-slate-400 hover:text-slate-700']"
       >
         <Icon name="receipt" custom-class="w-5 h-5" />
-        <span class="text-[10px] tracking-tight">Aktivitas</span>
+        <span class="text-[10px] tracking-tight">Mutasi</span>
       </button>
 
       <!-- 3. CENTER ELEVATED FLOATING ACTION BUTTON (Catat Keuangan Cepat) -->
@@ -1787,32 +1809,29 @@
         <span class="text-[10px] font-bold tracking-wider text-emerald-800 mt-0.5 uppercase">Catat</span>
       </div>
 
-      <!-- 4. Untukmu / Statistik -->
-      <button 
-        @click="activeTab = 'analytics'" 
-        type="button" 
-        :class="['flex flex-col items-center gap-1 w-14 transition-all cursor-pointer relative', activeTab === 'analytics' ? 'text-emerald-700 font-bold scale-105' : 'text-slate-400 hover:text-slate-700']"
-      >
-        <div class="relative">
-          <Icon name="star" custom-class="w-5 h-5" />
-          <span class="absolute -top-0.5 -right-1 w-2 h-2 rounded-full bg-emerald-500"></span>
-        </div>
-        <span class="text-[10px] tracking-tight">Untukmu</span>
-      </button>
-
-      <!-- 5. Akun Saya -->
+      <!-- 4. Kantong Rekening -->
       <button 
         @click="activeTab = 'pockets'" 
         type="button" 
         :class="['flex flex-col items-center gap-1 w-14 transition-all cursor-pointer', activeTab === 'pockets' ? 'text-emerald-700 font-bold scale-105' : 'text-slate-400 hover:text-slate-700']"
       >
-        <Icon name="user" custom-class="w-5 h-5" />
-        <span class="text-[10px] tracking-tight">Akun Saya</span>
+        <Icon name="credit-card" custom-class="w-5 h-5" />
+        <span class="text-[10px] tracking-tight">Kantong</span>
+      </button>
+
+      <!-- 5. Menu Drawer Selengkapnya -->
+      <button 
+        @click="isMobileSidebarOpen = true" 
+        type="button" 
+        class="flex flex-col items-center gap-1 w-14 transition-all cursor-pointer text-slate-400 hover:text-slate-700"
+      >
+        <Icon name="menu" custom-class="w-5 h-5" />
+        <span class="text-[10px] tracking-tight">Menu</span>
       </button>
     </div>
 
     <!-- Desktop Floating Action Pill (Akses Cepat Catat Keuangan di Komputer) -->
-    <div class="hidden md:block fixed bottom-6 right-6 z-40">
+    <div class="hidden lg:block fixed bottom-6 right-6 z-40">
       <button 
         @click="showQrisModal = true"
         type="button"
@@ -1834,6 +1853,12 @@
       @close="showQrisModal = false" 
     />
 
+    <!-- Modal Laporan Mutasi Excel Harian & Bulanan (Viewer & Downloader) -->
+    <ExcelMutationReportModal 
+      v-if="showExcelReportModal" 
+      @close="showExcelReportModal = false" 
+    />
+
     <!-- Modal Tentang Aplikasi & Panduan Lengkap -->
     <AboutModal 
       :is-open="showAboutModal" 
@@ -1851,6 +1876,7 @@ import Icon from '../common/Icon.vue'
 import ProfileView from '../settings/ProfileView.vue'
 import AppSettingsView from '../settings/AppSettingsView.vue'
 import QrisActionModal from './QrisActionModal.vue'
+import ExcelMutationReportModal from './ExcelMutationReportModal.vue'
 import AboutModal from '../about/AboutModal.vue'
 
 defineEmits(['toggle-ai'])
@@ -1862,6 +1888,7 @@ const settingsStore = useSettingsStore()
 const isBalanceHidden = ref(false)
 const isProfileMenuOpen = ref(false)
 const showQrisModal = ref(false)
+const showExcelReportModal = ref(false)
 const showAboutModal = ref(false)
 const activeTab = ref('overview')
 const filterType = ref('all')
@@ -1897,6 +1924,7 @@ const personalNavigation = [
   { id: 'quick-record', label: 'Catat Keuangan Cepat', icon: 'plus', badge: 'Instan' },
   { id: 'analytics', label: 'Statistik & Analisis', icon: 'chart', badge: 'Grafik' },
   { id: 'mutations', label: 'Riwayat Mutasi', icon: 'receipt', badge: null },
+  { id: 'excel-report', label: 'Laporan Mutasi Excel', icon: 'chart', badge: 'Excel' },
   { id: 'pockets', label: 'Kantong Rekening', icon: 'credit-card', badge: null },
   { id: 'debts', label: 'Buku Utang & Piutang', icon: 'debt', badge: null }
 ]
@@ -1904,6 +1932,11 @@ const personalNavigation = [
 function handleNavClick(item) {
   if (item.id === 'quick-record' || item.id === 'qris') {
     showQrisModal.value = true
+    isMobileSidebarOpen.value = false
+    return
+  }
+  if (item.id === 'excel-report') {
+    showExcelReportModal.value = true
     isMobileSidebarOpen.value = false
     return
   }

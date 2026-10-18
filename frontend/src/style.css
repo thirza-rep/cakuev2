@@ -32,3 +32,12 @@
 .saas-card {
   @apply bg-white border border-slate-200/80 rounded-xl shadow-sm transition-all duration-200;
 }
+
+/* Hide scrollbar utility for clean mobile horizontal swipes */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

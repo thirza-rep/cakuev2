@@ -6,7 +6,7 @@
       :class="[
         'fixed inset-y-0 left-0 z-40 bg-white border-r border-slate-200 flex flex-col transition-all duration-300 ease-in-out shadow-xs select-none',
         isSidebarCollapsed ? 'w-20' : 'w-64 sm:w-72',
-        isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+        isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       ]"
     >
       <!-- Sidebar Brand Header -->
@@ -61,17 +61,17 @@
           v-if="!isSidebarCollapsed"
           @click="toggleSidebar" 
           type="button" 
-          class="hidden md:flex w-8 h-8 rounded-lg items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
+          class="hidden lg:flex w-8 h-8 rounded-lg items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
           title="Tutup Sidebar"
         >
           <Icon name="chevron-left" custom-class="w-4 h-4" />
         </button>
 
-        <!-- Close Button (Mobile) -->
+        <!-- Close Button (Mobile & Tablet) -->
         <button 
           @click="isMobileSidebarOpen = false" 
           type="button" 
-          class="md:hidden w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer shrink-0"
+          class="lg:hidden w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer shrink-0"
         >
           <Icon name="close" custom-class="w-4 h-4" />
         </button>
@@ -143,7 +143,7 @@
                 title="Buka Form Tambah Cabang Baru"
               >
                 <Icon name="plus" custom-class="w-3.5 h-3.5 text-white" />
-                <span>+ Cabang</span>
+                <span>Cabang</span>
               </button>
             </div>
           </div>
@@ -171,44 +171,98 @@
             Menu Operasional
           </div>
           <nav class="space-y-1">
-            <button 
-              v-for="item in allowedMainNavigation" 
-              :key="item.id"
-              @click="activeTab = item.id; isMobileSidebarOpen = false"
-              :class="[
-                'w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all cursor-pointer group relative',
-                activeTab === item.id 
-                  ? 'bg-slate-900 text-white shadow-xs' 
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
-                isSidebarCollapsed ? 'justify-center px-0' : ''
-              ]"
-              :title="isSidebarCollapsed ? item.label : ''"
-            >
-              <Icon 
-                :name="item.icon" 
-                custom-class="w-5 h-5 shrink-0" 
-                :class="activeTab === item.id ? 'text-white' : 'text-slate-500 group-hover:text-slate-800'" 
-              />
-              
-              <span v-if="!isSidebarCollapsed" class="truncate flex-1 text-left">
-                {{ item.label }}
-              </span>
-
-              <span 
-                v-if="!isSidebarCollapsed && item.badge" 
-                class="text-[10px] px-2 py-0.5 rounded-full font-mono font-bold bg-emerald-100 text-emerald-800"
+            <template v-for="item in allowedMainNavigation" :key="item.id">
+              <button 
+                @click="handleMainNavigationClick(item)"
+                :class="[
+                  'w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all cursor-pointer group relative',
+                  activeTab === item.id 
+                    ? 'bg-slate-900 text-white shadow-xs' 
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
+                  isSidebarCollapsed ? 'justify-center px-0' : ''
+                ]"
+                :title="isSidebarCollapsed ? item.label : ''"
               >
-                {{ item.badge }}
-              </span>
+                <Icon 
+                  :name="item.icon" 
+                  custom-class="w-5 h-5 shrink-0" 
+                  :class="activeTab === item.id ? 'text-white' : 'text-slate-500 group-hover:text-slate-800'" 
+                />
+                
+                <span v-if="!isSidebarCollapsed" class="truncate flex-1 text-left">
+                  {{ item.label }}
+                </span>
 
-              <!-- Floating Tooltip saat Sidebar Collapsed -->
-              <span 
-                v-if="isSidebarCollapsed" 
-                class="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-900 text-white text-xs font-bold rounded-lg shadow-lg whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50"
+                <span 
+                  v-if="!isSidebarCollapsed && item.badge" 
+                  class="text-[10px] px-2 py-0.5 rounded-full font-mono font-bold bg-emerald-100 text-emerald-800"
+                >
+                  {{ item.badge }}
+                </span>
+
+                <!-- Chevron indicator jika item memiliki subItems -->
+                <svg
+                  v-if="!isSidebarCollapsed && item.subItems && item.subItems.length"
+                  class="w-4 h-4 transition-transform duration-200 shrink-0 text-slate-400 group-hover:text-slate-600"
+                  :class="{ 'rotate-180 text-white': activeTab === item.id }"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                </svg>
+
+                <!-- Floating Tooltip saat Sidebar Collapsed -->
+                <span 
+                  v-if="isSidebarCollapsed" 
+                  class="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-900 text-white text-xs font-bold rounded-lg shadow-lg whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50"
+                >
+                  {{ item.label }}
+                </span>
+              </button>
+
+              <!-- Nested Sub-Menu (Tampil saat aktif & sidebar terbuka) -->
+              <div 
+                v-if="!isSidebarCollapsed && item.subItems && item.subItems.length && activeTab === item.id"
+                class="ml-5 pl-2.5 border-l-2 border-slate-200/80 my-1 space-y-1 animate-fadeIn"
               >
-                {{ item.label }}
-              </span>
-            </button>
+                <!-- Kategori Tampilan / Views -->
+                <div class="px-2 py-1 text-[9px] font-mono font-bold uppercase text-slate-400 tracking-wider">
+                  Bagian Halaman
+                </div>
+                <button
+                  v-for="sub in item.subItems.filter(s => s.type === 'view')"
+                  :key="sub.id"
+                  @click="handleSubMenuClick(item.id, sub)"
+                  :class="[
+                    'w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all text-left cursor-pointer',
+                    inventoryActiveSubTab === sub.id 
+                      ? 'bg-emerald-50 text-emerald-900 font-extrabold border border-emerald-200/80 shadow-2xs' 
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+                  ]"
+                >
+                  <Icon :name="sub.icon" custom-class="w-3.5 h-3.5 shrink-0 text-slate-500" />
+                  <span class="truncate">{{ sub.label }}</span>
+                  <span v-if="sub.id === 'transfers' && stockStore.stockTransfers.length" class="ml-auto text-[9px] px-1.5 py-0.2 rounded-full font-mono bg-sky-100 text-sky-800 font-bold">
+                    {{ stockStore.stockTransfers.length }}
+                  </span>
+                </button>
+
+                <!-- Kategori Aksi Cepat (Actions) -->
+                <div class="px-2 pt-2 pb-1 text-[9px] font-mono font-bold uppercase text-slate-400 tracking-wider">
+                  Aksi Cepat
+                </div>
+                <button
+                  v-for="sub in item.subItems.filter(s => s.type === 'action' && (!s.role || authStore[s.role]))"
+                  :key="sub.id"
+                  @click="handleSubMenuClick(item.id, sub)"
+                  class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-all text-left cursor-pointer active:scale-98"
+                >
+                  <Icon :name="sub.icon" custom-class="w-3.5 h-3.5 shrink-0 text-emerald-600" />
+                  <span class="truncate">{{ sub.label }}</span>
+                </button>
+              </div>
+            </template>
           </nav>
         </div>
 
@@ -254,7 +308,7 @@
       </div>
 
       <!-- Sidebar Bottom Toggle Action Bar (Desktop) -->
-      <div class="p-2 border-t border-slate-200 hidden md:block bg-white">
+      <div class="p-2 border-t border-slate-200 hidden lg:block bg-white">
         <button 
           @click="toggleSidebar" 
           type="button" 
@@ -294,30 +348,30 @@
       </div>
     </aside>
 
-    <!-- Mobile Backdrop -->
+    <!-- Mobile & Tablet Backdrop -->
     <div 
       v-if="isMobileSidebarOpen" 
       @click="isMobileSidebarOpen = false" 
-      class="fixed inset-0 z-30 bg-slate-900/40 backdrop-blur-xs md:hidden"
+      class="fixed inset-0 z-30 bg-slate-900/40 backdrop-blur-xs lg:hidden"
     ></div>
 
-    <!-- 2. MAIN CONTENT AREA (Offset by sidebar width) -->
+    <!-- 2. MAIN CONTENT AREA (Offset by sidebar width on desktop) -->
     <div 
       :class="[
         'flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out min-w-0',
-        isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64 sm:md:ml-72'
+        isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64 sm:lg:ml-72'
       ]"
     >
       <!-- Top Header Navbar -->
-      <header class="bg-white border-b border-slate-200 sticky top-0 z-20 shadow-xs h-16 flex items-center px-4 sm:px-6 lg:px-8">
-        <div class="w-full flex items-center justify-between gap-4">
+      <header class="bg-white border-b border-slate-200 sticky top-0 z-20 shadow-xs h-16 flex items-center px-3 sm:px-6 lg:px-8">
+        <div class="w-full flex items-center justify-between gap-2 sm:gap-4">
           <!-- Left: Mobile Hamburger Toggle + Active Branch Selector + Breadcrumb -->
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
             <!-- Mobile Hamburger Toggle -->
             <button 
               @click="toggleMobileSidebar" 
               type="button" 
-              class="md:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 cursor-pointer"
+              class="lg:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 cursor-pointer shrink-0"
               title="Buka Menu"
             >
               <Icon name="menu" custom-class="w-5 h-5" />
@@ -334,32 +388,32 @@
             <!-- Active Branch Selector Dropdown (Terkunci jika peran non-Owner/Manager) -->
             <div 
               :class="[
-                'flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-colors ml-2',
+                'flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl border transition-colors min-w-0 max-w-[150px] sm:max-w-xs shrink',
                 !authStore.currentRoleConfig.canSwitchBranch 
                   ? 'bg-slate-100/90 border-slate-300 text-slate-500' 
                   : 'bg-slate-50 hover:bg-slate-100/80 border-slate-200'
               ]"
               :title="!authStore.currentRoleConfig.canSwitchBranch ? 'Terkunci: Hak akses Anda terbatas pada cabang ini' : 'Pilih Cabang Aktif'"
             >
-              <Icon :name="!authStore.currentRoleConfig.canSwitchBranch ? 'lock' : 'building'" custom-class="w-4 h-4 text-slate-600" />
+              <Icon :name="!authStore.currentRoleConfig.canSwitchBranch ? 'lock' : 'building'" custom-class="w-4 h-4 text-slate-600 shrink-0" />
               <select 
                 v-model="authStore.businessUser.currentBranch"
                 :disabled="!authStore.currentRoleConfig.canSwitchBranch"
                 @change="authStore.setBranch(authStore.businessUser.currentBranch)"
-                class="bg-transparent border-none text-slate-800 font-bold text-xs focus:outline-none cursor-pointer disabled:cursor-not-allowed disabled:text-slate-600"
+                class="bg-transparent border-none text-slate-800 font-bold text-xs focus:outline-none cursor-pointer disabled:cursor-not-allowed disabled:text-slate-600 truncate w-full"
               >
                 <option v-for="b in authStore.branches" :key="b.id" :value="b.name">
                   {{ b.status === 'open' ? '🟢' : '🔴 [TUTUP]' }} {{ b.name }}
                 </option>
               </select>
-              <span v-if="!authStore.currentRoleConfig.canSwitchBranch" class="text-[9px] font-mono font-bold bg-slate-200 text-slate-700 px-1 py-0.5 rounded">
+              <span v-if="!authStore.currentRoleConfig.canSwitchBranch" class="text-[9px] font-mono font-bold bg-slate-200 text-slate-700 px-1 py-0.5 rounded shrink-0">
                 Terkunci
               </span>
             </div>
           </div>
 
           <!-- Right: Clean Profile Box (with Dropdown) -->
-          <div class="relative">
+          <div class="relative shrink-0">
             <button 
               @click="isProfileMenuOpen = !isProfileMenuOpen"
               type="button"
@@ -540,7 +594,7 @@
       </header>
 
       <!-- Main Workspace (Screen-filling, generous width) -->
-      <main class="flex-1 max-w-[1600px] w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6 pb-24 md:pb-8">
+      <main class="flex-1 max-w-[1600px] w-full mx-auto p-3.5 sm:p-5 lg:p-8 space-y-5 sm:space-y-6 pb-24 lg:pb-8">
         <!-- Restrictive Role Notice Banner (Tampil saat bukan Owner) -->
         <div 
           v-if="!authStore.isOwner" 
@@ -595,31 +649,31 @@
         <!-- TAB 1: EXECUTIVE DASHBOARD (SaaS Business Metrics) -->
         <div v-else-if="activeTab === 'dashboard'" class="space-y-6">
           <!-- 4 KPI Cards with Drilldown Audit Click Handlers & Clean Light Mode Aesthetics -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
             <!-- 1. Omset -->
             <div 
               @click="openAuditModal('income')"
               role="button"
               tabindex="0"
-              class="saas-card p-6 space-y-2 cursor-pointer group hover:border-emerald-500 hover:shadow-md transition-all active:scale-[0.99] relative overflow-hidden"
+              class="saas-card p-4 sm:p-5 lg:p-6 space-y-2.5 cursor-pointer group hover:border-emerald-500 hover:shadow-md transition-all active:scale-[0.99] relative overflow-hidden min-w-0"
               title="Klik untuk melihat Audit Detail Omset Riil"
             >
-              <div class="flex items-center justify-between text-slate-500 text-xs sm:text-sm font-bold">
-                <span class="group-hover:text-emerald-700 transition-colors">Total Omset Bisnis</span>
-                <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-xs">
+              <div class="flex items-center justify-between text-slate-500 text-xs sm:text-sm font-bold gap-2">
+                <span class="group-hover:text-emerald-700 transition-colors truncate">Total Omset Bisnis</span>
+                <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-xs">
                   <Icon name="income" custom-class="w-4 h-4" />
                 </div>
               </div>
-              <div class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight group-hover:text-emerald-800 transition-colors">
+              <div class="text-xl sm:text-2xl xl:text-3xl font-extrabold text-slate-900 tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-ellipsis group-hover:text-emerald-800 transition-colors">
                 Rp {{ formatNumber(financeStore.totalIncome) }}
               </div>
-              <div class="flex items-center justify-between pt-1">
-                <div class="text-xs text-emerald-700 font-semibold flex items-center gap-1">
-                  <Icon name="check" custom-class="w-3.5 h-3.5" />
-                  <span>Arus Kas Masuk Riil</span>
+              <div class="flex items-center justify-between pt-1 gap-2 min-w-0">
+                <div class="text-xs text-emerald-700 font-semibold flex items-center gap-1 truncate">
+                  <Icon name="check" custom-class="w-3.5 h-3.5 shrink-0" />
+                  <span class="truncate">Arus Kas Masuk Riil</span>
                 </div>
-                <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 group-hover:bg-emerald-600 group-hover:text-white transition-all flex items-center gap-0.5">
-                  Audit Detail →
+                <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-all flex items-center gap-0.5">
+                  Audit →
                 </span>
               </div>
             </div>
@@ -629,24 +683,24 @@
               @click="openAuditModal('expense')"
               role="button"
               tabindex="0"
-              class="saas-card p-6 space-y-2 cursor-pointer group hover:border-rose-400 hover:shadow-md transition-all active:scale-[0.99] relative overflow-hidden"
+              class="saas-card p-4 sm:p-5 lg:p-6 space-y-2.5 cursor-pointer group hover:border-rose-400 hover:shadow-md transition-all active:scale-[0.99] relative overflow-hidden min-w-0"
               title="Klik untuk melihat Audit Detail Beban & HPP"
             >
-              <div class="flex items-center justify-between text-slate-500 text-xs sm:text-sm font-bold">
-                <span class="group-hover:text-rose-700 transition-colors">Beban Operasional & HPP</span>
-                <div class="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center group-hover:bg-rose-600 group-hover:text-white transition-all shadow-xs">
+              <div class="flex items-center justify-between text-slate-500 text-xs sm:text-sm font-bold gap-2">
+                <span class="group-hover:text-rose-700 transition-colors truncate">Beban Operasional & HPP</span>
+                <div class="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0 group-hover:bg-rose-600 group-hover:text-white transition-all shadow-xs">
                   <Icon name="expense" custom-class="w-4 h-4" />
                 </div>
               </div>
-              <div class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight group-hover:text-rose-800 transition-colors">
+              <div class="text-xl sm:text-2xl xl:text-3xl font-extrabold text-slate-900 tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-ellipsis group-hover:text-rose-800 transition-colors">
                 Rp {{ formatNumber(financeStore.totalExpense) }}
               </div>
-              <div class="flex items-center justify-between pt-1">
-                <div class="text-xs text-slate-500 font-medium truncate max-w-[150px]">
+              <div class="flex items-center justify-between pt-1 gap-2 min-w-0">
+                <div class="text-xs text-slate-500 font-medium truncate">
                   Bahan baku & operasional
                 </div>
-                <span class="text-[11px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200 group-hover:bg-rose-600 group-hover:text-white group-hover:border-rose-600 transition-all flex items-center gap-0.5">
-                  Audit Detail →
+                <span class="text-[11px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200 shrink-0 group-hover:bg-rose-600 group-hover:text-white group-hover:border-rose-600 transition-all flex items-center gap-0.5">
+                  Audit →
                 </span>
               </div>
             </div>
@@ -656,24 +710,24 @@
               @click="openAuditModal('net_profit')"
               role="button"
               tabindex="0"
-              class="saas-card p-6 space-y-2 cursor-pointer group hover:border-teal-500 hover:shadow-md transition-all active:scale-[0.99] relative overflow-hidden"
+              class="saas-card p-4 sm:p-5 lg:p-6 space-y-2.5 cursor-pointer group hover:border-teal-500 hover:shadow-md transition-all active:scale-[0.99] relative overflow-hidden min-w-0"
               title="Klik untuk melihat Audit Laba Rugi (P&L Akuntan)"
             >
-              <div class="flex items-center justify-between text-slate-500 text-xs sm:text-sm font-bold">
-                <span class="group-hover:text-teal-700 transition-colors">Laba Bersih (Surplus)</span>
-                <div class="w-8 h-8 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center group-hover:bg-teal-600 group-hover:text-white transition-all shadow-xs">
+              <div class="flex items-center justify-between text-slate-500 text-xs sm:text-sm font-bold gap-2">
+                <span class="group-hover:text-teal-700 transition-colors truncate">Laba Bersih (Surplus)</span>
+                <div class="w-8 h-8 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center shrink-0 group-hover:bg-teal-600 group-hover:text-white transition-all shadow-xs">
                   <Icon name="chart" custom-class="w-4 h-4" />
                 </div>
               </div>
-              <div class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-emerald-700 tracking-tight">
+              <div class="text-xl sm:text-2xl xl:text-3xl font-extrabold text-emerald-700 tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">
                 Rp {{ formatNumber(financeStore.netSavings) }}
               </div>
-              <div class="flex items-center justify-between pt-1">
-                <div class="text-xs text-teal-700 font-semibold">
+              <div class="flex items-center justify-between pt-1 gap-2 min-w-0">
+                <div class="text-xs text-teal-700 font-semibold truncate">
                   Net Margin 39.9%
                 </div>
-                <span class="text-[11px] font-bold text-teal-800 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200 group-hover:bg-teal-600 group-hover:text-white transition-all flex items-center gap-0.5">
-                  P&L Akuntan →
+                <span class="text-[11px] font-bold text-teal-800 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200 shrink-0 group-hover:bg-teal-600 group-hover:text-white transition-all flex items-center gap-0.5">
+                  P&L →
                 </span>
               </div>
             </div>
@@ -683,40 +737,40 @@
               @click="openAuditModal('assets')"
               role="button"
               tabindex="0"
-              class="saas-card p-6 space-y-2 cursor-pointer group hover:border-sky-500 hover:shadow-md transition-all active:scale-[0.99] relative overflow-hidden"
+              class="saas-card p-4 sm:p-5 lg:p-6 space-y-2.5 cursor-pointer group hover:border-sky-500 hover:shadow-md transition-all active:scale-[0.99] relative overflow-hidden min-w-0"
               title="Klik untuk melihat Audit Buku Aset & Depresiasi"
             >
-              <div class="flex items-center justify-between text-slate-500 text-xs sm:text-sm font-bold">
-                <span class="group-hover:text-sky-700 transition-colors">Total Aset Tetap</span>
-                <div class="w-8 h-8 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center group-hover:bg-sky-600 group-hover:text-white transition-all shadow-xs">
+              <div class="flex items-center justify-between text-slate-500 text-xs sm:text-sm font-bold gap-2">
+                <span class="group-hover:text-sky-700 transition-colors truncate">Total Aset Tetap</span>
+                <div class="w-8 h-8 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center shrink-0 group-hover:bg-sky-600 group-hover:text-white transition-all shadow-xs">
                   <Icon name="building" custom-class="w-4 h-4" />
                 </div>
               </div>
-              <div class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight group-hover:text-sky-900 transition-colors">
+              <div class="text-xl sm:text-2xl xl:text-3xl font-extrabold text-slate-900 tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-ellipsis group-hover:text-sky-900 transition-colors">
                 Rp {{ formatNumber(totalAssetsBookValue) }}
               </div>
-              <div class="flex items-center justify-between pt-1">
-                <div class="text-xs text-slate-500 font-medium">
+              <div class="flex items-center justify-between pt-1 gap-2 min-w-0">
+                <div class="text-xs text-slate-500 font-medium truncate">
                   Nilai buku depresiasi
                 </div>
-                <span class="text-[11px] font-bold text-sky-800 bg-sky-50 px-2 py-0.5 rounded-full border border-sky-200 group-hover:bg-sky-600 group-hover:text-white transition-all flex items-center gap-0.5">
-                  Buku Aset →
+                <span class="text-[11px] font-bold text-sky-800 bg-sky-50 px-2 py-0.5 rounded-full border border-sky-200 shrink-0 group-hover:bg-sky-600 group-hover:text-white transition-all flex items-center gap-0.5">
+                  Aset →
                 </span>
               </div>
             </div>
           </div>
 
           <!-- SECTION KHUSUS: KOLOM ALOKASI DANA RISET & PENGEMBANGAN (R&D) USAHA -->
-          <div class="saas-card p-6 sm:p-7 space-y-5 bg-gradient-to-br from-white via-white to-indigo-50/30 border border-slate-200 shadow-xs">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-              <div class="flex items-center gap-3.5">
-                <div class="w-11 h-11 rounded-2xl bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center justify-center shadow-xs">
+          <div class="saas-card p-4 sm:p-6 lg:p-7 space-y-4 sm:space-y-5 bg-gradient-to-br from-white via-white to-indigo-50/30 border border-slate-200 shadow-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 pb-4 border-b border-slate-100">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center justify-center shrink-0 shadow-xs">
                   <Icon name="chart" custom-class="w-5 h-5 text-indigo-700" />
                 </div>
-                <div>
-                  <div class="flex items-center gap-2">
-                    <h3 class="text-base sm:text-lg font-black tracking-tight text-slate-900">Kolom Alokasi Riset & Pengembangan (R&D) Usaha</h3>
-                    <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-900 border border-indigo-200 uppercase tracking-wider">
+                <div class="min-w-0">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <h3 class="text-sm sm:text-base lg:text-lg font-black tracking-tight text-slate-900">Kolom Alokasi Riset & Pengembangan (R&D) Usaha</h3>
+                    <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-900 border border-indigo-200 uppercase tracking-wider shrink-0">
                       Alokasi 15% Laba
                     </span>
                   </div>
@@ -726,42 +780,42 @@
                 </div>
               </div>
 
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-2 self-start sm:self-auto shrink-0">
                 <button 
                   @click="openAuditModal('net_profit')"
                   type="button"
-                  class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 text-xs font-bold transition-all cursor-pointer border border-indigo-200"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 text-xs font-bold transition-all cursor-pointer border border-indigo-200 shadow-2xs"
                 >
-                  <span>Audit Laba Rugi Akuntan</span>
+                  <span>Audit Laba Rugi</span>
                   <Icon name="chevron-right" custom-class="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
 
             <!-- 3 Pilar Finansial R&D -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-1">
-                <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total Alokasi R&D Berjalan (15%)</div>
-                <div class="text-xl sm:text-2xl font-black text-indigo-800 tracking-tight">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+              <div class="p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-1 min-w-0">
+                <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider truncate">Total Alokasi R&D (15%)</div>
+                <div class="text-lg sm:text-xl xl:text-2xl font-black text-indigo-800 tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">
                   Rp {{ formatNumber(rdAllocationTotal) }}
                 </div>
-                <div class="text-[11px] text-slate-500">Dari total surplus laba bersih kas</div>
+                <div class="text-[11px] text-slate-500 truncate">Dari surplus laba bersih kas</div>
               </div>
 
-              <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-1">
-                <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Realisasi Belanja Riset Terpakai</div>
-                <div class="text-xl sm:text-2xl font-black text-slate-800 tracking-tight">
+              <div class="p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-1 min-w-0">
+                <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider truncate">Realisasi Belanja Riset</div>
+                <div class="text-lg sm:text-xl xl:text-2xl font-black text-slate-800 tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">
                   Rp {{ formatNumber(rdRealizationTotal) }}
                 </div>
-                <div class="text-[11px] text-emerald-700 font-semibold">Terserap pada 3 proyek inovasi</div>
+                <div class="text-[11px] text-emerald-700 font-semibold truncate">Terserap pada 3 proyek</div>
               </div>
 
-              <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-1">
-                <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Sisa Saldo Kas R&D Tersedia</div>
-                <div class="text-xl sm:text-2xl font-black text-emerald-700 tracking-tight">
+              <div class="p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-1 min-w-0">
+                <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider truncate">Sisa Saldo Kas R&D</div>
+                <div class="text-lg sm:text-xl xl:text-2xl font-black text-emerald-700 tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">
                   Rp {{ formatNumber(rdRemainingBudget) }}
                 </div>
-                <div class="text-[11px] text-emerald-600 font-semibold">Cadangan likuid siap pakai</div>
+                <div class="text-[11px] text-emerald-600 font-semibold truncate">Cadangan likuid siap pakai</div>
               </div>
             </div>
 
@@ -770,7 +824,7 @@
               <div class="text-xs font-bold uppercase tracking-wider text-slate-400">
                 Portofolio Proyek Riset Aktif (Inovasi Produk & Proses)
               </div>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
                 <div 
                   v-for="proj in rdProjects" 
                   :key="proj.id"
@@ -790,15 +844,15 @@
                   </div>
 
                   <div class="space-y-2 pt-2 border-t border-slate-100">
-                    <div class="flex items-center justify-between text-xs">
+                    <div class="flex items-center justify-between text-xs gap-2">
                       <span class="text-slate-500 font-medium">Realisasi Dana</span>
-                      <span class="font-extrabold text-slate-900">Rp {{ formatNumber(proj.realization) }} / {{ formatNumber(proj.budget) }}</span>
+                      <span class="font-extrabold text-slate-900 tabular-nums whitespace-nowrap">Rp {{ formatNumber(proj.realization) }} / {{ formatNumber(proj.budget) }}</span>
                     </div>
                     <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                       <div class="h-full bg-indigo-600 rounded-full transition-all duration-500" :style="{ width: `${proj.progress}%` }"></div>
                     </div>
                     <div class="flex items-center justify-between text-[11px]">
-                      <span class="text-slate-500">Progres Inovasi: <strong class="text-slate-800">{{ proj.progress }}%</strong></span>
+                      <span class="text-slate-500">Progres Inovasi: <strong class="text-slate-800 tabular-nums">{{ proj.progress }}%</strong></span>
                       <span class="font-bold text-indigo-700">{{ proj.status }}</span>
                     </div>
                   </div>
@@ -807,25 +861,25 @@
             </div>
           </div>
 
-          <!-- Section 2: Shortcut Cepat Operasional yang Sering Digunakan -->
+          <!-- Section 2: Shortcut Cepat Operasional yang Sering Digunakan (Grid 4 Tombol Lega) -->
           <div class="space-y-3">
             <div class="text-xs font-bold uppercase tracking-wider text-slate-400">
               Shortcut Cepat Operasional
             </div>
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               <!-- Shortcut 1: Buka Kasir POS -->
               <button 
                 v-if="authStore.canAccess('pos')"
                 @click="activeTab = 'pos'"
                 type="button"
-                class="saas-card p-5 flex flex-col items-center justify-center text-center gap-3 hover:border-emerald-500 hover:shadow-md transition-all cursor-pointer group"
+                class="saas-card p-3.5 sm:p-4 md:p-5 min-h-[96px] sm:min-h-[110px] rounded-2xl flex flex-col items-center justify-center text-center gap-2 sm:gap-2.5 hover:border-emerald-500 hover:shadow-md active:scale-[0.98] transition-all cursor-pointer group"
               >
-                <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-xs">
-                  <Icon name="store" custom-class="w-6 h-6" />
+                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-xs">
+                  <Icon name="store" custom-class="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <div>
-                  <div class="font-extrabold text-sm sm:text-base text-slate-900 group-hover:text-emerald-700 transition-colors">Kasir POS Toko</div>
-                  <div class="text-xs text-slate-500 mt-0.5">Input order penjualan cepat</div>
+                <div class="w-full">
+                  <div class="font-extrabold text-xs sm:text-sm md:text-base text-slate-900 group-hover:text-emerald-700 transition-colors truncate">Kasir POS Toko</div>
+                  <div class="text-[11px] text-slate-500 mt-0.5 truncate hidden sm:block">Input order penjualan cepat</div>
                 </div>
               </button>
 
@@ -834,14 +888,14 @@
                 v-if="authStore.canAccess('inventory')"
                 @click="activeTab = 'inventory'"
                 type="button"
-                class="saas-card p-5 flex flex-col items-center justify-center text-center gap-3 hover:border-blue-500 hover:shadow-md transition-all cursor-pointer group"
+                class="saas-card p-3.5 sm:p-4 md:p-5 min-h-[96px] sm:min-h-[110px] rounded-2xl flex flex-col items-center justify-center text-center gap-2 sm:gap-2.5 hover:border-blue-500 hover:shadow-md active:scale-[0.98] transition-all cursor-pointer group"
               >
-                <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all shadow-xs">
-                  <Icon name="box" custom-class="w-6 h-6" />
+                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-xs">
+                  <Icon name="box" custom-class="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <div>
-                  <div class="font-extrabold text-sm sm:text-base text-slate-900 group-hover:text-blue-700 transition-colors">Inventaris & Cabang</div>
-                  <div class="text-xs text-slate-500 mt-0.5">Matriks stok & surat jalan</div>
+                <div class="w-full">
+                  <div class="font-extrabold text-xs sm:text-sm md:text-base text-slate-900 group-hover:text-blue-700 transition-colors truncate">Inventaris & Cabang</div>
+                  <div class="text-[11px] text-slate-500 mt-0.5 truncate hidden sm:block">Matriks stok & surat jalan</div>
                 </div>
               </button>
 
@@ -850,14 +904,14 @@
                 v-if="authStore.canAccess('analytics')"
                 @click="activeTab = 'analytics'"
                 type="button"
-                class="saas-card p-5 flex flex-col items-center justify-center text-center gap-3 hover:border-teal-500 hover:shadow-md transition-all cursor-pointer group"
+                class="saas-card p-3.5 sm:p-4 md:p-5 min-h-[96px] sm:min-h-[110px] rounded-2xl flex flex-col items-center justify-center text-center gap-2 sm:gap-2.5 hover:border-teal-500 hover:shadow-md active:scale-[0.98] transition-all cursor-pointer group"
               >
-                <div class="w-12 h-12 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center group-hover:bg-teal-600 group-hover:text-white transition-all shadow-xs">
-                  <Icon name="chart" custom-class="w-6 h-6" />
+                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center shrink-0 group-hover:bg-teal-600 group-hover:text-white transition-all shadow-xs">
+                  <Icon name="chart" custom-class="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <div>
-                  <div class="font-extrabold text-sm sm:text-base text-slate-900 group-hover:text-teal-700 transition-colors">Statistik & Analisis</div>
-                  <div class="text-xs text-slate-500 mt-0.5">Grafik KPI & margin laba</div>
+                <div class="w-full">
+                  <div class="font-extrabold text-xs sm:text-sm md:text-base text-slate-900 group-hover:text-teal-700 transition-colors truncate">Statistik & Analisis</div>
+                  <div class="text-[11px] text-slate-500 mt-0.5 truncate hidden sm:block">Grafik KPI & margin laba</div>
                 </div>
               </button>
 
@@ -866,24 +920,24 @@
                 v-if="authStore.canAccess('journal')"
                 @click="activeTab = 'journal'"
                 type="button"
-                class="saas-card p-5 flex flex-col items-center justify-center text-center gap-3 hover:border-purple-500 hover:shadow-md transition-all cursor-pointer group"
+                class="saas-card p-3.5 sm:p-4 md:p-5 min-h-[96px] sm:min-h-[110px] rounded-2xl flex flex-col items-center justify-center text-center gap-2 sm:gap-2.5 hover:border-purple-500 hover:shadow-md active:scale-[0.98] transition-all cursor-pointer group"
               >
-                <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-700 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-all shadow-xs">
-                  <Icon name="receipt" custom-class="w-6 h-6" />
+                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-purple-50 text-purple-700 flex items-center justify-center shrink-0 group-hover:bg-purple-600 group-hover:text-white transition-all shadow-xs">
+                  <Icon name="receipt" custom-class="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <div>
-                  <div class="font-extrabold text-sm sm:text-base text-slate-900 group-hover:text-purple-700 transition-colors">Jurnal Transaksi Kas</div>
-                  <div class="text-xs text-slate-500 mt-0.5">Buku jurnal & mutasi kas</div>
+                <div class="w-full">
+                  <div class="font-extrabold text-xs sm:text-sm md:text-base text-slate-900 group-hover:text-purple-700 transition-colors truncate">Jurnal Transaksi Kas</div>
+                  <div class="text-[11px] text-slate-500 mt-0.5 truncate hidden sm:block">Buku jurnal & mutasi kas</div>
                 </div>
               </button>
             </div>
           </div>
 
           <!-- Section 3: Ringkasan Mini Aktivitas Kas (Hanya 3 Baris Ringkas) -->
-          <div class="saas-card p-5 sm:p-6 space-y-4">
+          <div class="saas-card p-4 sm:p-5 lg:p-6 space-y-4">
             <div class="flex items-center justify-between pb-3 border-b border-slate-100">
               <div>
-                <h3 class="text-base font-bold text-slate-900">Aktivitas Transaksi Kas Terkini</h3>
+                <h3 class="text-sm sm:text-base font-bold text-slate-900">Aktivitas Transaksi Kas Terkini</h3>
                 <p class="text-xs text-slate-500">Pratinjau mutasi terakhir di seluruh cabang</p>
               </div>
               <button 
@@ -892,7 +946,7 @@
                 type="button"
                 class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 hover:text-emerald-950 transition-colors cursor-pointer"
               >
-                <span>Buka Buku Jurnal Lengkap</span>
+                <span>Buka Jurnal</span>
                 <Icon name="chevron-right" custom-class="w-3.5 h-3.5" />
               </button>
             </div>
@@ -901,18 +955,18 @@
               <div 
                 v-for="t in financeStore.transactions.slice(0, 3)" 
                 :key="t.id"
-                class="py-3 flex items-center justify-between gap-4 text-xs sm:text-sm"
+                class="py-3 flex items-center justify-between gap-3 text-xs sm:text-sm"
               >
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3 min-w-0">
                   <div :class="['w-9 h-9 rounded-xl flex items-center justify-center shrink-0', t.type === 'income' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-700']">
                     <Icon :name="t.type === 'income' ? 'income' : 'expense'" custom-class="w-4 h-4" />
                   </div>
-                  <div>
-                    <div class="font-bold text-slate-900">{{ t.desc }}</div>
-                    <div class="text-[11px] text-slate-500">{{ t.date }} • {{ t.category }}</div>
+                  <div class="min-w-0">
+                    <div class="font-bold text-slate-900 truncate">{{ t.desc }}</div>
+                    <div class="text-[11px] text-slate-500 truncate">{{ t.date }} • {{ t.category }}</div>
                   </div>
                 </div>
-                <div :class="['font-extrabold font-mono text-sm sm:text-base text-right', t.type === 'income' ? 'text-emerald-700' : 'text-slate-900']">
+                <div :class="['font-extrabold tabular-nums tracking-tight text-xs sm:text-sm md:text-base text-right shrink-0 whitespace-nowrap', t.type === 'income' ? 'text-emerald-700' : 'text-slate-900']">
                   {{ t.type === 'income' ? '+' : '-' }} Rp {{ formatNumber(t.amount) }}
                 </div>
               </div>
@@ -934,23 +988,23 @@
           </div>
 
           <!-- 3 Analytical Cards -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <div class="saas-card p-6 space-y-2">
-              <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Gross Profit Margin (HPP)</div>
-              <div class="text-3xl sm:text-4xl font-extrabold font-mono text-emerald-700">38.4%</div>
-              <p class="text-xs text-slate-500">Rasio efisiensi harga pokok penjualan bahan baku toko</p>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+            <div class="saas-card p-4 sm:p-5 lg:p-6 space-y-2 min-w-0">
+              <div class="text-xs font-bold uppercase tracking-wider text-slate-400 truncate">Gross Profit Margin (HPP)</div>
+              <div class="text-2xl sm:text-3xl xl:text-4xl font-extrabold font-mono tabular-nums text-emerald-700">38.4%</div>
+              <p class="text-xs text-slate-500 leading-relaxed">Rasio efisiensi harga pokok penjualan bahan baku toko</p>
             </div>
 
-            <div class="saas-card p-6 space-y-2">
-              <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Net Profit Margin (Laba Bersih)</div>
-              <div class="text-3xl sm:text-4xl font-extrabold font-mono text-teal-700">39.9%</div>
-              <p class="text-xs text-slate-500">Sisa margin bersih setelah dipotong seluruh beban operasional</p>
+            <div class="saas-card p-4 sm:p-5 lg:p-6 space-y-2 min-w-0">
+              <div class="text-xs font-bold uppercase tracking-wider text-slate-400 truncate">Net Profit Margin (Laba Bersih)</div>
+              <div class="text-2xl sm:text-3xl xl:text-4xl font-extrabold font-mono tabular-nums text-teal-700">39.9%</div>
+              <p class="text-xs text-slate-500 leading-relaxed">Sisa margin bersih setelah dipotong seluruh beban operasional</p>
             </div>
 
-            <div class="saas-card p-6 space-y-2">
-              <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Rasio Likuiditas Kas</div>
-              <div class="text-3xl sm:text-4xl font-extrabold font-mono text-blue-700">2.7x</div>
-              <p class="text-xs text-slate-500">Kemampuan kas riil menutupi beban operasional 3 bulan ke depan</p>
+            <div class="saas-card p-4 sm:p-5 lg:p-6 space-y-2 min-w-0">
+              <div class="text-xs font-bold uppercase tracking-wider text-slate-400 truncate">Rasio Likuiditas Kas</div>
+              <div class="text-2xl sm:text-3xl xl:text-4xl font-extrabold font-mono tabular-nums text-blue-700">2.7x</div>
+              <p class="text-xs text-slate-500 leading-relaxed">Kemampuan kas riil menutupi beban operasional 3 bulan ke depan</p>
             </div>
           </div>
 
@@ -964,8 +1018,8 @@
               <div class="space-y-3.5">
                 <div>
                   <div class="flex justify-between text-xs font-bold text-slate-700 mb-1">
-                    <span>Bahan Baku Pokok (Tepung, Biji Kopi, Minyak)</span>
-                    <span class="font-mono">54% (Rp 1.500.000)</span>
+                    <span class="truncate pr-2">Bahan Baku Pokok (Tepung, Biji Kopi, Minyak)</span>
+                    <span class="font-mono tabular-nums shrink-0">54% (Rp 1.500.000)</span>
                   </div>
                   <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
                     <div class="h-full bg-rose-500 rounded-full" style="width: 54%"></div>
@@ -973,8 +1027,8 @@
                 </div>
                 <div>
                   <div class="flex justify-between text-xs font-bold text-slate-700 mb-1">
-                    <span>Gaji & Insentif Karyawan</span>
-                    <span class="font-mono">28% (Rp 780.000)</span>
+                    <span class="truncate pr-2">Gaji & Insentif Karyawan</span>
+                    <span class="font-mono tabular-nums shrink-0">28% (Rp 780.000)</span>
                   </div>
                   <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
                     <div class="h-full bg-amber-500 rounded-full" style="width: 28%"></div>
@@ -982,8 +1036,8 @@
                 </div>
                 <div>
                   <div class="flex justify-between text-xs font-bold text-slate-700 mb-1">
-                    <span>Utilitas, Listrik & Logistik</span>
-                    <span class="font-mono">18% (Rp 500.000)</span>
+                    <span class="truncate pr-2">Utilitas, Listrik & Logistik</span>
+                    <span class="font-mono tabular-nums shrink-0">18% (Rp 500.000)</span>
                   </div>
                   <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
                     <div class="h-full bg-blue-500 rounded-full" style="width: 18%"></div>
@@ -1083,7 +1137,7 @@
                       </span>
                     </td>
                     <td class="py-3 px-4 text-slate-600 font-medium">Cabang Jakarta</td>
-                    <td :class="['py-3 px-4 text-right font-extrabold font-mono text-sm sm:text-base', t.type === 'income' ? 'text-emerald-700' : 'text-slate-900']">
+                    <td :class="['py-3 px-4 text-right font-extrabold font-mono text-sm sm:text-base tabular-nums whitespace-nowrap', t.type === 'income' ? 'text-emerald-700' : 'text-slate-900']">
                       {{ t.type === 'income' ? '+' : '-' }} Rp {{ formatNumber(t.amount) }}
                     </td>
                   </tr>
@@ -1100,12 +1154,23 @@
 
         <!-- TAB 3: INVENTARIS & MULTI-CABANG -->
         <div v-else-if="activeTab === 'inventory'" class="space-y-6">
-          <BranchStockManager @navigate="activeTab = $event" />
+          <BranchStockManager 
+            :active-sub-tab="inventoryActiveSubTab" 
+            :triggered-action="inventoryTriggeredAction"
+            @update:active-sub-tab="inventoryActiveSubTab = $event"
+            @navigate="activeTab = $event" 
+          />
         </div>
 
-        <!-- TAB 4: ASET TETAP & DEPRESIASI -->
+        <!-- TAB 4: ASET TETAP & DEPRESIASI (RBAC STRICT OWNER) -->
         <div v-else-if="activeTab === 'assets'" class="space-y-6">
-          <AssetManager />
+          <AssetManager 
+            :auto-open-add="shouldTriggerAddAsset"
+            :auto-open-depreciation="shouldTriggerRunDepreciation"
+            @reset-auto-open-add="shouldTriggerAddAsset = false"
+            @reset-auto-open-depreciation="shouldTriggerRunDepreciation = false"
+            @navigate="activeTab = $event"
+          />
         </div>
 
         <!-- TAB KHUSUS: MANAJEMEN CABANG & MULTI-OUTLET (RBAC) -->
@@ -1128,14 +1193,10 @@
         </div>
       </main>
 
-      <!-- Dedicated B2B Footer -->
-      <footer class="py-4 px-6 bg-white border-t border-slate-200 text-center text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2 mt-auto">
-        <div>{{ settingsStore.appName }} SaaS ERP &copy; 2026 — 100% Free Open-Source Architecture</div>
-        <div class="flex items-center gap-4 text-xs font-medium">
-          <span class="text-emerald-700 font-semibold">• Multi-Cabang Aktif</span>
-          <span>• Database PostgreSQL</span>
-          <span>• Baileys WA Gateway ($0 Cost)</span>
-        </div>
+      <!-- Minimalist Desktop Footer (Hidden on Mobile & Tablet to prevent clutter) -->
+      <footer class="hidden lg:flex py-3 px-6 bg-white border-t border-slate-200/80 text-xs text-slate-400 items-center justify-between mt-auto select-none">
+        <div>{{ settingsStore.appName }} &copy; 2026</div>
+        <div class="text-[11px] font-medium text-slate-400">Sistem Kasir & Keuangan Terintegrasi</div>
       </footer>
     </div>
 
@@ -1192,56 +1253,56 @@
               @click="selectedAuditTab = 'income'"
               type="button"
               :class="[
-                'p-2.5 rounded-xl border flex flex-col items-center gap-1 transition-all cursor-pointer text-center',
+                'p-2 sm:p-2.5 rounded-xl border flex flex-col items-center gap-0.5 transition-all cursor-pointer text-center min-w-0',
                 selectedAuditTab === 'income' 
                   ? 'bg-white border-emerald-500 text-emerald-800 shadow-xs ring-1 ring-emerald-400' 
                   : 'bg-slate-100/80 border-slate-200 text-slate-600 hover:bg-white'
               ]"
             >
-              <span class="text-[11px] text-slate-500">Omset Penjualan</span>
-              <span class="font-extrabold text-xs sm:text-sm">Rp {{ formatNumber(financeStore.totalIncome) }}</span>
+              <span class="text-[10px] sm:text-[11px] text-slate-500 truncate w-full">Omset Penjualan</span>
+              <span class="font-extrabold text-xs sm:text-sm tabular-nums whitespace-nowrap truncate w-full">Rp {{ formatNumber(financeStore.totalIncome) }}</span>
             </button>
 
             <button 
               @click="selectedAuditTab = 'expense'"
               type="button"
               :class="[
-                'p-2.5 rounded-xl border flex flex-col items-center gap-1 transition-all cursor-pointer text-center',
+                'p-2 sm:p-2.5 rounded-xl border flex flex-col items-center gap-0.5 transition-all cursor-pointer text-center min-w-0',
                 selectedAuditTab === 'expense' 
                   ? 'bg-white border-rose-400 text-rose-800 shadow-xs ring-1 ring-rose-300' 
                   : 'bg-slate-100/80 border-slate-200 text-slate-600 hover:bg-white'
               ]"
             >
-              <span class="text-[11px] text-slate-500">Beban & HPP</span>
-              <span class="font-extrabold text-xs sm:text-sm">Rp {{ formatNumber(financeStore.totalExpense) }}</span>
+              <span class="text-[10px] sm:text-[11px] text-slate-500 truncate w-full">Beban & HPP</span>
+              <span class="font-extrabold text-xs sm:text-sm tabular-nums whitespace-nowrap truncate w-full">Rp {{ formatNumber(financeStore.totalExpense) }}</span>
             </button>
 
             <button 
               @click="selectedAuditTab = 'net_profit'"
               type="button"
               :class="[
-                'p-2.5 rounded-xl border flex flex-col items-center gap-1 transition-all cursor-pointer text-center',
+                'p-2 sm:p-2.5 rounded-xl border flex flex-col items-center gap-0.5 transition-all cursor-pointer text-center min-w-0',
                 selectedAuditTab === 'net_profit' 
                   ? 'bg-white border-teal-500 text-teal-800 shadow-xs ring-1 ring-teal-400' 
                   : 'bg-slate-100/80 border-slate-200 text-slate-600 hover:bg-white'
               ]"
             >
-              <span class="text-[11px] text-slate-500">Laba Bersih P&L</span>
-              <span class="font-extrabold text-xs sm:text-sm">Rp {{ formatNumber(financeStore.netSavings) }}</span>
+              <span class="text-[10px] sm:text-[11px] text-slate-500 truncate w-full">Laba Bersih P&L</span>
+              <span class="font-extrabold text-xs sm:text-sm tabular-nums whitespace-nowrap truncate w-full">Rp {{ formatNumber(financeStore.netSavings) }}</span>
             </button>
 
             <button 
               @click="selectedAuditTab = 'assets'"
               type="button"
               :class="[
-                'p-2.5 rounded-xl border flex flex-col items-center gap-1 transition-all cursor-pointer text-center',
+                'p-2 sm:p-2.5 rounded-xl border flex flex-col items-center gap-0.5 transition-all cursor-pointer text-center min-w-0',
                 selectedAuditTab === 'assets' 
                   ? 'bg-white border-sky-500 text-sky-800 shadow-xs ring-1 ring-sky-400' 
                   : 'bg-slate-100/80 border-slate-200 text-slate-600 hover:bg-white'
               ]"
             >
-              <span class="text-[11px] text-slate-500">Total Aset Tetap</span>
-              <span class="font-extrabold text-xs sm:text-sm">Rp {{ formatNumber(totalAssetsBookValue) }}</span>
+              <span class="text-[10px] sm:text-[11px] text-slate-500 truncate w-full">Total Aset Tetap</span>
+              <span class="font-extrabold text-xs sm:text-sm tabular-nums whitespace-nowrap truncate w-full">Rp {{ formatNumber(totalAssetsBookValue) }}</span>
             </button>
           </div>
         </div>
@@ -1252,21 +1313,21 @@
           <!-- TAB 1: AUDIT OMSET (PENJUALAN KASIR & QRIS MASUK) -->
           <div v-if="selectedAuditTab === 'income'" class="space-y-4">
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div class="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-200/80">
-                <div class="text-[11px] text-slate-500 font-bold uppercase">Total Penerimaan Kas</div>
-                <div class="text-xl font-black text-emerald-800 mt-0.5">Rp {{ formatNumber(financeStore.totalIncome) }}</div>
+              <div class="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-200/80 min-w-0">
+                <div class="text-[11px] text-slate-500 font-bold uppercase truncate">Total Penerimaan Kas</div>
+                <div class="text-xl font-black text-emerald-800 mt-0.5 tabular-nums whitespace-nowrap truncate">Rp {{ formatNumber(financeStore.totalIncome) }}</div>
                 <div class="text-[10px] text-emerald-700 font-semibold mt-1">100% Terekonsiliasi</div>
               </div>
-              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
-                <div class="text-[11px] text-slate-500 font-bold uppercase">Jumlah Transaksi Masuk</div>
-                <div class="text-xl font-black text-slate-900 mt-0.5">
+              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 min-w-0">
+                <div class="text-[11px] text-slate-500 font-bold uppercase truncate">Jumlah Transaksi Masuk</div>
+                <div class="text-xl font-black text-slate-900 mt-0.5 tabular-nums whitespace-nowrap truncate">
                   {{ financeStore.transactions.filter(t => t.type === 'income').length }} Transaksi
                 </div>
                 <div class="text-[10px] text-slate-500 mt-1">POS Kasir & Transfer Masuk</div>
               </div>
-              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
-                <div class="text-[11px] text-slate-500 font-bold uppercase">Rata-rata Order (AOV)</div>
-                <div class="text-xl font-black text-slate-900 mt-0.5">
+              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 min-w-0">
+                <div class="text-[11px] text-slate-500 font-bold uppercase truncate">Rata-rata Order (AOV)</div>
+                <div class="text-xl font-black text-slate-900 mt-0.5 tabular-nums whitespace-nowrap truncate">
                   Rp {{ formatNumber(Math.round(financeStore.totalIncome / Math.max(1, financeStore.transactions.filter(t => t.type === 'income').length))) }}
                 </div>
                 <div class="text-[10px] text-slate-500 mt-1">Tinggi berkat menu kombo</div>
@@ -1319,19 +1380,19 @@
           <!-- TAB 2: AUDIT BEBAN & HPP (PENGELUARAN KAS RIIL) -->
           <div v-else-if="selectedAuditTab === 'expense'" class="space-y-4">
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div class="p-3.5 rounded-xl bg-rose-50/60 border border-rose-200/80">
-                <div class="text-[11px] text-slate-500 font-bold uppercase">Total Beban & HPP</div>
-                <div class="text-xl font-black text-rose-800 mt-0.5">Rp {{ formatNumber(financeStore.totalExpense) }}</div>
+              <div class="p-3.5 rounded-xl bg-rose-50/60 border border-rose-200/80 min-w-0">
+                <div class="text-[11px] text-slate-500 font-bold uppercase truncate">Total Beban & HPP</div>
+                <div class="text-xl font-black text-rose-800 mt-0.5 tabular-nums whitespace-nowrap truncate">Rp {{ formatNumber(financeStore.totalExpense) }}</div>
                 <div class="text-[10px] text-rose-700 font-semibold mt-1">Tercatat di kas keluar</div>
               </div>
-              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
-                <div class="text-[11px] text-slate-500 font-bold uppercase">HPP Bahan Baku Pokok</div>
-                <div class="text-xl font-black text-slate-900 mt-0.5">Rp {{ formatNumber(accountingHpp) }}</div>
+              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 min-w-0">
+                <div class="text-[11px] text-slate-500 font-bold uppercase truncate">HPP Bahan Baku Pokok</div>
+                <div class="text-xl font-black text-slate-900 mt-0.5 tabular-nums whitespace-nowrap truncate">Rp {{ formatNumber(accountingHpp) }}</div>
                 <div class="text-[10px] text-slate-500 mt-1">Tepung, ragi, minyak, kemasan</div>
               </div>
-              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
-                <div class="text-[11px] text-slate-500 font-bold uppercase">Beban Operasional (OPEX)</div>
-                <div class="text-xl font-black text-slate-900 mt-0.5">Rp {{ formatNumber(opexExpenses) }}</div>
+              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 min-w-0">
+                <div class="text-[11px] text-slate-500 font-bold uppercase truncate">Beban Operasional (OPEX)</div>
+                <div class="text-xl font-black text-slate-900 mt-0.5 tabular-nums whitespace-nowrap truncate">Rp {{ formatNumber(opexExpenses) }}</div>
                 <div class="text-[10px] text-slate-500 mt-1">Listrik, sewa toko, gaji</div>
               </div>
             </div>
@@ -1776,6 +1837,64 @@
         </div>
       </div>
     </div>
+
+    <!-- 3. MODERN MOBILE BOTTOM NAVIGATION BAR (Khusus Mobile & Tablet di Bawah 1024px) -->
+    <div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.06)] border-t border-slate-200/80 px-2 py-1.5 flex items-center justify-around pb-4 text-slate-500">
+      <!-- 1. Dashboard -->
+      <button 
+        @click="activeTab = 'dashboard'" 
+        type="button" 
+        :class="['flex flex-col items-center gap-1 w-14 transition-all cursor-pointer', activeTab === 'dashboard' ? 'text-emerald-700 font-bold scale-105' : 'text-slate-400 hover:text-slate-700']"
+      >
+        <Icon name="home" custom-class="w-5 h-5" />
+        <span class="text-[10px] tracking-tight">Beranda</span>
+      </button>
+
+      <!-- 2. Kasir POS (Elevated Center Button) -->
+      <div v-if="authStore.canAccess('pos')" class="relative flex flex-col items-center -mt-6">
+        <button 
+          @click="activeTab = 'pos'"
+          type="button"
+          class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 shadow-lg shadow-emerald-600/30 border-4 border-white flex items-center justify-center transform active:scale-95 hover:scale-105 transition-all cursor-pointer group"
+          title="Kasir POS Toko"
+        >
+          <Icon name="store" custom-class="w-5 h-5 text-white drop-shadow-xs group-hover:scale-110 transition-transform" />
+        </button>
+        <span class="text-[10px] font-bold tracking-wider text-emerald-800 mt-0.5 uppercase">Kasir</span>
+      </div>
+
+      <!-- 3. Inventaris -->
+      <button 
+        v-if="authStore.canAccess('inventory')"
+        @click="activeTab = 'inventory'" 
+        type="button" 
+        :class="['flex flex-col items-center gap-1 w-14 transition-all cursor-pointer', activeTab === 'inventory' ? 'text-emerald-700 font-bold scale-105' : 'text-slate-400 hover:text-slate-700']"
+      >
+        <Icon name="box" custom-class="w-5 h-5" />
+        <span class="text-[10px] tracking-tight">Stok</span>
+      </button>
+
+      <!-- 4. Jurnal -->
+      <button 
+        v-if="authStore.canAccess('journal')"
+        @click="activeTab = 'journal'" 
+        type="button" 
+        :class="['flex flex-col items-center gap-1 w-14 transition-all cursor-pointer', activeTab === 'journal' ? 'text-emerald-700 font-bold scale-105' : 'text-slate-400 hover:text-slate-700']"
+      >
+        <Icon name="receipt" custom-class="w-5 h-5" />
+        <span class="text-[10px] tracking-tight">Jurnal</span>
+      </button>
+
+      <!-- 5. Menu Lainnya -->
+      <button 
+        @click="toggleMobileSidebar" 
+        type="button" 
+        class="flex flex-col items-center gap-1 w-14 transition-all cursor-pointer text-slate-400 hover:text-slate-700"
+      >
+        <Icon name="menu" custom-class="w-5 h-5" />
+        <span class="text-[10px] tracking-tight">Menu</span>
+      </button>
+    </div>
   </div>
 </template>
 
@@ -1853,9 +1972,42 @@ const mainNavigation = [
   { id: 'dashboard', label: 'Ringkasan Usaha', icon: 'wallet', badge: null },
   { id: 'analytics', label: 'Statistik & Analisis', icon: 'chart', badge: 'KPI' },
   { id: 'pos', label: 'Kasir POS Toko', icon: 'store', badge: 'Fast POS' },
-  { id: 'inventory', label: 'Inventaris & Stok', icon: 'box', badge: null },
-  { id: 'branches', label: 'Manajemen Cabang', icon: 'building', badge: 'Multi' },
-  { id: 'assets', label: 'Aset & Depresiasi', icon: 'building', badge: null },
+  { 
+    id: 'inventory', 
+    label: 'Inventaris & Stok', 
+    icon: 'box', 
+    badge: null,
+    subItems: [
+      { id: 'saldo', label: 'Matriks Saldo Stok', icon: 'box', type: 'view' },
+      { id: 'transfers', label: 'Surat Jalan Cabang', icon: 'truck', type: 'view' },
+      { id: 'mutations', label: 'Buku Mutasi Audit', icon: 'receipt', type: 'view' },
+      { id: 'action-inbound', label: 'Restock Masuk', icon: 'income', type: 'action', role: 'canManageStock' },
+      { id: 'action-outbound', label: 'Catat Rusak', icon: 'expense', type: 'action', role: 'canManageStock' },
+      { id: 'action-product', label: 'Produk Baru', icon: 'plus', type: 'action', role: 'canAddProduct' },
+      { id: 'action-transfer', label: 'Buat Surat Jalan', icon: 'truck', type: 'action', role: 'canManageStock' }
+    ]
+  },
+  { 
+    id: 'branches', 
+    label: 'Manajemen Cabang', 
+    icon: 'building', 
+    badge: 'Multi',
+    subItems: [
+      { id: 'all-branches', label: 'Daftar Semua Cabang', icon: 'building', type: 'view' },
+      { id: 'action-add-branch', label: 'Buka Cabang Baru', icon: 'plus', type: 'action', role: 'isOwner' }
+    ]
+  },
+  { 
+    id: 'assets', 
+    label: 'Aset & Depresiasi', 
+    icon: 'building', 
+    badge: null,
+    subItems: [
+      { id: 'all-assets', label: 'Daftar Aset & Nilai Buku', icon: 'building', type: 'view' },
+      { id: 'action-add-asset', label: 'Tambah Aset Baru', icon: 'plus', type: 'action', role: 'isOwner' },
+      { id: 'action-run-depreciation', label: 'Eksekusi Depresiasi', icon: 'calculator', type: 'action', role: 'isOwner' }
+    ]
+  },
   { id: 'journal', label: 'Jurnal Transaksi Kas', icon: 'receipt', badge: null }
 ]
 
@@ -1878,8 +2030,48 @@ const activeTabLabel = computed(() => {
   return current ? current.label : 'Modul ERP'
 })
 
-// Trigger Tambah Cabang Baru dari Sidebar
+// State Sub-Menu & Aksi Terpadu untuk Inventaris & Stok
+const inventoryActiveSubTab = ref('saldo')
+const inventoryTriggeredAction = ref(null)
+
+function handleMainNavigationClick(item) {
+  if (activeTab.value === item.id) {
+    // Jika sudah di tab ini dan memiliki subItems, biarkan tetap terbuka
+    return
+  }
+  activeTab.value = item.id
+  // Jika menu tidak memiliki sub-items, tutup sidebar di layar HP/tablet
+  if (!item.subItems || !item.subItems.length) {
+    isMobileSidebarOpen.value = false
+  }
+}
+
+function handleSubMenuClick(parentId, sub) {
+  activeTab.value = parentId
+  if (parentId === 'inventory') {
+    if (sub.type === 'view') {
+      inventoryActiveSubTab.value = sub.id
+    } else if (sub.type === 'action') {
+      inventoryTriggeredAction.value = { action: sub.id, ts: Date.now() }
+    }
+  } else if (parentId === 'branches') {
+    if (sub.id === 'action-add-branch') {
+      shouldTriggerAddBranch.value = true
+    }
+  } else if (parentId === 'assets') {
+    if (sub.id === 'action-add-asset') {
+      shouldTriggerAddAsset.value = true
+    } else if (sub.id === 'action-run-depreciation') {
+      shouldTriggerRunDepreciation.value = true
+    }
+  }
+  isMobileSidebarOpen.value = false
+}
+
+// Trigger Tambah Cabang & Aset dari Sidebar
 const shouldTriggerAddBranch = ref(false)
+const shouldTriggerAddAsset = ref(false)
+const shouldTriggerRunDepreciation = ref(false)
 
 const currentBranchStatus = computed(() => {
   const b = authStore.branches.find(item => item.name === authStore.businessUser.currentBranch)

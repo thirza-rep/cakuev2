@@ -72,42 +72,55 @@ export const useStockStore = defineStore('stock', () => {
     }
   ])
 
-  // Manajemen Data Aset & Depresiasi
-  const assets = ref([
+  // Manajemen Data Aset & Depresiasi (Persisten)
+  const defaultAssets = [
     {
       id: 'AST-01',
       name: 'Mesin Espresso La Marzocco 2 Group',
+      category: 'Mesin & Peralatan',
       branch: 'Cabang Jakarta Selatan',
       purchaseDate: '2025-01-15',
       cost: 125000000,
       usefulLifeYears: 5,
       salvageValue: 20000000,
       currentValue: 97000000,
-      monthlyDepreciation: 1750000
+      monthlyDepreciation: 1750000,
+      accumulatedDepreciation: 28000000,
+      notes: 'Unit operasional bar kopi utama'
     },
     {
       id: 'AST-02',
       name: 'Deep Fryer Komersial 20 Liter (Penggoreng Cakue)',
+      category: 'Mesin & Peralatan',
       branch: 'Cabang Bandung Dago',
       purchaseDate: '2025-06-10',
       cost: 18500000,
       usefulLifeYears: 4,
       salvageValue: 2500000,
       currentValue: 14500000,
-      monthlyDepreciation: 333333
+      monthlyDepreciation: 333333,
+      accumulatedDepreciation: 4000000,
+      notes: 'Penggorengan kapasitas besar dapur cakue'
     },
     {
       id: 'AST-03',
       name: 'Tablet POS & Thermal Printer Sunmi',
+      category: 'Elektronik & POS',
       branch: 'Cabang Surabaya Gubeng',
       purchaseDate: '2026-02-01',
       cost: 6500000,
       usefulLifeYears: 3,
       salvageValue: 500000,
       currentValue: 5166000,
-      monthlyDepreciation: 166666
+      monthlyDepreciation: 166666,
+      accumulatedDepreciation: 1334000,
+      notes: 'Terminal kasir transaksi POS'
     }
-  ])
+  ]
+
+  const savedAssets = localStorage.getItem('cakue_assets')
+  const assets = ref(savedAssets ? JSON.parse(savedAssets) : defaultAssets)
+  watch(assets, (val) => localStorage.setItem('cakue_assets', JSON.stringify(val)), { deep: true })
 
   // Buku Catatan Mutasi Stok Fisik (Inventory Movement Ledger)
   const stockLedger = ref([
@@ -376,6 +389,106 @@ export const useStockStore = defineStore('stock', () => {
     return Object.values(branchStocks.value[branchId]).reduce((sum, q) => sum + (Number(q) || 0), 0)
   }
 
+  // --- MANAJEMEN ASET TETAP & DEPRESIASI BULANAN ---
+
+  // 1. Tambah Aset Baru
+  function addAsset({ name, category = 'Mesin & Peralatan', branch, purchaseDate, cost, usefulLifeYears, salvageValue = 0, notes = '' }) {
+    const numCost = Math.max(0, Number(cost) || 0)
+    const numSalvage = Math.max(0, Number(salvageValue) || 0)
+    const numYears = Math.max(1, Number(usefulLifeYears) || 1)
+    const monthlyDepr = Math.round((numCost - numSalvage) / (numYears * 12))
+    
+    const newId = `AST-${Date.now().toString(36).toUpperCase()}`
+    const newAsset = {
+      id: newId,
+      name: name.trim(),
+      category: category || 'Mesin & Peralatan',
+      branch: branch || 'Cabang Jakarta Selatan',
+      purchaseDate: purchaseDate || new Date().toISOString().slice(0, 10),
+      cost: numCost,
+      usefulLifeYears: numYears,
+      salvageValue: numSalvage,
+      currentValue: numCost,
+      monthlyDepreciation: monthlyDepr,
+      accumulatedDepreciation: 0,
+      notes: notes.trim()
+    }
+    assets.value.unshift(newAsset)
+    return newAsset
+  }
+
+  // 2. Update Aset
+  function updateAsset(id, updatedData) {
+    const idx = assets.value.findIndex(a => a.id === id)
+    if (idx !== -1) {
+      const existing = assets.value[idx]
+      const numCost = Number(updatedData.cost !== undefined ? updatedData.cost : existing.cost)
+      const numSalvage = Number(updatedData.salvageValue !== undefined ? updatedData.salvageValue : existing.salvageValue)
+      const numYears = Number(updatedData.usefulLifeYears !== undefined ? updatedData.usefulLifeYears : existing.usefulLifeYears)
+      const monthlyDepr = Math.round((numCost - numSalvage) / (numYears * 12))
+
+      assets.value[idx] = {
+        ...existing,
+        ...updatedData,
+        cost: numCost,
+        salvageValue: numSalvage,
+        usefulLifeYears: numYears,
+        monthlyDepreciation: monthlyDepr
+      }
+      return true
+    }
+    return false
+  }
+
+  // 3. Hapus Aset
+  function deleteAsset(id) {
+    const idx = assets.value.findIndex(a => a.id === id)
+    if (idx !== -1) {
+      assets.value.splice(idx, 1)
+      return true
+    }
+    return false
+  }
+
+  // 4. Depresiasi Aset Tunggal (1 Bulan)
+  function depreciateAsset(id) {
+    const ast = assets.value.find(a => a.id === id)
+    if (!ast) return { success: false, message: 'Aset tidak ditemukan' }
+    
+    const minVal = ast.salvageValue || 0
+    if (ast.currentValue <= minVal) {
+      return { success: false, message: `Nilai buku ${ast.name} sudah mencapai nilai residu minimal (Rp ${minVal.toLocaleString('id-ID')}).` }
+    }
+
+    const deprAmount = Math.min(ast.monthlyDepreciation, ast.currentValue - minVal)
+    ast.currentValue -= deprAmount
+    ast.accumulatedDepreciation = (ast.accumulatedDepreciation || 0) + deprAmount
+
+    return { 
+      success: true, 
+      amount: deprAmount, 
+      currentValue: ast.currentValue,
+      message: `Penyusutan Rp ${deprAmount.toLocaleString('id-ID')} berhasil dicatat untuk ${ast.name}`
+    }
+  }
+
+  // 5. Eksekusi Depresiasi Bulanan Semua Aset
+  function runBatchDepreciation() {
+    let totalDepreciated = 0
+    let count = 0
+    assets.value.forEach(ast => {
+      const minVal = ast.salvageValue || 0
+      if (ast.currentValue > minVal) {
+        const deprAmount = Math.min(ast.monthlyDepreciation, ast.currentValue - minVal)
+        ast.currentValue -= deprAmount
+        ast.accumulatedDepreciation = (ast.accumulatedDepreciation || 0) + deprAmount
+        totalDepreciated += deprAmount
+        count++
+      }
+    })
+    return { count, totalDepreciated }
+  }
+
   return {
     products,
     branchStocks,
@@ -392,6 +505,11 @@ export const useStockStore = defineStore('stock', () => {
     initBranchStock,
     removeBranchStock,
     hasRemainingStock,
-    getBranchTotalStockUnits
+    getBranchTotalStockUnits,
+    addAsset,
+    updateAsset,
+    deleteAsset,
+    depreciateAsset,
+    runBatchDepreciation
   }
 })

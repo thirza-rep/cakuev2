@@ -12,12 +12,17 @@ export const useFinanceStore = defineStore('finance', () => {
 
   // Baris Transaksi Buku Besar (Excel Grid Data)
   const transactions = ref([
-    { id: 'TRX-1001', date: '2026-10-14', category: 'Penjualan / Omset', desc: 'Pendapatan Kasir Shift Pagi', type: 'income', amount: 3850000, account: 'BCA Prioritas', tag: 'Bisnis', verified: true },
-    { id: 'TRX-1002', date: '2026-10-14', category: 'Bahan Baku', desc: 'Restock Kopi & Susu UHT', type: 'expense', amount: 1450000, account: 'Bank Mandiri Bisnis', tag: 'HPP', verified: true },
-    { id: 'TRX-1003', date: '2026-10-13', category: 'Operasional', desc: 'Listrik & Wifi Cabang Jakarta', type: 'expense', amount: 650000, account: 'BCA Prioritas', tag: 'Utilitas', verified: true },
-    { id: 'TRX-1004', date: '2026-10-13', category: 'Gaji & Upah', desc: 'Uang Makan Karyawan Part-time', type: 'expense', amount: 200000, account: 'Dompet Tunai (Cash)', tag: 'Payroll', verified: true },
-    { id: 'TRX-1005', date: '2026-10-12', category: 'Investasi Pribadi', desc: 'Dividen Reksadana Pasar Uang', type: 'income', amount: 780000, account: 'BCA Prioritas', tag: 'Passive', verified: true },
-    { id: 'TRX-1006', date: '2026-10-11', category: 'Belanja Dapur', desc: 'Kebutuhan Mingguan Rumah', type: 'expense', amount: 480000, account: 'GoPay & OVO E-Wallet', tag: 'Pribadi', verified: true }
+    { id: 'TRX-1007', date: '2026-10-16', time: '08:30', category: 'Penjualan / Omset', desc: 'Pendapatan Kasir & QRIS Pagi', type: 'income', amount: 4250000, account: 'BCA Prioritas', tag: 'Bisnis', verified: true },
+    { id: 'TRX-1008', date: '2026-10-16', time: '11:15', category: 'Bahan Baku', desc: 'Pembelian Kopi & Bahan Pokok', type: 'expense', amount: 950000, account: 'Bank Mandiri Bisnis', tag: 'HPP', verified: true },
+    { id: 'TRX-1009', date: '2026-10-16', time: '13:45', category: 'Makan & Minum', desc: 'Makan Siang & Snack Tim', type: 'expense', amount: 125000, account: 'GoPay & OVO E-Wallet', tag: 'Operasional', verified: true },
+    { id: 'TRX-1010', date: '2026-10-15', time: '10:00', category: 'Jasa & Konsultasi', desc: 'Pelunasan Desain Digital Klien', type: 'income', amount: 2800000, account: 'BCA Prioritas', tag: 'Project', verified: true },
+    { id: 'TRX-1011', date: '2026-10-15', time: '16:30', category: 'Transportasi', desc: 'Bahan Bakar & Tol Operasional', type: 'expense', amount: 320000, account: 'Dompet Tunai (Cash)', tag: 'Kendaraan', verified: true },
+    { id: 'TRX-1001', date: '2026-10-14', time: '09:00', category: 'Penjualan / Omset', desc: 'Pendapatan Kasir Shift Pagi', type: 'income', amount: 3850000, account: 'BCA Prioritas', tag: 'Bisnis', verified: true },
+    { id: 'TRX-1002', date: '2026-10-14', time: '14:20', category: 'Bahan Baku', desc: 'Restock Kopi & Susu UHT', type: 'expense', amount: 1450000, account: 'Bank Mandiri Bisnis', tag: 'HPP', verified: true },
+    { id: 'TRX-1003', date: '2026-10-13', time: '10:15', category: 'Operasional', desc: 'Listrik & Wifi Cabang Jakarta', type: 'expense', amount: 650000, account: 'BCA Prioritas', tag: 'Utilitas', verified: true },
+    { id: 'TRX-1004', date: '2026-10-13', time: '17:00', category: 'Gaji & Upah', desc: 'Uang Makan Karyawan Part-time', type: 'expense', amount: 200000, account: 'Dompet Tunai (Cash)', tag: 'Payroll', verified: true },
+    { id: 'TRX-1005', date: '2026-10-12', time: '11:40', category: 'Investasi Pribadi', desc: 'Dividen Reksadana Pasar Uang', type: 'income', amount: 780000, account: 'BCA Prioritas', tag: 'Passive', verified: true },
+    { id: 'TRX-1006', date: '2026-10-11', time: '15:10', category: 'Belanja Dapur', desc: 'Kebutuhan Mingguan Rumah', type: 'expense', amount: 480000, account: 'GoPay & OVO E-Wallet', tag: 'Pribadi', verified: true }
   ])
 
   // Catatan Utang & Piutang (dengan Riwayat Pembayaran Sinkron)

@@ -23,6 +23,9 @@ export const ROLES = {
     canDeleteBranch: true,
     canEditAppBranding: true,
     canEditFinancialSettings: true,
+    canManageAssets: true,
+    canDeleteAsset: true,
+    canRunDepreciation: true,
     description: 'Akses penuh tanpa batas ke semua cabang, buka/tutup/hapus cabang, staf & konfigurasi sistem'
   },
   MANAGER: {
@@ -45,6 +48,9 @@ export const ROLES = {
     canDeleteBranch: false,
     canEditAppBranding: false,
     canEditFinancialSettings: false,
+    canManageAssets: false,
+    canDeleteAsset: false,
+    canRunDepreciation: false,
     description: 'Akses operasional, kasir POS, buka/tutup toko cabang, staf cabang, dan pengaturan cabang toko'
   },
   CASHIER: {
@@ -67,6 +73,9 @@ export const ROLES = {
     canDeleteBranch: false,
     canEditAppBranding: false,
     canEditFinancialSettings: false,
+    canManageAssets: false,
+    canDeleteAsset: false,
+    canRunDepreciation: false,
     assignedBranch: 'Cabang Jakarta Selatan',
     description: 'Akses terbatas khusus modul Kasir POS dan profil akun pada cabang penugasan'
   },
@@ -90,6 +99,9 @@ export const ROLES = {
     canDeleteBranch: false,
     canEditAppBranding: false,
     canEditFinancialSettings: false,
+    canManageAssets: false,
+    canDeleteAsset: false,
+    canRunDepreciation: false,
     assignedBranch: 'Gudang Pusat (Central Hub)',
     description: 'Akses terbatas khusus modul Inventaris Stok, Surat Jalan dan profil akun'
   }
@@ -246,6 +258,9 @@ export const useAuthStore = defineStore('auth', () => {
   const canDeleteBranch = computed(() => Boolean(currentRoleConfig.value.canDeleteBranch))
   const canEditAppBranding = computed(() => Boolean(currentRoleConfig.value.canEditAppBranding))
   const canEditFinancialSettings = computed(() => Boolean(currentRoleConfig.value.canEditFinancialSettings))
+  const canManageAssets = computed(() => Boolean(currentRoleConfig.value.canManageAssets))
+  const canDeleteAsset = computed(() => Boolean(currentRoleConfig.value.canDeleteAsset))
+  const canRunDepreciation = computed(() => Boolean(currentRoleConfig.value.canRunDepreciation))
 
   function canAccess(moduleId) {
     if (moduleId === 'profile') return true
@@ -402,6 +417,9 @@ export const useAuthStore = defineStore('auth', () => {
     canDeleteBranch,
     canEditAppBranding,
     canEditFinancialSettings,
+    canManageAssets,
+    canDeleteAsset,
+    canRunDepreciation,
     user,
     personalUser,
     businessUser,

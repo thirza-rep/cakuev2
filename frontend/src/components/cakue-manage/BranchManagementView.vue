@@ -1,52 +1,41 @@
 <template>
   <div class="space-y-6 max-w-7xl mx-auto pb-12 font-sans">
     
-    <!-- 1. HEADER UTAMA & RBAC INDICATOR -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 bg-white border border-slate-200 rounded-2xl shadow-xs">
-      <div class="space-y-1">
-        <div class="flex items-center gap-2.5">
-          <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-xs">
-            <Icon name="building" custom-class="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h1 class="text-base sm:text-xl font-black text-slate-900 tracking-tight flex items-center gap-2 flex-wrap">
-              <span>Manajemen Cabang & Multi-Outlet</span>
-              <span :class="['text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border uppercase tracking-wider', authStore.currentRoleConfig.color]">
-                Peran: {{ authStore.currentRoleConfig.title }}
-              </span>
-            </h1>
-            <p class="text-xs text-slate-500">
-              Pusat kendali penambahan cabang, status operasional buka/tutup toko, alokasi inventaris, dan pengawasan tim cabang terisolasi.
-            </p>
-          </div>
+    <!-- 1. HEADER UTAMA: SLIM & BERSIH -->
+    <div class="flex items-center justify-between gap-3 p-4 sm:p-5 bg-white border border-slate-200 rounded-2xl shadow-xs">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center shrink-0 shadow-xs">
+          <Icon name="building" custom-class="w-4.5 h-4.5 sm:w-5 sm:h-5 text-white" />
+        </div>
+        <div class="min-w-0">
+          <h1 class="text-sm sm:text-base font-black text-slate-900 tracking-tight flex items-center gap-1.5 sm:gap-2 flex-wrap">
+            <span>Manajemen Cabang & Outlet</span>
+            <span :class="['text-[9px] sm:text-[10px] font-extrabold px-1.5 sm:px-2 py-0.5 rounded-full border uppercase tracking-wider', authStore.currentRoleConfig.color]">
+              {{ authStore.currentRoleConfig.title }}
+            </span>
+          </h1>
         </div>
       </div>
 
       <!-- Tombol Aksi Buka Cabang Baru (Khusus Owner) -->
-      <div class="flex items-center gap-2.5">
+      <div class="flex items-center gap-2 shrink-0">
         <button 
           v-if="authStore.isOwner"
           @click="openAddBranchModal"
           type="button"
-          class="flex items-center gap-2 px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm rounded-xl shadow-xs transition-all cursor-pointer"
+          class="flex items-center gap-1.5 px-3 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
         >
-          <Icon name="plus" custom-class="w-4 h-4 text-white" />
-          <span>+ Buka Cabang Baru</span>
+          <Icon name="plus" custom-class="w-3.5 h-3.5 text-white" />
+          <span>Buka Cabang</span>
         </button>
-
-        <div v-else class="text-right">
-          <span class="text-[11px] font-medium text-slate-500 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
-            Akses Terbatas: Hanya Pengaturan Status Cabang
-          </span>
-        </div>
       </div>
     </div>
 
     <!-- 2. ALERT NOTIFIKASI -->
     <transition name="fade">
-      <div v-if="alertMessage" :class="['p-4 rounded-2xl flex items-center justify-between text-xs sm:text-sm shadow-xs border', alertType === 'error' ? 'bg-rose-50 border-rose-200 text-rose-900' : 'bg-emerald-50 border-emerald-200 text-emerald-900']">
+      <div v-if="alertMessage" :class="['p-3.5 rounded-2xl flex items-center justify-between text-xs shadow-xs border', alertType === 'error' ? 'bg-rose-50 border-rose-200 text-rose-900' : 'bg-emerald-50 border-emerald-200 text-emerald-900']">
         <div class="flex items-center gap-2.5 font-bold">
-          <Icon :name="alertType === 'error' ? 'alert' : 'check'" :custom-class="['w-5 h-5 shrink-0', alertType === 'error' ? 'text-rose-700' : 'text-emerald-700']" />
+          <Icon :name="alertType === 'error' ? 'alert' : 'check'" :custom-class="['w-4 h-4 shrink-0', alertType === 'error' ? 'text-rose-700' : 'text-emerald-700']" />
           <span>{{ alertMessage }}</span>
         </div>
         <button @click="alertMessage = ''" class="font-bold cursor-pointer text-xs underline">
@@ -55,92 +44,78 @@
       </div>
     </transition>
 
-    <!-- 3. QUICK STATS KPI METRICS -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-      <!-- Total Cabang & Hub -->
-      <div class="p-4 sm:p-5 bg-white border border-slate-200 rounded-2xl shadow-2xs space-y-1">
-        <div class="flex items-center justify-between text-slate-500 text-xs font-bold uppercase tracking-wider">
-          <span>Total Outlet & Hub</span>
-          <Icon name="building" custom-class="w-4 h-4 text-slate-400" />
+    <!-- 3. QUICK STATS KPI METRICS (COMPACT STRIP) -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+      <!-- Total Cabang -->
+      <div class="p-3 bg-white border border-slate-200/90 rounded-xl shadow-2xs flex items-center justify-between">
+        <div>
+          <div class="text-[10px] text-slate-400 font-bold uppercase">Total Cabang</div>
+          <div class="text-base sm:text-lg font-black text-slate-900 font-mono mt-0.5">{{ authStore.branches.length }}</div>
         </div>
-        <div class="text-xl sm:text-2xl font-black text-slate-900 font-mono">
-          {{ authStore.branches.length }}
-        </div>
-        <div class="text-[11px] text-slate-400 font-medium">
-          {{ storeBranchesCount }} Toko Ritel • {{ warehouseCount }} Gudang Hub
+        <div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
+          <Icon name="building" custom-class="w-4 h-4" />
         </div>
       </div>
 
-      <!-- Cabang Buka (Aktif) -->
-      <div class="p-4 sm:p-5 bg-white border border-slate-200 rounded-2xl shadow-2xs space-y-1">
-        <div class="flex items-center justify-between text-slate-500 text-xs font-bold uppercase tracking-wider">
-          <span>Operasional Buka</span>
+      <!-- Operasional Buka -->
+      <div class="p-3 bg-white border border-slate-200/90 rounded-xl shadow-2xs flex items-center justify-between">
+        <div>
+          <div class="text-[10px] text-emerald-600 font-bold uppercase">Buka Aktif</div>
+          <div class="text-base sm:text-lg font-black text-emerald-700 font-mono mt-0.5">{{ openBranchesCount }}</div>
+        </div>
+        <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
           <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
         </div>
-        <div class="text-xl sm:text-2xl font-black text-emerald-700 font-mono">
-          {{ openBranchesCount }}
-        </div>
-        <div class="text-[11px] text-emerald-600 font-medium">
-          Siap melayani transaksi kasir POS
-        </div>
       </div>
 
-      <!-- Cabang Tutup Sementara -->
-      <div class="p-4 sm:p-5 bg-white border border-slate-200 rounded-2xl shadow-2xs space-y-1">
-        <div class="flex items-center justify-between text-slate-500 text-xs font-bold uppercase tracking-wider">
-          <span>Tutup / Libur</span>
+      <!-- Tutup / Libur -->
+      <div class="p-3 bg-white border border-slate-200/90 rounded-xl shadow-2xs flex items-center justify-between">
+        <div>
+          <div class="text-[10px] text-rose-600 font-bold uppercase">Tutup / Libur</div>
+          <div class="text-base sm:text-lg font-black text-rose-700 font-mono mt-0.5">{{ closedBranchesCount }}</div>
+        </div>
+        <div class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
           <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
         </div>
-        <div class="text-xl sm:text-2xl font-black text-rose-700 font-mono">
-          {{ closedBranchesCount }}
-        </div>
-        <div class="text-[11px] text-rose-600 font-medium">
-          Toko libur atau tutup sementara
-        </div>
       </div>
 
-      <!-- Total Staf & Kasir Terdaftar -->
-      <div class="p-4 sm:p-5 bg-white border border-slate-200 rounded-2xl shadow-2xs space-y-1">
-        <div class="flex items-center justify-between text-slate-500 text-xs font-bold uppercase tracking-wider">
-          <span>Total Personil Tim</span>
-          <Icon name="users" custom-class="w-4 h-4 text-slate-400" />
+      <!-- Total Personil -->
+      <div class="p-3 bg-white border border-slate-200/90 rounded-xl shadow-2xs flex items-center justify-between">
+        <div>
+          <div class="text-[10px] text-slate-400 font-bold uppercase">Personel Tim</div>
+          <div class="text-base sm:text-lg font-black text-slate-900 font-mono mt-0.5">{{ settingsStore.staffList.length }}</div>
         </div>
-        <div class="text-xl sm:text-2xl font-black text-slate-900 font-mono">
-          {{ settingsStore.staffList.length }}
-        </div>
-        <div class="text-[11px] text-slate-400 font-medium">
-          Tim mandiri per cabang kerja
+        <div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
+          <Icon name="users" custom-class="w-4 h-4" />
         </div>
       </div>
     </div>
 
     <!-- 4. FILTER & PENCARIAN CABANG -->
-    <div class="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 bg-white border border-slate-200 rounded-2xl shadow-2xs">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-2.5 p-3 sm:p-3.5 bg-white border border-slate-200 rounded-2xl shadow-2xs">
       <div class="relative w-full sm:w-80">
         <input 
           v-model="searchQuery" 
           type="text" 
-          placeholder="Cari cabang, kota, kode, atau manajer..."
+          placeholder="Cari cabang, kota, kode, manajer..."
           class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:bg-white focus:border-emerald-600 focus:outline-none font-medium"
         />
         <Icon name="search" custom-class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
       </div>
 
-      <div class="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
-        <!-- Filter Status Operasional -->
+      <div class="flex items-center gap-2 overflow-x-auto no-scrollbar w-full sm:w-auto pb-0.5 sm:pb-0 text-xs">
         <select 
           v-model="statusFilter"
-          class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:bg-white focus:outline-none"
+          class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:bg-white focus:outline-none cursor-pointer"
         >
           <option value="all">Semua Status</option>
-          <option value="open">🟢 Buka Saja</option>
-          <option value="closed">🔴 Tutup Saja</option>
+          <option value="open">🟢 Buka</option>
+          <option value="closed">🔴 Tutup</option>
         </select>
 
-        <!-- Filter Tipe -->
         <select 
           v-model="typeFilter"
-          class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:bg-white focus:outline-none"
+          class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:bg-white focus:outline-none cursor-pointer"
         >
           <option value="all">Semua Tipe</option>
           <option value="branch">Toko Cabang</option>
@@ -149,174 +124,188 @@
       </div>
     </div>
 
-    <!-- 5. GRID DAFTAR CABANG & OUTLET USAHA -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+    <!-- 5. DAFTAR CABANG & OUTLET (PROGRESSIVE DISCLOSURE: AT-A-GLANCE, KLIK UNTUK DETAIL) -->
+    <div class="space-y-3">
       <div 
         v-for="branch in filteredBranches" 
         :key="branch.id"
-        class="bg-white border border-slate-200 rounded-2xl shadow-xs hover:shadow-md transition-all flex flex-col justify-between overflow-hidden"
+        class="bg-white border border-slate-200/90 hover:border-slate-300 rounded-2xl shadow-2xs transition-all overflow-hidden"
       >
-        <!-- Card Top Bar: Status Badge & Code -->
-        <div class="p-5 space-y-4">
-          <div class="flex items-center justify-between gap-2">
-            <span class="text-[10px] font-mono font-extrabold px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-md">
-              {{ branch.code }}
-            </span>
-
-            <div class="flex items-center gap-1.5">
+        <!-- Compact Summary Row (At-a-glance, Tersirat & Esensial) -->
+        <div 
+          @click="toggleBranchDetails(branch.id)"
+          class="p-3.5 sm:p-4 flex items-center justify-between gap-3 cursor-pointer select-none hover:bg-slate-50/60 transition-colors"
+        >
+          <!-- Left Info: Status Dot + Icon + Nama Cabang + Kota & Tipe -->
+          <div class="flex items-center gap-3 min-w-0">
+            <div :class="[
+              'w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 shadow-2xs text-xs font-black relative',
+              branch.status === 'open' ? 'bg-emerald-50 text-emerald-800' : 'bg-rose-50 text-rose-800'
+            ]">
+              <Icon name="building" custom-class="w-4 h-4 sm:w-5 sm:h-5" />
               <span 
                 :class="[
-                  'px-2.5 py-0.5 rounded-full text-[10px] font-extrabold font-mono uppercase tracking-wider border flex items-center gap-1',
-                  branch.status === 'open' 
-                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200' 
-                    : 'bg-rose-50 text-rose-800 border-rose-200'
+                  'absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white',
+                  branch.status === 'open' ? 'bg-emerald-500' : 'bg-rose-500'
                 ]"
+              ></span>
+            </div>
+
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-extrabold text-slate-900 text-xs sm:text-sm tracking-tight truncate">{{ branch.name }}</span>
+                <span class="text-[9px] font-mono font-bold px-1.5 py-0.2 bg-slate-100 text-slate-600 rounded border border-slate-200">
+                  {{ branch.code }}
+                </span>
+                <span :class="[
+                  'px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider',
+                  branch.status === 'open' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                ]">
+                  {{ branch.status === 'open' ? 'Buka' : 'Tutup' }}
+                </span>
+              </div>
+              <div class="text-xs text-slate-500 truncate mt-0.5 flex items-center gap-1.5">
+                <span>{{ branch.city }}</span>
+                <span>•</span>
+                <span>{{ branch.type === 'warehouse' ? 'Gudang Hub' : 'Toko Cabang' }}</span>
+                <span>•</span>
+                <span class="text-slate-700 font-semibold">{{ getStaffCount(branch.name) }} Tim</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Info: Stok Cabang & Chevron Toggle -->
+          <div class="flex items-center gap-3 shrink-0">
+            <div class="text-right hidden sm:block">
+              <div class="text-xs font-extrabold text-slate-900 tabular-nums">
+                {{ formatNumber(stockStore.getBranchTotalStockUnits(branch.id)) }} unit
+              </div>
+              <div class="text-[10px] text-slate-400">Total Stok Fisik</div>
+            </div>
+
+            <div class="text-right sm:hidden">
+              <span class="text-xs font-bold text-slate-800 tabular-nums bg-slate-100 px-2 py-0.5 rounded-md">
+                {{ formatNumber(stockStore.getBranchTotalStockUnits(branch.id)) }} unit
+              </span>
+            </div>
+
+            <div class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors">
+              <svg 
+                class="w-4 h-4 transition-transform duration-200"
+                :class="{ 'rotate-180': expandedBranchIds.has(branch.id) }"
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
               >
-                <span class="w-1.5 h-1.5 rounded-full" :class="branch.status === 'open' ? 'bg-emerald-500' : 'bg-rose-500'"></span>
-                <span>{{ branch.status === 'open' ? 'BUKA' : 'TUTUP' }}</span>
-              </span>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
+        </div>
 
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">
-                {{ branch.type === 'warehouse' ? 'Gudang Hub' : 'Toko Cabang' }}
-              </span>
+        <!-- Expandable Detail Drawer (Muncul saat diklik) -->
+        <div 
+          v-if="expandedBranchIds.has(branch.id)"
+          class="px-4 pb-4 pt-2 border-t border-slate-100 bg-slate-50/60 space-y-3.5 text-xs animate-fadeIn"
+        >
+          <!-- Alamat, Jam Operasional, & Kontak -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-slate-600">
+            <div class="p-2.5 bg-white border border-slate-200/80 rounded-xl space-y-1">
+              <div class="text-[10px] text-slate-400 font-bold uppercase">Alamat Lengkap</div>
+              <div class="font-medium text-slate-800">{{ branch.address }} ({{ branch.city }})</div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div class="p-2.5 bg-white border border-slate-200/80 rounded-xl space-y-1">
+                <div class="text-[10px] text-slate-400 font-bold uppercase">Jam Buka</div>
+                <div class="font-bold text-slate-800">{{ branch.operatingHours }}</div>
+              </div>
+              <div class="p-2.5 bg-white border border-slate-200/80 rounded-xl space-y-1">
+                <div class="text-[10px] text-slate-400 font-bold uppercase">Telepon / WA</div>
+                <div class="font-mono font-bold text-slate-800">{{ branch.phone }}</div>
+              </div>
             </div>
           </div>
 
-          <!-- Branch Name & Location -->
-          <div>
-            <h3 class="text-base font-black text-slate-900 flex items-center gap-1.5">
-              <span>{{ branch.name }}</span>
-            </h3>
-            <p class="text-xs text-slate-500 mt-1 flex items-start gap-1">
-              <span class="shrink-0 text-slate-400">📍</span>
-              <span class="line-clamp-2">{{ branch.address }} ({{ branch.city }})</span>
-            </p>
-          </div>
-
-          <!-- Operating Hours & Contact Phone -->
-          <div class="grid grid-cols-2 gap-2 p-2.5 bg-slate-50 rounded-xl text-[11px] border border-slate-100">
-            <div>
-              <div class="text-slate-400 font-bold uppercase text-[9px]">Jam Buka</div>
-              <div class="font-bold text-slate-800">{{ branch.operatingHours }}</div>
-            </div>
-            <div>
-              <div class="text-slate-400 font-bold uppercase text-[9px]">Telepon / WA</div>
-              <div class="font-mono font-bold text-slate-800">{{ branch.phone }}</div>
-            </div>
-          </div>
-
-          <!-- Tim Manajemen Cabang (Isolated Team) -->
-          <div class="space-y-2 pt-2 border-t border-slate-100">
-            <div class="flex items-center justify-between text-xs">
-              <span class="font-bold text-slate-700 flex items-center gap-1">
+          <!-- Tim & Manajer Cabang -->
+          <div class="p-3 bg-white border border-slate-200/80 rounded-xl space-y-2.5">
+            <div class="flex items-center justify-between">
+              <div class="font-bold text-slate-800 flex items-center gap-1.5">
                 <Icon name="users" custom-class="w-3.5 h-3.5 text-slate-500" />
-                <span>Tim Cabang:</span>
-              </span>
-              <span class="text-[11px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.2 rounded">
-                {{ getStaffCount(branch.name) }} Personel
-              </span>
-            </div>
-
-            <!-- Manajer Cabang -->
-            <div class="p-2 bg-emerald-50/50 border border-emerald-100 rounded-xl flex items-center justify-between text-xs">
-              <div class="flex items-center gap-2">
-                <div class="w-6 h-6 rounded-full bg-emerald-700 text-white font-bold text-[10px] flex items-center justify-center shrink-0">
-                  {{ (branch.managerName || 'M').charAt(0) }}
-                </div>
-                <div>
-                  <div class="text-[10px] text-slate-400 font-bold uppercase leading-none">Manajer Cabang</div>
-                  <div class="font-bold text-slate-900 leading-tight">{{ branch.managerName || 'Belum Ditunjuk' }}</div>
-                </div>
+                <span>Personel Tim Cabang ({{ getStaffCount(branch.name) }})</span>
+              </div>
+              <div class="text-[11px] text-slate-500">
+                Manajer: <strong class="text-slate-800">{{ branch.managerName || 'Belum Ditunjuk' }}</strong>
               </div>
             </div>
 
-            <!-- Chips Staf / Kasir Cabang -->
-            <div class="flex flex-wrap gap-1.5 pt-1">
+            <!-- Chips Staf -->
+            <div class="flex flex-wrap gap-1.5">
               <span 
-                v-for="st in getBranchStaff(branch.name).slice(0, 4)" 
+                v-for="st in getBranchStaff(branch.name)" 
                 :key="st.id"
                 class="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-700 rounded-md text-[10px] font-medium"
               >
                 <span class="w-1.5 h-1.5 rounded-full" :class="st.role === 'manager' ? 'bg-emerald-500' : 'bg-blue-500'"></span>
                 <span>{{ st.name }} ({{ st.role }})</span>
               </span>
-              <span 
-                v-if="getBranchStaff(branch.name).length > 4"
-                class="px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded-md text-[10px] font-bold"
-              >
-                +{{ getBranchStaff(branch.name).length - 4 }} staf lainnya
+              <span v-if="!getBranchStaff(branch.name).length" class="text-slate-400 italic text-[11px]">
+                Belum ada staf terdaftar pada cabang ini.
               </span>
             </div>
-
-            <!-- Tombol Kelola Tim Cabang Ini -->
-            <button 
-              @click="manageBranchTeam(branch.name)"
-              type="button"
-              class="w-full mt-1 py-1.5 px-3 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <Icon name="users" custom-class="w-3.5 h-3.5 text-slate-600" />
-              <span>Kelola Tim Cabang Ini</span>
-            </button>
           </div>
 
-          <!-- Total Stok Fisik di Cabang -->
-          <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-xs">
-            <span class="text-slate-600 font-medium">Stok Barang Cabang:</span>
+          <!-- Action Buttons Bar -->
+          <div class="pt-1 flex flex-wrap items-center justify-between gap-2 border-t border-slate-200/60">
+            <!-- Left: Toggle Status Buka/Tutup -->
+            <button 
+              @click="handleToggleStatus(branch)"
+              type="button"
+              :disabled="!canManageThisBranch(branch)"
+              :class="[
+                'py-2 px-3.5 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs',
+                branch.status === 'open' 
+                  ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200' 
+                  : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200',
+                !canManageThisBranch(branch) ? 'opacity-50 cursor-not-allowed' : ''
+              ]"
+            >
+              <span class="w-2 h-2 rounded-full" :class="branch.status === 'open' ? 'bg-rose-600' : 'bg-emerald-600'"></span>
+              <span>{{ branch.status === 'open' ? 'Tutup Toko Hari Ini' : 'Buka Operasional Toko' }}</span>
+            </button>
+
+            <!-- Right: Kelola Tim + Edit + Hapus -->
             <div class="flex items-center gap-2">
-              <span class="font-mono font-black text-slate-900">
-                {{ formatNumber(stockStore.getBranchTotalStockUnits(branch.id)) }} unit
-              </span>
               <button 
-                @click="$emit('navigate', 'inventory')" 
-                class="text-[10px] text-emerald-700 font-bold underline cursor-pointer"
+                @click="manageBranchTeam(branch.name)"
+                type="button"
+                class="py-2 px-3 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs rounded-xl border border-slate-200/90 shadow-2xs flex items-center gap-1.5 transition-colors cursor-pointer"
               >
-                Cek Stok ↗
+                <Icon name="users" custom-class="w-3.5 h-3.5 text-slate-600" />
+                <span>Kelola Tim</span>
+              </button>
+
+              <button 
+                v-if="canManageThisBranch(branch)"
+                @click="openEditBranchModal(branch)"
+                type="button"
+                class="p-2 bg-white hover:bg-slate-100 text-slate-700 rounded-xl border border-slate-200/90 shadow-2xs transition-colors cursor-pointer"
+                title="Edit Data Cabang"
+              >
+                <Icon name="edit" custom-class="w-4 h-4 text-slate-600" />
+              </button>
+
+              <button 
+                v-if="authStore.isOwner && branch.id !== 'wh-1'"
+                @click="openDeleteConfirmModal(branch)"
+                type="button"
+                class="p-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl border border-rose-200 shadow-2xs transition-colors cursor-pointer"
+                title="Hapus Cabang"
+              >
+                <Icon name="trash" custom-class="w-4 h-4 text-rose-600" />
               </button>
             </div>
           </div>
-        </div>
-
-        <!-- Card Footer Actions: Buka/Tutup Toggle, Edit, Hapus -->
-        <div class="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-2">
-          <!-- Toggle Buka / Tutup Operasional Toko -->
-          <button 
-            @click="handleToggleStatus(branch)"
-            type="button"
-            :disabled="!canManageThisBranch(branch)"
-            :class="[
-              'flex-1 py-2 px-3 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5',
-              branch.status === 'open' 
-                ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200' 
-                : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200',
-              !canManageThisBranch(branch) ? 'opacity-50 cursor-not-allowed' : ''
-            ]"
-            :title="branch.status === 'open' ? 'Tutup Operasional Toko Hari Ini' : 'Buka Operasional Toko'"
-          >
-            <span class="w-2 h-2 rounded-full" :class="branch.status === 'open' ? 'bg-rose-600' : 'bg-emerald-600'"></span>
-            <span>{{ branch.status === 'open' ? 'Tutup Toko' : 'Buka Toko' }}</span>
-          </button>
-
-          <!-- Edit Cabang (Owner & Manajer) -->
-          <button 
-            v-if="canManageThisBranch(branch)"
-            @click="openEditBranchModal(branch)"
-            type="button"
-            class="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
-            title="Edit Data Cabang"
-          >
-            <Icon name="edit" custom-class="w-4 h-4" />
-          </button>
-
-          <!-- Hapus Cabang (Khusus Owner) -->
-          <button 
-            v-if="authStore.isOwner && branch.id !== 'wh-1'"
-            @click="openDeleteConfirmModal(branch)"
-            type="button"
-            class="p-2 text-rose-600 hover:text-rose-800 hover:bg-rose-100 rounded-xl transition-colors cursor-pointer"
-            title="Tutup Permanen / Hapus Cabang Ini"
-          >
-            <Icon name="trash" custom-class="w-4 h-4" />
-          </button>
         </div>
       </div>
     </div>
@@ -656,6 +645,17 @@ const typeFilter = ref('all')
 
 const alertMessage = ref('')
 const alertType = ref('success')
+
+// State Progressive Disclosure (Klik untuk Buka/Tutup Detail Cabang)
+const expandedBranchIds = ref(new Set())
+
+function toggleBranchDetails(id) {
+  if (expandedBranchIds.value.has(id)) {
+    expandedBranchIds.value.delete(id)
+  } else {
+    expandedBranchIds.value.add(id)
+  }
+}
 
 // Helper counts
 const storeBranchesCount = computed(() => {

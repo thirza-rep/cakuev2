@@ -1,93 +1,112 @@
 <template>
   <div class="space-y-6 font-sans">
     
-    <!-- 1. HEADER UTAMA & RBAC INDICATOR -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 bg-white border border-slate-200 rounded-2xl shadow-xs">
-      <div class="space-y-1">
-        <div class="flex items-center gap-2.5">
-          <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center shadow-xs">
-            <Icon name="box" custom-class="w-5 h-5 text-emerald-700" />
+    <!-- 1. HEADER UTAMA: MINIMALIS, BERSIH & RAMPING -->
+    <div class="p-3.5 sm:p-5 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-3">
+      <!-- Baris Atas: Ikon, Judul Ringkas, Badge Peran, & Tombol Cabang Cepat -->
+      <div class="flex items-center justify-between gap-2.5">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center shrink-0 shadow-xs">
+            <Icon name="box" custom-class="w-4.5 h-4.5 sm:w-5 sm:h-5 text-emerald-700" />
           </div>
-          <div>
-            <h3 class="text-base sm:text-lg font-black text-slate-900 tracking-tight flex items-center gap-2 flex-wrap">
-              <span>Manajemen Inventaris & Gudang Terpadu</span>
-              <span :class="['text-[10px] font-extrabold px-2 py-0.5 rounded-full border uppercase tracking-wider', authStore.currentRoleConfig.color]">
-                Peran: {{ authStore.currentRoleConfig.title }}
+          <div class="min-w-0">
+            <h3 class="text-sm sm:text-base font-black text-slate-900 tracking-tight flex items-center gap-1.5 sm:gap-2 flex-wrap">
+              <span>Inventaris & Stok</span>
+              <span :class="['text-[9px] sm:text-[10px] font-extrabold px-1.5 sm:px-2 py-0.5 rounded-full border uppercase tracking-wider', authStore.currentRoleConfig.color]">
+                {{ authStore.currentRoleConfig.title }}
               </span>
             </h3>
-            <p class="text-xs text-slate-500">
-              Pencatatan mutasi stok riil (Inbound Supplier, Outbound Rusak/Expired, Opname, & Surat Jalan)
-            </p>
           </div>
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+          <!-- Tombol Aksi Cepat ke Manajemen Cabang -->
+          <button 
+            v-if="authStore.canManageBranches"
+            @click="emit('navigate', 'branches')"
+            type="button"
+            class="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs rounded-xl border border-slate-200/90 shadow-2xs transition-all cursor-pointer shrink-0"
+            title="Kelola Multi-Cabang & Outlet"
+          >
+            <Icon name="building" custom-class="w-3.5 h-3.5 text-slate-600" />
+            <span class="hidden sm:inline">Kelola</span>
+            <span class="text-xs">Cabang</span>
+          </button>
         </div>
       </div>
 
-      <!-- Action Buttons (Responsive Flex Wrap) -->
-      <div class="flex flex-wrap items-center gap-2 sm:gap-2.5">
-        <!-- Jalan Pintas ke Manajemen Cabang & Outlet -->
-        <button 
-          v-if="authStore.canManageBranches"
-          @click="emit('navigate', 'branches')"
+      <!-- In-Page Sub-View Switcher Tabs (Sinkron dengan Sidebar Sub-Menu) -->
+      <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-2 border-t border-slate-100 text-xs">
+        <button
+          @click="emit('update:activeSubTab', 'saldo')"
           type="button"
-          class="flex items-center gap-1.5 px-3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl border border-slate-300 shadow-2xs transition-all cursor-pointer"
-          title="Kelola Multi-Cabang & Buka Cabang Baru"
+          :class="[
+            'px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition-all cursor-pointer shrink-0 flex items-center gap-1.5',
+            activeSubTab === 'saldo'
+              ? 'bg-slate-900 text-white shadow-xs'
+              : 'bg-slate-100 hover:bg-slate-200/80 text-slate-600'
+          ]"
         >
-          <Icon name="building" custom-class="w-4 h-4 text-emerald-700" />
-          <span>Cabang & Outlet 🏢</span>
+          <Icon name="box" custom-class="w-3.5 h-3.5" />
+          <span>Matriks Saldo</span>
         </button>
 
-        <!-- Tambah Master Produk Baru (Khusus Owner & Manajer) -->
-        <button 
-          v-if="authStore.canAddProduct"
-          @click="showAddProductModal = true"
+        <button
+          @click="emit('update:activeSubTab', 'transfers')"
           type="button"
-          class="flex items-center gap-1.5 px-3.5 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 hover:text-slate-900 font-bold text-xs rounded-xl shadow-2xs transition-all cursor-pointer"
-          title="Daftarkan Produk atau Bahan Baku Baru"
+          :class="[
+            'px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition-all cursor-pointer shrink-0 flex items-center gap-1.5',
+            activeSubTab === 'transfers'
+              ? 'bg-slate-900 text-white shadow-xs'
+              : 'bg-slate-100 hover:bg-slate-200/80 text-slate-600'
+          ]"
         >
-          <Icon name="plus" custom-class="w-4 h-4 text-emerald-700" />
-          <span>+ Master Produk</span>
+          <Icon name="truck" custom-class="w-3.5 h-3.5" />
+          <span>Surat Jalan</span>
+          <span 
+            v-if="stockStore.stockTransfers.length"
+            :class="[
+              'text-[10px] px-1.5 py-0.2 rounded-full font-mono font-black',
+              activeSubTab === 'transfers' ? 'bg-emerald-400 text-slate-950' : 'bg-slate-200 text-slate-700'
+            ]"
+          >
+            {{ stockStore.stockTransfers.length }}
+          </span>
         </button>
 
-        <!-- Tambah Stok Masuk (Inbound / Restock) -->
-        <button 
-          v-if="authStore.canManageStock"
-          @click="openAdjustmentModal(null, 'in')"
+        <button
+          @click="emit('update:activeSubTab', 'mutations')"
           type="button"
-          class="flex items-center gap-1.5 px-3.5 py-2.5 bg-emerald-50 border border-emerald-300 hover:bg-emerald-100 text-emerald-900 font-bold text-xs rounded-xl shadow-2xs transition-all cursor-pointer"
-          title="Catat Barang Masuk dari Supplier atau Dapur"
+          :class="[
+            'px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition-all cursor-pointer shrink-0 flex items-center gap-1.5',
+            activeSubTab === 'mutations'
+              ? 'bg-slate-900 text-white shadow-xs'
+              : 'bg-slate-100 hover:bg-slate-200/80 text-slate-600'
+          ]"
         >
-          <Icon name="income" custom-class="w-4 h-4 text-emerald-700" />
-          <span>+ Barang Masuk (Restock)</span>
+          <Icon name="receipt" custom-class="w-3.5 h-3.5" />
+          <span>Buku Mutasi</span>
         </button>
 
-        <!-- Kurangi Stok Keluar / Rusak / Expired -->
-        <button 
-          v-if="authStore.canManageStock"
-          @click="openAdjustmentModal(null, 'out')"
+        <button
+          @click="emit('update:activeSubTab', 'all')"
           type="button"
-          class="flex items-center gap-1.5 px-3.5 py-2.5 bg-rose-50 border border-rose-300 hover:bg-rose-100 text-rose-900 font-bold text-xs rounded-xl shadow-2xs transition-all cursor-pointer"
-          title="Catat Barang Rusak, Kadaluarsa, atau Selisih Opname"
+          :class="[
+            'px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition-all cursor-pointer shrink-0 flex items-center gap-1.5',
+            activeSubTab === 'all'
+              ? 'bg-slate-900 text-white shadow-xs'
+              : 'bg-slate-100 hover:bg-slate-200/80 text-slate-600'
+          ]"
         >
-          <Icon name="expense" custom-class="w-4 h-4 text-rose-700" />
-          <span>- Catat Rusak / Expired</span>
-        </button>
-
-        <!-- Buat Surat Jalan Antar-Cabang -->
-        <button 
-          v-if="authStore.canManageStock"
-          @click="showTransferModal = true"
-          type="button"
-          class="flex items-center gap-1.5 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
-          title="Penyaluran Antar Gudang dan Cabang"
-        >
-          <Icon name="truck" custom-class="w-4 h-4 text-emerald-400" />
-          <span>Kirim Surat Jalan</span>
+          <span>Semua Bagian</span>
         </button>
       </div>
     </div>
 
-    <!-- 2. FILTER & PENCARIAN CEPAT -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-white border border-slate-200 rounded-2xl shadow-2xs">
+    <!-- 2 & 3. BAGIAN MATRIKS SALDO & FILTER -->
+    <div v-if="activeSubTab === 'saldo' || activeSubTab === 'all'" class="space-y-6">
+      <!-- 2. FILTER & PENCARIAN CEPAT -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4 bg-white border border-slate-200 rounded-2xl shadow-2xs">
       <!-- Search Input -->
       <div class="relative w-full sm:w-72">
         <span class="absolute left-3.5 top-2.5 text-slate-400">
@@ -102,14 +121,14 @@
       </div>
 
       <!-- Category Filter Pills -->
-      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 text-xs">
+      <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5 sm:pb-0 text-xs">
         <button 
           v-for="cat in ['Semua', 'Bahan Baku', 'Sirup', 'Packaging', 'Makanan Jadi']" 
           :key="cat"
           @click="selectedCategory = cat"
           type="button"
           :class="[
-            'px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition-all cursor-pointer text-xs',
+            'px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition-all cursor-pointer text-xs shrink-0',
             selectedCategory === cat 
               ? 'bg-slate-900 text-white shadow-2xs' 
               : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
@@ -256,55 +275,149 @@
         </table>
       </div>
     </div>
+    </div>
 
-    <!-- 4. ACTIVE SURAT JALAN (IN-TRANSIT TRANSFERS) -->
-    <div class="saas-card p-5 sm:p-6 space-y-4">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+    <!-- 4. ACTIVE SURAT JALAN (IN-TRANSIT TRANSFERS) - PROGRESSIVE DISCLOSURE -->
+    <div v-if="activeSubTab === 'transfers' || activeSubTab === 'all'" class="saas-card p-4 sm:p-6 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 flex-wrap gap-2">
         <div class="flex items-center gap-2.5">
-          <Icon name="truck" custom-class="w-5 h-5 text-sky-600" />
-          <span class="text-sm sm:text-base font-bold text-slate-900">Daftar Surat Jalan Penyaluran Stok (In-Transit)</span>
+          <div class="w-8 h-8 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center shrink-0">
+            <Icon name="truck" custom-class="w-4 h-4" />
+          </div>
+          <div>
+            <span class="text-sm sm:text-base font-bold text-slate-900">Daftar Surat Jalan Penyaluran Stok</span>
+            <p class="text-[11px] text-slate-500">Klik kartu untuk melihat rincian muatan dan kurir</p>
+          </div>
         </div>
-        <span class="text-xs text-slate-500 font-semibold">{{ stockStore.stockTransfers.length }} Pengiriman Tercatat</span>
+        <span class="text-xs text-slate-500 font-semibold bg-slate-100 px-2.5 py-1 rounded-lg">
+          {{ stockStore.stockTransfers.length }} Pengiriman
+        </span>
       </div>
 
-      <div class="space-y-3">
+      <div class="space-y-2.5">
         <div 
           v-for="tf in stockStore.stockTransfers" 
           :key="tf.id"
-          class="p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs sm:text-sm font-sans"
+          class="border border-slate-200/90 hover:border-slate-300 rounded-2xl bg-white hover:bg-slate-50/50 transition-all shadow-2xs overflow-hidden"
         >
-          <div class="space-y-1">
-            <div class="flex items-center gap-2 flex-wrap">
-              <span class="font-extrabold text-slate-900 font-mono">{{ tf.id }}</span>
-              <span class="text-slate-400 text-xs">• {{ tf.date }}</span>
-              <span :class="['px-2 py-0.5 rounded-md text-[10px] font-bold', tf.status === 'IN_TRANSIT' ? 'bg-sky-100 text-sky-800 border border-sky-300' : 'bg-emerald-100 text-emerald-800 border border-emerald-300']">
-                {{ tf.status === 'IN_TRANSIT' ? 'DALAM PERJALANAN' : 'SUDAH DITERIMA' }}
-              </span>
+          <!-- Compact Summary Row (At-a-glance, Tersirat & Esensial) -->
+          <div 
+            @click="toggleTransferDetails(tf.id)"
+            class="p-3.5 sm:p-4 flex items-center justify-between gap-3 cursor-pointer select-none"
+          >
+            <!-- Left Info: ID + Rute + Status -->
+            <div class="flex items-center gap-3 min-w-0">
+              <div :class="[
+                'w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-xs font-black shadow-2xs',
+                tf.status === 'IN_TRANSIT' ? 'bg-sky-50 text-sky-700' : 'bg-emerald-50 text-emerald-700'
+              ]">
+                <Icon :name="tf.status === 'IN_TRANSIT' ? 'truck' : 'check'" custom-class="w-4 h-4" />
+              </div>
+
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="font-extrabold text-slate-900 font-mono text-xs sm:text-sm tracking-tight">{{ tf.id }}</span>
+                  <span :class="[
+                    'px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider',
+                    tf.status === 'IN_TRANSIT' ? 'bg-sky-100 text-sky-800' : 'bg-emerald-100 text-emerald-800'
+                  ]">
+                    {{ tf.status === 'IN_TRANSIT' ? 'Dalam Perjalanan' : 'Diterima' }}
+                  </span>
+                </div>
+                <div class="text-xs text-slate-600 font-medium truncate mt-0.5">
+                  <span class="text-slate-400">{{ tf.from ? tf.from.replace(' (Central Hub)', '') : 'Pusat' }}</span>
+                  <span class="text-slate-400 mx-1">&rarr;</span>
+                  <strong class="text-slate-800">{{ tf.to }}</strong>
+                </div>
+              </div>
             </div>
-            <div class="text-slate-700">
-              Dari: <strong>{{ tf.from }}</strong> &rarr; Tujuan: <strong class="text-slate-900">{{ tf.to }}</strong> (Kurir: {{ tf.driver }})
-            </div>
-            <div class="text-slate-500 text-xs">
-              Muatan: <span v-for="(it, i) in tf.items" :key="i" class="text-slate-800 font-semibold">{{ it.productName }} ({{ it.qty }} pcs){{ i < tf.items.length - 1 ? ', ' : '' }}</span>
+
+            <!-- Right Info: Summary Muatan & Chevron Toggle -->
+            <div class="flex items-center gap-3 shrink-0">
+              <div class="text-right hidden sm:block">
+                <div class="text-xs font-extrabold text-slate-900 tabular-nums">
+                  {{ getTransferTotalQty(tf.items) }} pcs
+                </div>
+                <div class="text-[11px] text-slate-400">
+                  {{ tf.items ? tf.items.length : 0 }} jenis item
+                </div>
+              </div>
+
+              <div class="text-right sm:hidden">
+                <span class="text-xs font-extrabold text-slate-900 tabular-nums bg-slate-100 px-2 py-0.5 rounded-md">
+                  {{ getTransferTotalQty(tf.items) }} pcs
+                </span>
+              </div>
+
+              <div class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors">
+                <svg 
+                  class="w-4 h-4 transition-transform duration-200"
+                  :class="{ 'rotate-180': expandedTransferIds.has(tf.id) }"
+                  fill="none" 
+                  viewBox="0 0 24 24" 
+                  stroke="currentColor"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
             </div>
           </div>
 
-          <div v-if="tf.status === 'IN_TRANSIT' && authStore.canManageStock">
-            <button 
-              @click="stockStore.receiveTransfer(tf.id)"
-              type="button"
-              class="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer self-start"
-            >
-              <Icon name="check" custom-class="w-3.5 h-3.5" />
-              <span>Konfirmasi Terima Barang</span>
-            </button>
+          <!-- Expandable Detail Drawer/Section (Muncul saat diklik) -->
+          <div 
+            v-if="expandedTransferIds.has(tf.id)"
+            class="px-4 pb-4 pt-2 border-t border-slate-100 bg-slate-50/70 space-y-3.5 text-xs animate-fadeIn"
+          >
+            <!-- Meta Details: Kurir & Waktu -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-slate-600">
+              <div class="flex items-center gap-2">
+                <span class="text-slate-400 text-[11px]">Waktu Kirim:</span>
+                <span class="font-bold text-slate-800">{{ tf.date }}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-slate-400 text-[11px]">Kurir / Armada:</span>
+                <span class="font-bold text-slate-800">{{ tf.driver || 'Kurir Internal' }}</span>
+              </div>
+            </div>
+
+            <!-- Detail List Muatan Barang -->
+            <div class="border border-slate-200/90 rounded-xl bg-white overflow-hidden">
+              <div class="bg-slate-100/70 px-3 py-1.5 font-bold text-[11px] text-slate-600 border-b border-slate-200/70 flex justify-between">
+                <span>Rincian Barang Muatan</span>
+                <span>Kuantitas</span>
+              </div>
+              <div class="divide-y divide-slate-100">
+                <div 
+                  v-for="(it, i) in tf.items" 
+                  :key="i"
+                  class="px-3 py-2 flex items-center justify-between text-xs hover:bg-slate-50/50"
+                >
+                  <span class="font-medium text-slate-800">{{ it.productName }}</span>
+                  <span class="font-bold text-slate-900 tabular-nums bg-slate-100 px-2 py-0.5 rounded">
+                    {{ it.qty }} pcs
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Button: Konfirmasi Terima -->
+            <div v-if="tf.status === 'IN_TRANSIT' && authStore.canManageStock" class="pt-1 flex justify-end">
+              <button 
+                @click.stop="stockStore.receiveTransfer(tf.id)"
+                type="button"
+                class="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+              >
+                <Icon name="check" custom-class="w-3.5 h-3.5" />
+                <span>Konfirmasi Barang Telah Sampai</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
     <!-- 5. BUKU RIWAYAT MUTASI STOK (STOCK MOVEMENT LEDGER AUDIT) -->
-    <div class="saas-card p-5 sm:p-6 space-y-4">
+    <div v-if="activeSubTab === 'mutations' || activeSubTab === 'all'" class="saas-card p-5 sm:p-6 space-y-4">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100 flex-wrap gap-2">
         <div class="flex items-center gap-2.5">
           <Icon name="receipt" custom-class="w-5 h-5 text-emerald-700" />
@@ -387,14 +500,14 @@
             type="button"
             :class="['py-2 rounded-lg transition-all cursor-pointer', adjustForm.type === 'in' ? 'bg-white text-emerald-800 shadow-2xs font-extrabold' : 'text-slate-600']"
           >
-            + Barang Masuk (Restock)
+            Barang Masuk (Restock)
           </button>
           <button 
             @click="adjustForm.type = 'out'"
             type="button"
             :class="['py-2 rounded-lg transition-all cursor-pointer', adjustForm.type === 'out' ? 'bg-white text-rose-800 shadow-2xs font-extrabold' : 'text-slate-600']"
           >
-            - Barang Keluar (Rusak/Expired)
+            Barang Keluar (Rusak/Expired)
           </button>
         </div>
 
@@ -715,13 +828,38 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useStockStore } from '../../stores/stockStore'
 import { useAuthStore } from '../../stores/authStore'
 import { useFinanceStore } from '../../stores/financeStore'
 import Icon from '../common/Icon.vue'
 
-const emit = defineEmits(['navigate'])
+const props = defineProps({
+  activeSubTab: {
+    type: String,
+    default: 'saldo' // 'saldo', 'transfers', 'mutations', 'all'
+  },
+  triggeredAction: {
+    type: Object,
+    default: null
+  }
+})
+
+const emit = defineEmits(['navigate', 'update:activeSubTab'])
+
+// Watcher untuk merespons aksi yang dipicu dari Sub-Menu Sidebar
+watch(() => props.triggeredAction, (newVal) => {
+  if (!newVal || !newVal.action) return
+  if (newVal.action === 'action-inbound') {
+    openAdjustmentModal(null, 'in')
+  } else if (newVal.action === 'action-outbound') {
+    openAdjustmentModal(null, 'out')
+  } else if (newVal.action === 'action-product') {
+    showAddProductModal.value = true
+  } else if (newVal.action === 'action-transfer') {
+    showTransferModal.value = true
+  }
+})
 
 const stockStore = useStockStore()
 const authStore = useAuthStore()
@@ -735,6 +873,22 @@ const selectedCategory = ref('Semua')
 const showAdjustModal = ref(false)
 const showAddProductModal = ref(false)
 const showTransferModal = ref(false)
+
+// Expand/Collapse Detail Surat Jalan
+const expandedTransferIds = ref(new Set())
+
+function toggleTransferDetails(id) {
+  if (expandedTransferIds.value.has(id)) {
+    expandedTransferIds.value.delete(id)
+  } else {
+    expandedTransferIds.value.add(id)
+  }
+}
+
+function getTransferTotalQty(items) {
+  if (!items || !items.length) return 0
+  return items.reduce((sum, it) => sum + (it.qty || 0), 0)
+}
 
 // Adjustment Form State
 const adjustForm = ref({
