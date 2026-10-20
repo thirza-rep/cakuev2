@@ -19,7 +19,49 @@ services:
       timeout: 5s
       retries: 5
 
-  # 2. BAILEYS WHATSAPP GATEWAY (SELF-HOSTED $0 COST)
+  # 2. ADMINER (DATABASE WEB GUI FOR POSTGRESQL)
+  adminer:
+    image: adminer:latest
+    container_name: cakue-adminer
+    restart: unless-stopped
+    ports:
+      - "8088:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # 3. CAKUE BACKEND REST API & LEDGER ENGINE
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cakue-backend
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - DATABASE_URL=postgresql://cakue_user:cakue_password_secure2026@postgres:5432/cakue_db
+      - WA_GATEWAY_URL=http://wa-gateway:3333
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # 4. CAKUE FRONTEND (VUE 3 + TAILWIND + NGINX SPA)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: cakue-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+  # 5. BAILEYS WHATSAPP GATEWAY (SELF-HOSTED $0 COST)
   wa-gateway:
     build:
       context: ./wa-gateway

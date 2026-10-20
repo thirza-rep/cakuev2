@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">CAKUE</string>
+    <string name="title_activity_main">CAKUE</string>
+    <string name="package_name">com.codevits.cakue</string>
+    <string name="custom_url_scheme">com.codevits.cakue</string>
+</resources>
