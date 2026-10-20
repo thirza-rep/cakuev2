@@ -36,9 +36,6 @@ jobs:
           distribution: 'temurin'
           java-version: 21
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Install Frontend Dependencies
         working-directory: frontend
         run: npm ci
@@ -56,6 +53,8 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug --stacktrace
+        env:
+          ANDROID_HOME: /usr/local/lib/android/sdk
 
       - name: Upload Android APK
         uses: actions/upload-artifact@v4
