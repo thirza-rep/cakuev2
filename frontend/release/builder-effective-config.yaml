@@ -1,0 +1,18 @@
+directories:
+  output: release
+  buildResources: build
+appId: com.codevits.cakue
+productName: CAKUE
+files:
+  - filter:
+      - dist/**/*
+      - electron/**/*
+      - package.json
+win:
+  target:
+    - nsis
+    - portable
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+electronVersion: 33.4.11

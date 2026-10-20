@@ -2,6 +2,8 @@
   "name": "cakue-app",
   "private": true,
   "version": "1.0.0",
+  "description": "CAKUE Business SaaS ERP and Personal Mobile Banking Platform",
+  "author": "Codevits",
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
@@ -9,7 +11,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "build:win": "vite build && electron-builder --win --x64",
-    "build:apk": "vite build && cap sync android"
+    "build:apk": "vite build && cap copy android"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.3",
@@ -40,10 +42,7 @@
       "package.json"
     ],
     "win": {
-      "target": [
-        "nsis",
-        "portable"
-      ]
+      "target": "nsis"
     },
     "nsis": {
       "oneClick": false,
