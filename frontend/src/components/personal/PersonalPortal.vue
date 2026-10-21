@@ -26,7 +26,7 @@
           <div 
             @click="isSidebarCollapsed ? toggleSidebar() : null"
             :class="[
-              'w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center shrink-0 border border-slate-200 bg-white shadow-xs',
+              'w-11 h-11 rounded-xl overflow-hidden flex items-center justify-center shrink-0 border border-slate-200/90 bg-white shadow-xs',
               isSidebarCollapsed ? 'cursor-pointer hover:ring-2 hover:ring-emerald-400 transition-all' : ''
             ]"
             :title="isSidebarCollapsed ? 'Klik untuk memperbesar sidebar' : ''"
