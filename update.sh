@@ -56,6 +56,7 @@ if [ -n "$SERVER_IP" ]; then
         --exclude 'dist' \
         --exclude 'release' \
         --exclude 'android' \
+        --exclude 'installers' \
         --exclude 'auth_info_baileys' \
         "${PROJECT_DIR}/" "${SERVER_USER}@${SERVER_IP}:${SERVER_APP_DIR}/"
 
