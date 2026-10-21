@@ -43,6 +43,12 @@
         </button>
       </div>
 
+      <!-- Error Message Banner -->
+      <div v-if="errorMessage" class="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs flex items-start gap-2">
+        <Icon name="alert-circle" custom-class="w-4 h-4 shrink-0 mt-0.5" />
+        <span>{{ errorMessage }}</span>
+      </div>
+
       <form @submit.prevent="handleRegister" class="space-y-3.5">
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Lengkap</label>
@@ -91,9 +97,11 @@
 
         <button 
           type="submit" 
-          class="w-full py-2.5 px-4 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+          :disabled="isLoading"
+          class="w-full py-2.5 px-4 bg-emerald-700 hover:bg-emerald-800 disabled:bg-emerald-400 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer flex items-center justify-center gap-2"
         >
-          Daftar Akun Baru (100% Bebas Biaya)
+          <span v-if="isLoading">Mendaftarkan ke Database...</span>
+          <span v-else>Daftar Akun Baru (100% Bebas Biaya)</span>
         </button>
       </form>
 
@@ -115,13 +123,33 @@ import Icon from '../common/Icon.vue'
 const emit = defineEmits(['switch-view', 'go-onboarding'])
 const authStore = useAuthStore()
 
-const accountType = ref('personal')
+const accountType = ref('business')
 const name = ref('')
 const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
+const errorMessage = ref('')
+const isLoading = ref(false)
 
-function handleRegister() {
-  authStore.register(name.value, email.value, accountType.value)
+async function handleRegister() {
+  errorMessage.value = ''
+  if (password.value !== confirmPassword.value) {
+    errorMessage.value = 'Konfirmasi kata sandi tidak cocok!'
+    return
+  }
+
+  isLoading.value = true
+  try {
+    const role = accountType.value === 'personal' ? 'personal' : 'owner'
+    const branchId = 'jogja-1'
+    const res = await authStore.register(name.value, email.value, password.value, accountType.value, role, branchId)
+    if (!res.success) {
+      errorMessage.value = res.message || 'Pendaftaran gagal'
+    }
+  } catch (err) {
+    errorMessage.value = `Terjadi kesalahan: ${err.message}`
+  } finally {
+    isLoading.value = false
+  }
 }
 </script>

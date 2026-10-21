@@ -86,19 +86,27 @@ CREATE TABLE IF NOT EXISTS users (
     last_login TIMESTAMP
 );
 
--- Seed Data Cabang & Gudang
+-- Seed Data Cabang & Gudang (Termasuk 6 Cabang Wilayah Jogja)
 INSERT INTO branches (id, name, type, address) VALUES
-('wh-1', 'Gudang Pusat (Central Hub)', 'warehouse', 'Kawasan Industri Pulogadung, Jakarta Timur'),
+('jogja-wh', 'Gudang Pusat Jogja (Hub Distribusi)', 'warehouse', 'Kawasan Pergudangan Maguwoharjo, Sleman, D.I. Yogyakarta'),
+('jogja-1', 'Cabang 1 - Malioboro', 'branch', 'Jl. Malioboro No. 12, Danurejan, Kota Yogyakarta'),
+('jogja-2', 'Cabang 2 - Gejayan', 'branch', 'Jl. Affandi (Gejayan) No. 45, Caturtunggal, Sleman, D.I. Yogyakarta'),
+('jogja-3', 'Cabang 3 - Kaliurang', 'branch', 'Jl. Kaliurang KM 5.2 No. 8, Sinduadi, Mlati, Sleman, D.I. Yogyakarta'),
+('jogja-4', 'Cabang 4 - Seturan', 'branch', 'Jl. Seturan Raya No. 23, Kledokan, Caturtunggal, Sleman, D.I. Yogyakarta'),
+('jogja-5', 'Cabang 5 - Kotagede', 'branch', 'Jl. Mondorakan No. 17, Kotagede, Kota Yogyakarta'),
+('jogja-6', 'Cabang 6 - Bantul', 'branch', 'Jl. Jend. Sudirman No. 88, Nyeparan, Bantul, D.I. Yogyakarta'),
+('wh-1', 'Gudang Pusat Jakarta', 'warehouse', 'Kawasan Industri Pulogadung, Jakarta Timur'),
 ('br-1', 'Cabang Jakarta Selatan', 'branch', 'Jl. Senopati No. 42, Kebayoran Baru, Jakarta Selatan'),
 ('br-2', 'Cabang Bandung Dago', 'branch', 'Jl. Ir. H. Juanda No. 108, Dago, Bandung'),
 ('br-3', 'Cabang Surabaya Gubeng', 'branch', 'Jl. Pemuda No. 15, Gubeng, Surabaya')
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, type = EXCLUDED.type, address = EXCLUDED.address;
 
--- Seed Data Pengguna untuk Simulasi Hak Akses (RBAC)
-INSERT INTO users (id, email, name, phone, account_type, role, branch_id) VALUES
-('usr-owner', 'owner@cakuenusantara.com', 'Budi Santoso', '081234567890', 'business', 'owner', 'br-1'),
-('usr-manager', 'manager.dago@cakuenusantara.com', 'Siti Rahmawati', '081298765432', 'business', 'manager', 'br-2'),
-('usr-cashier', 'kasir.jaksel@cakuenusantara.com', 'Andi Pratama', '081311223344', 'business', 'cashier', 'br-1'),
-('usr-warehouse', 'gudang.pusat@cakuenusantara.com', 'Hendra Wijaya', '081355667788', 'business', 'warehouse', 'wh-1'),
-('usr-personal', 'budi.santoso@cakue.id', 'Budi Santoso', '081234567890', 'personal', 'personal', NULL)
+-- Seed Data Pengguna untuk Hak Akses (RBAC)
+INSERT INTO users (id, email, name, phone, password_hash, account_type, role, branch_id) VALUES
+('usr-master-admin', 'admin@cakue.id', 'Master Administrator', '0812-0000-0001', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 'business', 'owner', 'jogja-1'),
+('usr-dummy-budi', 'budi.santoso@cakue.id', 'Budi Santoso (Dummy / Demo)', '0812-3456-7890', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'business', 'owner', 'jogja-1'),
+('usr-owner', 'owner@cakuenusantara.com', 'Budi Santoso', '081234567890', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'business', 'owner', 'br-1'),
+('usr-manager', 'manager.dago@cakuenusantara.com', 'Siti Rahmawati', '081298765432', NULL, 'business', 'manager', 'br-2'),
+('usr-cashier', 'kasir.jaksel@cakuenusantara.com', 'Andi Pratama', '081311223344', NULL, 'business', 'cashier', 'br-1'),
+('usr-warehouse', 'gudang.pusat@cakuenusantara.com', 'Hendra Wijaya', '081355667788', NULL, 'business', 'warehouse', 'wh-1')
 ON CONFLICT (id) DO NOTHING;

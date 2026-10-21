@@ -762,6 +762,7 @@ function openAddBranchModal() {
 }
 
 onMounted(() => {
+  authStore.loadBranchesFromServer()
   if (props.autoOpenAdd && authStore.isOwner) {
     openAddBranchModal()
     emit('reset-auto-open')

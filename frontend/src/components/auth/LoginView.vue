@@ -41,6 +41,12 @@
           <span class="bg-white px-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider absolute">atau email</span>
         </div>
 
+        <!-- Error Message Banner -->
+        <div v-if="errorMessage" class="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs flex items-start gap-2">
+          <Icon name="alert-circle" custom-class="w-4 h-4 shrink-0 mt-0.5" />
+          <span>{{ errorMessage }}</span>
+        </div>
+
         <!-- Form Email & Password -->
         <form @submit.prevent="handleSubmit" class="space-y-3.5">
           <div>
@@ -49,7 +55,7 @@
               v-model="email" 
               type="email" 
               required
-              placeholder="budi.santoso@cakue.id" 
+              placeholder="admin@cakue.id atau budi.santoso@cakue.id" 
               class="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:border-emerald-500"
             />
           </div>
@@ -76,36 +82,40 @@
 
           <button 
             type="submit" 
-            class="w-full py-2.5 px-4 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+            :disabled="isLoading"
+            class="w-full py-2.5 px-4 bg-emerald-700 hover:bg-emerald-800 disabled:bg-emerald-400 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer flex items-center justify-center gap-2"
           >
-            Masuk ke Aplikasi
+            <span v-if="isLoading">Menghubungkan ke Server...</span>
+            <span v-else>Masuk ke Aplikasi</span>
           </button>
         </form>
 
         <!-- Quick Demo Profiles -->
         <div class="pt-4 border-t border-slate-100 space-y-2">
-          <div class="text-[11px] font-semibold text-slate-500 text-center uppercase tracking-wide">Pilih Mode Masuk Cepat:</div>
+          <div class="text-[11px] font-semibold text-slate-500 text-center uppercase tracking-wide">Pilih Profil Akses Cepat:</div>
           <div class="grid grid-cols-2 gap-2">
             <button 
-              @click="quickAccess('personal')" 
-              class="p-2.5 bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 rounded-xl text-left transition-all cursor-pointer group"
+              @click="quickAccess('master')" 
+              type="button"
+              class="p-2.5 bg-purple-50/60 hover:bg-purple-100 border border-purple-200 rounded-xl text-left transition-all cursor-pointer group"
             >
-              <div class="flex items-center gap-1.5 font-bold text-xs text-slate-800 group-hover:text-emerald-800">
-                <Icon name="wallet" custom-class="w-3.5 h-3.5 text-emerald-700" />
-                <span>Perorangan</span>
+              <div class="flex items-center gap-1.5 font-bold text-xs text-purple-900">
+                <Icon name="shield-check" custom-class="w-3.5 h-3.5 text-purple-700" />
+                <span>Master Admin</span>
               </div>
-              <div class="text-[10px] text-slate-500 mt-0.5">Catatan Keuangan Pribadi</div>
+              <div class="text-[10px] text-purple-700/80 mt-0.5">Owner (Akses Penuh 6 Cabang)</div>
             </button>
 
             <button 
-              @click="quickAccess('business')" 
-              class="p-2.5 bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 rounded-xl text-left transition-all cursor-pointer group"
+              @click="quickAccess('dummy')" 
+              type="button"
+              class="p-2.5 bg-amber-50/60 hover:bg-amber-100 border border-amber-200 rounded-xl text-left transition-all cursor-pointer group"
             >
-              <div class="flex items-center gap-1.5 font-bold text-xs text-slate-800 group-hover:text-emerald-800">
-                <Icon name="store" custom-class="w-3.5 h-3.5 text-emerald-700" />
-                <span>Usaha / UMKM</span>
+              <div class="flex items-center gap-1.5 font-bold text-xs text-amber-900">
+                <Icon name="user" custom-class="w-3.5 h-3.5 text-amber-700" />
+                <span>Budi Santoso</span>
               </div>
-              <div class="text-[10px] text-slate-500 mt-0.5">SaaS POS & Multi-Cabang</div>
+              <div class="text-[10px] text-amber-700/80 mt-0.5">Akun Dummy / Demo</div>
             </button>
           </div>
         </div>
@@ -117,6 +127,47 @@
             Daftar Akun Baru
           </button>
         </div>
+
+        <!-- Server IP Indicator & Settings -->
+        <div class="pt-3 border-t border-slate-100 text-center">
+          <button 
+            type="button"
+            @click="showServerConfig = !showServerConfig"
+            class="text-[11px] text-slate-400 hover:text-slate-600 inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+          >
+            <span class="w-2 h-2 rounded-full" :class="isServerOnline ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'"></span>
+            <span>Server: {{ currentServerUrl }}</span>
+            <Icon name="settings" custom-class="w-3 h-3" />
+          </button>
+
+          <!-- Drawer Mini Konfigurasi Server -->
+          <div v-if="showServerConfig" class="mt-2.5 p-3 bg-slate-50 border border-slate-200 rounded-xl text-left space-y-2">
+            <div class="text-[11px] font-bold text-slate-700">Endpoint Server Mini PC:</div>
+            <div class="flex gap-1.5">
+              <input 
+                v-model="customServerUrl" 
+                type="text" 
+                placeholder="http://192.168.1.13:3001" 
+                class="flex-1 px-2.5 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-500"
+              />
+              <button 
+                type="button" 
+                @click="saveServerUrl"
+                class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-lg"
+              >
+                Simpan
+              </button>
+            </div>
+            <div class="flex gap-1 text-[10px] text-slate-500 flex-wrap">
+              <span>Preset:</span>
+              <button type="button" @click="customServerUrl = 'http://192.168.1.13:3001'" class="text-emerald-700 hover:underline">Wi-Fi Rumah</button>
+              <span>•</span>
+              <button type="button" @click="customServerUrl = 'http://100.88.200.16:3001'" class="text-emerald-700 hover:underline">Tailscale</button>
+              <span>•</span>
+              <button type="button" @click="customServerUrl = 'http://localhost:3001'" class="text-emerald-700 hover:underline">Localhost</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -126,27 +177,65 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useAuthStore } from '../../stores/authStore'
+import { getServerUrl, setServerUrl, checkServerHealth } from '../../api/client.js'
 import Icon from '../common/Icon.vue'
 import ForgotPasswordModal from './ForgotPasswordModal.vue'
 
 const emit = defineEmits(['switch-view', 'go-onboarding'])
 const authStore = useAuthStore()
 
-const email = ref('budi.santoso@cakue.id')
-const password = ref('password123')
+const email = ref('admin@cakue.id')
+const password = ref('admin123')
+const errorMessage = ref('')
+const isLoading = ref(false)
 const showForgotModal = ref(false)
+const showServerConfig = ref(false)
+const currentServerUrl = ref('')
+const customServerUrl = ref('')
+const isServerOnline = ref(false)
 
-function handleSubmit() {
-  if (email.value.includes('owner') || email.value.includes('cakuenusantara') || email.value.includes('bisnis') || email.value.includes('toko')) {
-    authStore.loginAs('business')
-  } else {
-    authStore.loginAs('personal')
+onMounted(async () => {
+  currentServerUrl.value = getServerUrl()
+  customServerUrl.value = currentServerUrl.value
+  const health = await checkServerHealth()
+  isServerOnline.value = health.ok
+})
+
+async function handleSubmit() {
+  errorMessage.value = ''
+  isLoading.value = true
+  try {
+    const res = await authStore.login(email.value, password.value)
+    if (!res.success) {
+      errorMessage.value = res.message || 'Gagal masuk. Periksa kembali email dan kata sandi.'
+    }
+  } catch (err) {
+    errorMessage.value = `Terjadi kesalahan: ${err.message}`
+  } finally {
+    isLoading.value = false
   }
 }
 
-function quickAccess(mode) {
-  authStore.loginAs(mode)
+async function quickAccess(mode) {
+  errorMessage.value = ''
+  if (mode === 'master') {
+    email.value = 'admin@cakue.id'
+    password.value = 'admin123'
+  } else {
+    email.value = 'budi.santoso@cakue.id'
+    password.value = 'password123'
+  }
+  await handleSubmit()
+}
+
+function saveServerUrl() {
+  setServerUrl(customServerUrl.value)
+  currentServerUrl.value = getServerUrl()
+  showServerConfig.value = false
+  checkServerHealth().then(h => {
+    isServerOnline.value = h.ok
+  })
 }
 </script>

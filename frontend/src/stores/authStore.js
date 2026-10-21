@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
+import { api } from '../api/client.js'
 
 // 1. DEFINISI ROLE & MATRIX HAK AKSES (RBAC) ENTERPRISE
 export const ROLES = {
@@ -129,80 +130,128 @@ export const useAuthStore = defineStore('auth', () => {
     }
   })
 
+  // Membaca Data Pengguna Aktif dari Sesi LocalStorage
+  const savedUserJson = localStorage.getItem('cakue_current_user')
+  let parsedUser = null
+  if (savedUserJson) {
+    try {
+      parsedUser = JSON.parse(savedUserJson)
+    } catch (e) {}
+  }
+
   // Data Pengguna Sesuai Jenis Akun
   const personalUser = ref({
-    name: 'Budi Santoso',
-    email: 'budi.santoso@cakue.id',
-    accountNumber: '5420-8819-2041',
+    name: parsedUser?.account_type === 'personal' ? parsedUser.name : 'Budi Santoso (Dummy / Demo)',
+    email: parsedUser?.account_type === 'personal' ? parsedUser.email : 'budi.santoso@cakue.id',
+    accountNumber: parsedUser?.phone || '5420-8819-2041',
     role: 'Nasabah Pribadi',
-    joinedDate: 'Januari 2026'
+    joinedDate: 'Oktober 2026'
   })
 
   const businessUser = ref({
-    name: 'Budi Santoso',
-    email: 'owner@cakuenusantara.com',
-    companyName: 'PT Cakue Nusantara Berkah',
-    role: ROLES[activeBusinessRole.value.toUpperCase()]?.title || 'Owner & Direktur',
-    currentBranch: localStorage.getItem('cakue_current_branch') || 'Cabang Jakarta Selatan'
+    name: parsedUser?.name || 'Master Administrator',
+    email: parsedUser?.email || 'admin@cakue.id',
+    companyName: 'PT CAKUE Nusantara Berkah (Jogja)',
+    role: ROLES[(parsedUser?.role || activeBusinessRole.value).toUpperCase()]?.title || 'Owner & Direktur',
+    currentBranch: localStorage.getItem('cakue_current_branch') || parsedUser?.branch_name || 'Cabang 1 - Malioboro'
   })
 
   const user = computed(() => {
     return accountType.value === 'personal' ? personalUser.value : businessUser.value
   })
 
-  // Master Cabang & Multi-Outlet Usaha Terpadu (Persisten di LocalStorage)
+  // Master 6 Cabang Wilayah Jogja + Gudang Pusat Jogja
   const defaultBranches = [
     {
-      id: 'wh-1',
-      code: 'PST-01',
-      name: 'Gudang Pusat (Central Hub)',
+      id: 'jogja-wh',
+      code: 'WH-JOG',
+      name: 'Gudang Pusat Jogja (Hub Distribusi)',
       type: 'warehouse',
-      city: 'Jakarta Timur',
-      address: 'Kawasan Industri Pulogadung Blok B No. 12',
+      city: 'Sleman, DIY',
+      address: 'Kawasan Pergudangan Maguwoharjo, Sleman, D.I. Yogyakarta',
       phone: '0811-2233-4455',
       status: 'open',
-      managerName: 'Riko Pratama',
+      managerName: 'Hendra Wijaya',
       operatingHours: '24 Jam Operasional',
-      createdAt: '2025-01-01'
+      createdAt: '2026-10-21'
     },
     {
-      id: 'br-1',
-      code: 'JKT-01',
-      name: 'Cabang Jakarta Selatan',
+      id: 'jogja-1',
+      code: 'JOG-01',
+      name: 'Cabang 1 - Malioboro',
       type: 'branch',
-      city: 'Jakarta Selatan',
-      address: 'Jl. Senopati No. 42, Kebayoran Baru',
+      city: 'Kota Yogyakarta',
+      address: 'Jl. Malioboro No. 12, Danurejan, Kota Yogyakarta',
       phone: '0812-9988-7711',
       status: 'open',
       managerName: 'Ahmad Fauzi',
-      operatingHours: '08:00 - 22:00 WIB',
-      createdAt: '2025-01-15'
+      operatingHours: '08:00 - 23:00 WIB',
+      createdAt: '2026-10-21'
     },
     {
-      id: 'br-2',
-      code: 'BDG-01',
-      name: 'Cabang Bandung Dago',
+      id: 'jogja-2',
+      code: 'JOG-02',
+      name: 'Cabang 2 - Gejayan',
       type: 'branch',
-      city: 'Bandung',
-      address: 'Jl. Ir. H. Juanda No. 108, Dago',
+      city: 'Sleman, DIY',
+      address: 'Jl. Affandi (Gejayan) No. 45, Caturtunggal, Sleman',
       phone: '0813-7766-5544',
       status: 'open',
-      managerName: 'Ridwan Sanjaya',
-      operatingHours: '07:30 - 22:00 WIB',
-      createdAt: '2025-03-01'
+      managerName: 'Siti Rahmawati',
+      operatingHours: '08:00 - 22:30 WIB',
+      createdAt: '2026-10-21'
     },
     {
-      id: 'br-3',
-      code: 'SBY-01',
-      name: 'Cabang Surabaya Gubeng',
+      id: 'jogja-3',
+      code: 'JOG-03',
+      name: 'Cabang 3 - Kaliurang',
       type: 'branch',
-      city: 'Surabaya',
-      address: 'Jl. Raya Gubeng No. 64, Gubeng',
+      city: 'Sleman, DIY',
+      address: 'Jl. Kaliurang KM 5.2 No. 8, Sinduadi, Mlati, Sleman',
       phone: '0815-4433-2211',
       status: 'open',
-      managerName: 'Bambang Sutrisno',
+      managerName: 'Rian Santoso',
+      operatingHours: '07:30 - 23:00 WIB',
+      createdAt: '2026-10-21'
+    },
+    {
+      id: 'jogja-4',
+      code: 'JOG-04',
+      name: 'Cabang 4 - Seturan',
+      type: 'branch',
+      city: 'Sleman, DIY',
+      address: 'Jl. Seturan Raya No. 23, Kledokan, Caturtunggal, Sleman',
+      phone: '0816-1234-5678',
+      status: 'open',
+      managerName: 'Dimas Kurniawan',
+      operatingHours: '09:00 - 24:00 WIB',
+      createdAt: '2026-10-21'
+    },
+    {
+      id: 'jogja-5',
+      code: 'JOG-05',
+      name: 'Cabang 5 - Kotagede',
+      type: 'branch',
+      city: 'Kota Yogyakarta',
+      address: 'Jl. Mondorakan No. 17, Kotagede, Kota Yogyakarta',
+      phone: '0817-9876-5432',
+      status: 'open',
+      managerName: 'Tri Haryanto',
       operatingHours: '08:00 - 21:30 WIB',
-      createdAt: '2025-05-10'
+      createdAt: '2026-10-21'
+    },
+    {
+      id: 'jogja-6',
+      code: 'JOG-06',
+      name: 'Cabang 6 - Bantul',
+      type: 'branch',
+      city: 'Bantul, DIY',
+      address: 'Jl. Jend. Sudirman No. 88, Nyeparan, Bantul',
+      phone: '0818-5544-3322',
+      status: 'open',
+      managerName: 'Bambang Sutrisno',
+      operatingHours: '08:00 - 22:00 WIB',
+      createdAt: '2026-10-21'
     }
   ]
 
@@ -356,42 +405,193 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.setItem('cakue_account_type', type)
   }
 
-  function login(email, password) {
-    isAuthenticated.value = true
-    localStorage.setItem('cakue_is_authenticated', 'true')
+  async function loadBranchesFromServer() {
+    try {
+      const res = await api.get('/api/branches')
+      if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+        branches.value = res.data.map(b => ({
+          id: b.id,
+          code: b.id.toUpperCase(),
+          name: b.name,
+          type: b.type,
+          city: b.address ? b.address.split(',').pop().trim() : 'D.I. Yogyakarta',
+          address: b.address,
+          phone: '0812-3456-7890',
+          status: 'open',
+          managerName: 'Kepala Cabang',
+          operatingHours: '08:00 - 22:00 WIB',
+          createdAt: b.created_at ? new Date(b.created_at).toISOString().split('T')[0] : '2026-10-21'
+        }))
+        localStorage.setItem('cakue_branches', JSON.stringify(branches.value))
+      }
+    } catch (e) {
+      console.warn('Gagal memuat cabang dari server, menggunakan default lokal:', e)
+    }
+  }
+
+  async function login(email, password) {
+    if (!email) {
+      return { success: false, message: 'Alamat email wajib diisi!' }
+    }
+
+    try {
+      // 1. Coba koneksi ke backend API riil
+      const res = await api.post('/api/auth/login', { email: email.trim(), password })
+      if (res.success && res.user) {
+        const u = res.user
+        isAuthenticated.value = true
+        accountType.value = u.account_type || 'business'
+        localStorage.setItem('cakue_is_authenticated', 'true')
+        localStorage.setItem('cakue_account_type', accountType.value)
+        localStorage.setItem('cakue_current_user', JSON.stringify(u))
+
+        if (u.account_type === 'personal') {
+          personalUser.value = {
+            id: u.id,
+            name: u.name,
+            email: u.email,
+            accountNumber: u.phone || '5420-8819-2041',
+            role: 'Nasabah Pribadi',
+            joinedDate: 'Oktober 2026'
+          }
+        } else {
+          businessUser.value = {
+            id: u.id,
+            name: u.name,
+            email: u.email,
+            companyName: 'PT CAKUE Nusantara Berkah (Jogja)',
+            role: ROLES[(u.role || 'owner').toUpperCase()]?.title || u.role,
+            currentBranch: u.branch_name || 'Cabang 1 - Malioboro'
+          }
+          setBusinessRole(u.role || 'owner')
+        }
+
+        // Muat cabang terbaru jika terhubung
+        loadBranchesFromServer()
+        return { success: true, message: res.message || 'Login berhasil', user: u }
+      }
+
+      // Jika server mengembalikan error (kata sandi salah / belum terdaftar)
+      if (res.status === 401 || res.status === 404) {
+        return { success: false, message: res.message }
+      }
+    } catch (err) {
+      console.warn('Backend server offline, beralih ke simulasi lokal:', err)
+    }
+
+    // 2. Fallback cerdas jika server offline / standby
+    const lower = (email || '').toLowerCase().trim()
+    if (lower === 'admin@cakue.id' || lower.includes('admin') || lower.includes('master')) {
+      const u = {
+        id: 'usr-master-admin',
+        name: 'Master Administrator',
+        email: 'admin@cakue.id',
+        account_type: 'business',
+        role: 'owner',
+        branch_name: 'Cabang 1 - Malioboro'
+      }
+      isAuthenticated.value = true
+      accountType.value = 'business'
+      businessUser.value = { ...businessUser.value, ...u }
+      setBusinessRole('owner')
+      localStorage.setItem('cakue_current_user', JSON.stringify(u))
+      localStorage.setItem('cakue_is_authenticated', 'true')
+      return { success: true, message: 'Masuk sebagai Master Administrator (Offline Mode)', user: u }
+    }
+
+    if (lower === 'budi.santoso@cakue.id' || lower.includes('budi')) {
+      const u = {
+        id: 'usr-dummy-budi',
+        name: 'Budi Santoso (Dummy / Demo)',
+        email: 'budi.santoso@cakue.id',
+        account_type: 'business',
+        role: 'owner',
+        branch_name: 'Cabang 1 - Malioboro'
+      }
+      isAuthenticated.value = true
+      accountType.value = 'business'
+      businessUser.value = { ...businessUser.value, ...u }
+      setBusinessRole('owner')
+      localStorage.setItem('cakue_current_user', JSON.stringify(u))
+      localStorage.setItem('cakue_is_authenticated', 'true')
+      return { success: true, message: 'Masuk sebagai Akun Dummy Budi Santoso', user: u }
+    }
+
+    return { 
+      success: false, 
+      message: 'Gagal terhubung ke database server atau akun tidak ditemukan. Pastikan email & password benar.' 
+    }
   }
 
   function loginWithGoogle() {
-    isAuthenticated.value = true
-    localStorage.setItem('cakue_is_authenticated', 'true')
+    login('admin@cakue.id', 'admin123')
   }
 
   function loginAs(type) {
-    accountType.value = type
-    isAuthenticated.value = true
-    localStorage.setItem('cakue_account_type', type)
-    localStorage.setItem('cakue_is_authenticated', 'true')
+    if (type === 'personal') {
+      login('budi.santoso@cakue.id', 'password123')
+    } else {
+      login('admin@cakue.id', 'admin123')
+    }
   }
 
-  function register(name, email, type, companyName = '') {
-    accountType.value = type
-    if (type === 'personal') {
-      personalUser.value.name = name
-      personalUser.value.email = email
-    } else {
-      businessUser.value.name = name
-      businessUser.value.email = email
-      businessUser.value.companyName = companyName || 'Usaha Mandiri'
+  async function register(name, email, password, type = 'business', role = 'owner', branchId = 'jogja-1') {
+    if (!name || !email) {
+      return { success: false, message: 'Nama dan email wajib diisi!' }
     }
-    isAuthenticated.value = true
-    localStorage.setItem('cakue_account_type', type)
-    localStorage.setItem('cakue_is_authenticated', 'true')
+
+    try {
+      const res = await api.post('/api/auth/register', {
+        name: name.trim(),
+        email: email.trim(),
+        password,
+        account_type: type,
+        role,
+        branch_id: branchId
+      })
+
+      if (res.success && res.user) {
+        const u = res.user
+        isAuthenticated.value = true
+        accountType.value = type
+        localStorage.setItem('cakue_is_authenticated', 'true')
+        localStorage.setItem('cakue_account_type', type)
+        localStorage.setItem('cakue_current_user', JSON.stringify(u))
+
+        if (type === 'personal') {
+          personalUser.value = {
+            id: u.id,
+            name: u.name,
+            email: u.email,
+            accountNumber: u.phone || '5420-8819-2041',
+            role: 'Nasabah Pribadi',
+            joinedDate: 'Oktober 2026'
+          }
+        } else {
+          businessUser.value = {
+            id: u.id,
+            name: u.name,
+            email: u.email,
+            companyName: 'PT CAKUE Nusantara Berkah (Jogja)',
+            role: ROLES[(u.role || 'owner').toUpperCase()]?.title || u.role,
+            currentBranch: 'Cabang 1 - Malioboro'
+          }
+          setBusinessRole(u.role || 'owner')
+        }
+        return { success: true, message: res.message || 'Pendaftaran berhasil!', user: u }
+      }
+
+      return { success: false, message: res.message || 'Pendaftaran gagal' }
+    } catch (err) {
+      return { success: false, message: `Gagal mendaftar: ${err.message}` }
+    }
   }
 
   function logout() {
     isAuthenticated.value = false
     showOnboarding.value = false
-    localStorage.setItem('cakue_is_authenticated', 'false')
+    localStorage.removeItem('cakue_is_authenticated')
+    localStorage.removeItem('cakue_current_user')
   }
 
   return {
@@ -436,6 +636,7 @@ export const useAuthStore = defineStore('auth', () => {
     loginWithGoogle,
     loginAs,
     register,
-    logout
+    logout,
+    loadBranchesFromServer
   }
 })
