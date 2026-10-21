@@ -648,9 +648,9 @@ onMounted(() => {
 })
 
 function loadProfileData() {
-  formProfile.name = settingsStore.userName
-  formProfile.email = settingsStore.userEmail
-  formProfile.phone = settingsStore.userPhone
+  formProfile.name = authStore.user?.name || settingsStore.userName || 'Master Administrator'
+  formProfile.email = authStore.user?.email || settingsStore.userEmail || 'admin@cakue.id'
+  formProfile.phone = authStore.user?.phone || settingsStore.userPhone || '0812-0000-0001'
   formProfile.avatar = settingsStore.userAvatar
   formPin.value = settingsStore.userPin || '123456'
 }

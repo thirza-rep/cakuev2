@@ -259,14 +259,14 @@
                   class="w-full h-full object-cover"
                 />
                 <span v-else class="font-black text-sm text-emerald-800">
-                  {{ settingsStore.userName ? settingsStore.userName.charAt(0).toUpperCase() : 'U' }}
+                  {{ (authStore.user?.name || authStore.personalUser?.name || 'M').charAt(0).toUpperCase() }}
                 </span>
               </div>
 
               <!-- Nama & Status Sesi Aktif -->
               <div class="text-left hidden sm:block">
                 <div class="text-xs sm:text-sm font-extrabold text-slate-900 leading-tight group-hover:text-emerald-700 transition-colors">
-                  {{ settingsStore.userName }}
+                  {{ authStore.user?.name || authStore.personalUser?.name || 'Master Administrator' }}
                 </div>
                 <div class="flex items-center gap-1.5 mt-0.5">
                   <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -301,12 +301,62 @@
               >
                 <!-- Info Sesi Card -->
                 <div class="px-3.5 py-3 bg-slate-50/90 rounded-xl border border-slate-100">
-                  <div class="text-xs font-black text-slate-900">{{ settingsStore.userName }}</div>
-                  <div class="text-[11px] text-slate-500 truncate">{{ settingsStore.userEmail }}</div>
+                  <div class="text-xs font-black text-slate-900">{{ authStore.user?.name || authStore.personalUser?.name || 'Master Administrator' }}</div>
+                  <div class="text-[11px] text-slate-500 truncate">{{ authStore.user?.email || authStore.personalUser?.email || 'admin@cakue.id' }}</div>
                   <div class="mt-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-mono text-[10px] font-bold">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
                     <span>Sesi: Nasabah Pribadi</span>
                   </div>
+                </div>
+
+                <!-- Quick Switch Account Card (1-Klik Ganti Akun) -->
+                <div class="p-2 bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl text-white shadow-sm space-y-1.5">
+                  <div class="px-1 text-[10px] font-mono font-bold tracking-wider text-slate-400 uppercase flex items-center justify-between">
+                    <span>Peralihan Akun Cepat</span>
+                    <span class="text-[9px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.2 rounded border border-emerald-500/30">1-Klik</span>
+                  </div>
+                  
+                  <!-- Option 1: Master Admin -->
+                  <button 
+                    @click="authStore.switchToAccount('master'); isProfileMenuOpen = false"
+                    type="button"
+                    class="w-full text-left p-2 rounded-lg transition-all flex items-center justify-between gap-2 border cursor-pointer"
+                    :class="(authStore.user?.email === 'admin@cakue.id') 
+                      ? 'bg-emerald-600/30 border-emerald-500 text-white font-bold' 
+                      : 'bg-white/5 border-white/10 hover:bg-white/10 text-slate-200'"
+                  >
+                    <div class="flex items-center gap-2 min-w-0">
+                      <div class="w-6 h-6 rounded-md bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center shrink-0">
+                        <span class="text-xs">👑</span>
+                      </div>
+                      <div class="min-w-0">
+                        <div class="text-xs font-bold truncate">Master Admin</div>
+                        <div class="text-[10px] text-slate-400">Data Bersih (Rp 0)</div>
+                      </div>
+                    </div>
+                    <span v-if="authStore.user?.email === 'admin@cakue.id'" class="text-[10px] bg-emerald-500 text-slate-900 font-extrabold px-1.5 py-0.5 rounded shadow-xs">Aktif</span>
+                  </button>
+
+                  <!-- Option 2: Dummy Budi Santoso -->
+                  <button 
+                    @click="authStore.switchToAccount('budi'); isProfileMenuOpen = false"
+                    type="button"
+                    class="w-full text-left p-2 rounded-lg transition-all flex items-center justify-between gap-2 border cursor-pointer"
+                    :class="(authStore.user?.email === 'budi.santoso@cakue.id' || authStore.user?.email?.includes('budi')) 
+                      ? 'bg-purple-600/30 border-purple-500 text-white font-bold' 
+                      : 'bg-white/5 border-white/10 hover:bg-white/10 text-slate-200'"
+                  >
+                    <div class="flex items-center gap-2 min-w-0">
+                      <div class="w-6 h-6 rounded-md bg-purple-500/20 border border-purple-400/40 flex items-center justify-center shrink-0">
+                        <span class="text-xs">👤</span>
+                      </div>
+                      <div class="min-w-0">
+                        <div class="text-xs font-bold truncate">Budi Santoso</div>
+                        <div class="text-[10px] text-slate-400">Dummy Demo (Sampel Data)</div>
+                      </div>
+                    </div>
+                    <span v-if="authStore.user?.email === 'budi.santoso@cakue.id' || authStore.user?.email?.includes('budi')" class="text-[10px] bg-purple-400 text-purple-950 font-extrabold px-1.5 py-0.5 rounded shadow-xs">Aktif</span>
+                  </button>
                 </div>
 
                 <!-- Menu 1: Profil & Keamanan Pribadi -->

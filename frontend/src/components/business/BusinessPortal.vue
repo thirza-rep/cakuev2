@@ -429,14 +429,14 @@
                   class="w-full h-full object-cover"
                 />
                 <span v-else class="font-black text-sm text-slate-800">
-                  {{ settingsStore.userName ? settingsStore.userName.charAt(0).toUpperCase() : 'U' }}
+                  {{ (authStore.user?.name || authStore.businessUser?.name || 'M').charAt(0).toUpperCase() }}
                 </span>
               </div>
 
               <!-- Nama & Status Sesi Usaha (Badge Peran Dinamis) -->
               <div class="text-left hidden sm:block">
                 <div class="text-xs sm:text-sm font-extrabold text-slate-900 leading-tight group-hover:text-emerald-700 transition-colors">
-                  {{ settingsStore.userName }}
+                  {{ authStore.user?.name || authStore.businessUser?.name || 'Master Administrator' }}
                 </div>
                 <div class="flex items-center gap-1.5 mt-0.5">
                   <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -473,8 +473,8 @@
               >
                 <!-- Info Sesi Card -->
                 <div class="px-3.5 py-3 bg-slate-50/90 rounded-xl border border-slate-100">
-                  <div class="text-xs font-black text-slate-900">{{ settingsStore.userName }}</div>
-                  <div class="text-[11px] text-slate-500 truncate">{{ authStore.businessUser.email }}</div>
+                  <div class="text-xs font-black text-slate-900">{{ authStore.user?.name || authStore.businessUser?.name || 'Master Administrator' }}</div>
+                  <div class="text-[11px] text-slate-500 truncate">{{ authStore.user?.email || authStore.businessUser?.email || 'admin@cakue.id' }}</div>
                   <div class="mt-2 flex flex-col gap-1">
                     <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-mono text-[10px] font-bold">
                       <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
@@ -484,6 +484,56 @@
                       Cabang: <span class="font-bold text-slate-700">{{ authStore.businessUser.currentBranch }}</span>
                     </div>
                   </div>
+                </div>
+
+                <!-- Quick Switch Account Card (1-Klik Ganti Akun) -->
+                <div class="p-2 bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl text-white shadow-sm space-y-1.5">
+                  <div class="px-1 text-[10px] font-mono font-bold tracking-wider text-slate-400 uppercase flex items-center justify-between">
+                    <span>Peralihan Akun Cepat</span>
+                    <span class="text-[9px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.2 rounded border border-emerald-500/30">1-Klik</span>
+                  </div>
+                  
+                  <!-- Option 1: Master Admin -->
+                  <button 
+                    @click="authStore.switchToAccount('master'); isProfileMenuOpen = false"
+                    type="button"
+                    class="w-full text-left p-2 rounded-lg transition-all flex items-center justify-between gap-2 border cursor-pointer"
+                    :class="(authStore.user?.email === 'admin@cakue.id') 
+                      ? 'bg-emerald-600/30 border-emerald-500 text-white font-bold' 
+                      : 'bg-white/5 border-white/10 hover:bg-white/10 text-slate-200'"
+                  >
+                    <div class="flex items-center gap-2 min-w-0">
+                      <div class="w-6 h-6 rounded-md bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center shrink-0">
+                        <span class="text-xs">👑</span>
+                      </div>
+                      <div class="min-w-0">
+                        <div class="text-xs font-bold truncate">Master Admin</div>
+                        <div class="text-[10px] text-slate-400">Data Bersih (Rp 0)</div>
+                      </div>
+                    </div>
+                    <span v-if="authStore.user?.email === 'admin@cakue.id'" class="text-[10px] bg-emerald-500 text-slate-900 font-extrabold px-1.5 py-0.5 rounded shadow-xs">Aktif</span>
+                  </button>
+
+                  <!-- Option 2: Dummy Budi Santoso -->
+                  <button 
+                    @click="authStore.switchToAccount('budi'); isProfileMenuOpen = false"
+                    type="button"
+                    class="w-full text-left p-2 rounded-lg transition-all flex items-center justify-between gap-2 border cursor-pointer"
+                    :class="(authStore.user?.email === 'budi.santoso@cakue.id' || authStore.user?.email?.includes('budi')) 
+                      ? 'bg-purple-600/30 border-purple-500 text-white font-bold' 
+                      : 'bg-white/5 border-white/10 hover:bg-white/10 text-slate-200'"
+                  >
+                    <div class="flex items-center gap-2 min-w-0">
+                      <div class="w-6 h-6 rounded-md bg-purple-500/20 border border-purple-400/40 flex items-center justify-center shrink-0">
+                        <span class="text-xs">👤</span>
+                      </div>
+                      <div class="min-w-0">
+                        <div class="text-xs font-bold truncate">Budi Santoso</div>
+                        <div class="text-[10px] text-slate-400">Dummy Demo (Sampel Data)</div>
+                      </div>
+                    </div>
+                    <span v-if="authStore.user?.email === 'budi.santoso@cakue.id' || authStore.user?.email?.includes('budi')" class="text-[10px] bg-purple-400 text-purple-950 font-extrabold px-1.5 py-0.5 rounded shadow-xs">Aktif</span>
+                  </button>
                 </div>
 
                 <!-- Menu 1: Profil & Keamanan Pengguna (Semua Role) -->
@@ -595,6 +645,33 @@
 
       <!-- Main Workspace (Screen-filling, generous width) -->
       <main class="flex-1 max-w-[1600px] w-full mx-auto p-3.5 sm:p-5 lg:p-8 space-y-5 sm:space-y-6 pb-24 lg:pb-8">
+        <!-- Demo Budi Mode Notice Banner (Peralihan Cepat ke Master Admin) -->
+        <div 
+          v-if="authStore.user?.email === 'budi.santoso@cakue.id' || authStore.user?.email?.includes('budi')"
+          class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 sm:px-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-300 rounded-2xl text-amber-950 shadow-xs"
+        >
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
+              👤
+            </div>
+            <div>
+              <div class="font-extrabold text-xs sm:text-sm text-amber-900 flex items-center gap-2">
+                <span>Mode Sesi: Akun Dummy / Demo (Budi Santoso)</span>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded-full font-bold bg-amber-200 text-amber-900 border border-amber-300">Data Sampel</span>
+              </div>
+              <p class="text-[11px] text-amber-700 mt-0.5">Data yang tampil saat ini adalah sampel demo. Untuk mengoperasikan pembukuan bersih (Rp 0 & 6 Cabang Jogja), gunakan Master Admin.</p>
+            </div>
+          </div>
+          <button 
+            @click="authStore.switchToAccount('master')"
+            type="button"
+            class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition-all shadow-xs flex items-center gap-2 shrink-0 cursor-pointer"
+          >
+            <span>👑 Beralih ke Master Admin (Bersih Rp 0)</span>
+            <span>➔</span>
+          </button>
+        </div>
+
         <!-- Restrictive Role Notice Banner (Tampil saat bukan Owner) -->
         <div 
           v-if="!authStore.isOwner" 

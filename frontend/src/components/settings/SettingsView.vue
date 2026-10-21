@@ -351,9 +351,11 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { useAuthStore } from '../../stores/authStore'
 import { useSettingsStore } from '../../stores/settingsStore'
 import Icon from '../common/Icon.vue'
 
+const authStore = useAuthStore()
 const settingsStore = useSettingsStore()
 
 const logoFileInput = ref(null)
@@ -385,9 +387,9 @@ function loadStoreValues() {
   tempBranding.appSubtitle = settingsStore.appSubtitle
   tempBranding.logo = settingsStore.appLogo
 
-  tempProfile.name = settingsStore.userName
-  tempProfile.email = settingsStore.userEmail
-  tempProfile.phone = settingsStore.userPhone
+  tempProfile.name = authStore.user?.name || settingsStore.userName || 'Master Administrator'
+  tempProfile.email = authStore.user?.email || settingsStore.userEmail || 'admin@cakue.id'
+  tempProfile.phone = authStore.user?.phone || settingsStore.userPhone || '0812-0000-0001'
   tempProfile.address = settingsStore.userAddress
   tempProfile.coordinates = settingsStore.mapsCoordinates
   tempProfile.avatar = settingsStore.userAvatar

@@ -11,11 +11,11 @@ export const useSettingsStore = defineStore('settings', () => {
   const appLogo = ref(localStorage.getItem('cakue_app_logo') || '')
 
   // 2. Profil Pengguna & Keamanan
-  const defaultUserName = 'Budi Santoso'
-  const defaultUserEmail = 'budi.santoso@cakue.id'
-  const defaultUserPhone = '081234567890'
-  const defaultUserAddress = 'Jl. Jenderal Sudirman Kav. 52-53, Jakarta Selatan'
-  const defaultMapsCoordinates = '-6.225014, 106.809653'
+  const defaultUserName = 'Master Administrator'
+  const defaultUserEmail = 'admin@cakue.id'
+  const defaultUserPhone = '0812-0000-0001'
+  const defaultUserAddress = 'Jl. Malioboro No. 12, Danurejan, Kota Yogyakarta'
+  const defaultMapsCoordinates = '-7.7928, 110.3658'
   const defaultUserPin = '123456'
 
   const userName = ref(localStorage.getItem('cakue_user_name') || defaultUserName)
@@ -26,27 +26,33 @@ export const useSettingsStore = defineStore('settings', () => {
   const mapsCoordinates = ref(localStorage.getItem('cakue_maps_coordinates') || defaultMapsCoordinates)
   const userPin = ref(localStorage.getItem('cakue_user_pin') || defaultUserPin)
 
-  // 3. Manajemen Staf & Tim Usaha (RBAC Master - Tim Terisolasi per Cabang)
+  // 3. Manajemen Staf & Tim Usaha (RBAC Master - Tim 6 Cabang Jogja & Hub Distribusi)
   const defaultStaffList = [
-    // Tim Kantor Pusat & Logistik Central Hub
-    { id: 'usr-1', name: 'Budi Santoso', email: 'owner@cakuenusantara.com', phone: '081234567890', role: 'owner', branch: 'Semua Cabang (Kantor Pusat)', active: true, pin: '123456', joinedAt: '2025-01-10' },
-    { id: 'usr-4', name: 'Riko Pratama', email: 'riko.gudang@cakue.id', phone: '081722223333', role: 'warehouse', branch: 'Gudang Pusat (Central Hub)', active: true, pin: '998877', joinedAt: '2025-08-20' },
-    { id: 'usr-5', name: 'Hendra Kurniawan', email: 'hendra.logistik@cakue.id', phone: '081911223344', role: 'warehouse', branch: 'Gudang Pusat (Central Hub)', active: true, pin: '554433', joinedAt: '2025-09-01' },
+    // Kantor Pusat & Gudang Hub Jogja
+    { id: 'usr-1', name: 'Master Administrator', email: 'admin@cakue.id', phone: '0812-0000-0001', role: 'owner', branch: 'Semua Cabang (Kantor Pusat Jogja)', active: true, pin: '123456', joinedAt: '2026-10-21' },
+    { id: 'usr-demo-budi', name: 'Budi Santoso (Dummy / Demo)', email: 'budi.santoso@cakue.id', phone: '081234567890', role: 'owner', branch: 'Cabang 1 - Malioboro', active: true, pin: '123456', joinedAt: '2026-10-14' },
+    { id: 'usr-wh-jog', name: 'Hendra Wijaya', email: 'hendra.gudang@cakue.id', phone: '0811-2233-4455', role: 'warehouse', branch: 'Gudang Pusat Jogja (Hub Distribusi)', active: true, pin: '998877', joinedAt: '2026-10-21' },
     
-    // Tim Cabang Jakarta Selatan
-    { id: 'usr-2', name: 'Ahmad Fauzi', email: 'ahmad.fauzi@cakue.id', phone: '081388889999', role: 'manager', branch: 'Cabang Jakarta Selatan', active: true, pin: '654321', joinedAt: '2025-03-15' },
-    { id: 'usr-3', name: 'Siti Rahma', email: 'siti.kasir@cakue.id', phone: '081255554444', role: 'cashier', branch: 'Cabang Jakarta Selatan', active: true, pin: '112233', joinedAt: '2025-06-01' },
-    { id: 'usr-6', name: 'Dimas Wicaksono', email: 'dimas.kasir@cakue.id', phone: '081277889900', role: 'cashier', branch: 'Cabang Jakarta Selatan', active: true, pin: '334455', joinedAt: '2025-07-10' },
+    // Cabang 1 - Malioboro
+    { id: 'usr-jog-1m', name: 'Ahmad Fauzi', email: 'fauzi.malioboro@cakue.id', phone: '0812-9988-7711', role: 'manager', branch: 'Cabang 1 - Malioboro', active: true, pin: '654321', joinedAt: '2026-10-21' },
+    { id: 'usr-jog-1k', name: 'Siti Rahma', email: 'siti.malioboro@cakue.id', phone: '0812-5555-4444', role: 'cashier', branch: 'Cabang 1 - Malioboro', active: true, pin: '112233', joinedAt: '2026-10-21' },
 
-    // Tim Cabang Bandung Dago
-    { id: 'usr-7', name: 'Ridwan Sanjaya', email: 'ridwan.bdg@cakue.id', phone: '081377665544', role: 'manager', branch: 'Cabang Bandung Dago', active: true, pin: '778899', joinedAt: '2025-03-01' },
-    { id: 'usr-8', name: 'Neng Maya Anggraini', email: 'maya.bdg@cakue.id', phone: '081366554433', role: 'cashier', branch: 'Cabang Bandung Dago', active: true, pin: '223344', joinedAt: '2025-04-12' },
-    { id: 'usr-9', name: 'Fajar Pratama', email: 'fajar.bdg@cakue.id', phone: '081355443322', role: 'cashier', branch: 'Cabang Bandung Dago', active: true, pin: '667788', joinedAt: '2025-05-20' },
+    // Cabang 2 - Gejayan
+    { id: 'usr-jog-2m', name: 'Siti Rahmawati', email: 'rahma.gejayan@cakue.id', phone: '0813-7766-5544', role: 'manager', branch: 'Cabang 2 - Gejayan', active: true, pin: '778899', joinedAt: '2026-10-21' },
+    { id: 'usr-jog-2k', name: 'Dewi Lestari', email: 'dewi.gejayan@cakue.id', phone: '0813-6655-4433', role: 'cashier', branch: 'Cabang 2 - Gejayan', active: true, pin: '223344', joinedAt: '2026-10-21' },
 
-    // Tim Cabang Surabaya Gubeng
-    { id: 'usr-10', name: 'Bambang Sutrisno', email: 'bambang.sby@cakue.id', phone: '081544332211', role: 'manager', branch: 'Cabang Surabaya Gubeng', active: true, pin: '889900', joinedAt: '2025-05-10' },
-    { id: 'usr-11', name: 'Dewi Anggraeni', email: 'dewi.sby@cakue.id', phone: '081533221100', role: 'cashier', branch: 'Cabang Surabaya Gubeng', active: true, pin: '445566', joinedAt: '2025-06-15' },
-    { id: 'usr-12', name: 'Tri Wahyudi', email: 'tri.sby@cakue.id', phone: '081522110099', role: 'cashier', branch: 'Cabang Surabaya Gubeng', active: true, pin: '990011', joinedAt: '2025-07-01' }
+    // Cabang 3 - Kaliurang
+    { id: 'usr-jog-3m', name: 'Rian Santoso', email: 'rian.kaliurang@cakue.id', phone: '0815-4433-2211', role: 'manager', branch: 'Cabang 3 - Kaliurang', active: true, pin: '889900', joinedAt: '2026-10-21' },
+    { id: 'usr-jog-3k', name: 'Doni Saputra', email: 'doni.kaliurang@cakue.id', phone: '0815-3322-1100', role: 'cashier', branch: 'Cabang 3 - Kaliurang', active: true, pin: '334455', joinedAt: '2026-10-21' },
+
+    // Cabang 4 - Seturan
+    { id: 'usr-jog-4m', name: 'Dimas Kurniawan', email: 'dimas.seturan@cakue.id', phone: '0816-1234-5678', role: 'manager', branch: 'Cabang 4 - Seturan', active: true, pin: '445566', joinedAt: '2026-10-21' },
+
+    // Cabang 5 - Kotagede
+    { id: 'usr-jog-5m', name: 'Tri Haryanto', email: 'tri.kotagede@cakue.id', phone: '0817-9876-5432', role: 'manager', branch: 'Cabang 5 - Kotagede', active: true, pin: '556677', joinedAt: '2026-10-21' },
+
+    // Cabang 6 - Bantul
+    { id: 'usr-jog-6m', name: 'Bambang Sutrisno', email: 'bambang.bantul@cakue.id', phone: '0818-5544-3322', role: 'manager', branch: 'Cabang 6 - Bantul', active: true, pin: '667788', joinedAt: '2026-10-21' }
   ]
 
   const savedStaffList = localStorage.getItem('cakue_staff_list')
@@ -54,9 +60,8 @@ export const useSettingsStore = defineStore('settings', () => {
   if (savedStaffList) {
     try {
       const parsed = JSON.parse(savedStaffList)
-      // Jika data lama hanya 4 staff atau kurang (belum ada tim Bandung/Surabaya), perbarui ke defaultStaffList
-      const hasBandung = Array.isArray(parsed) && parsed.some(s => s.branch === 'Cabang Bandung Dago')
-      if (hasBandung && parsed.length >= 8) {
+      const hasJogja = Array.isArray(parsed) && parsed.some(s => (s.branch || '').includes('Cabang 1') || (s.branch || '').includes('Malioboro'))
+      if (hasJogja && parsed.length >= 6) {
         initialStaffList = parsed
       } else {
         initialStaffList = defaultStaffList
@@ -244,6 +249,26 @@ export const useSettingsStore = defineStore('settings', () => {
     whatsappSettings.value = { ...whatsappSettings.value, ...settings }
   }
 
+  function syncUser(userObj) {
+    if (!userObj) return
+    if (userObj.name) {
+      userName.value = userObj.name
+      localStorage.setItem('cakue_user_name', userObj.name)
+    }
+    if (userObj.email) {
+      userEmail.value = userObj.email
+      localStorage.setItem('cakue_user_email', userObj.email)
+    }
+    if (userObj.phone) {
+      userPhone.value = userObj.phone
+      localStorage.setItem('cakue_user_phone', userObj.phone)
+    }
+    if (userObj.avatar_url) {
+      userAvatar.value = userObj.avatar_url
+      localStorage.setItem('cakue_user_avatar', userObj.avatar_url)
+    }
+  }
+
   function resetToDefault() {
     appName.value = defaultAppName
     appSubtitle.value = defaultAppSubtitle
@@ -262,6 +287,7 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   return {
+    syncUser,
     appName,
     appSubtitle,
     appLogo,

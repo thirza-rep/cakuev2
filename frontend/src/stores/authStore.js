@@ -4,6 +4,7 @@ import { api } from '../api/client.js'
 import { useFinanceStore } from './financeStore'
 import { useStockStore } from './stockStore'
 import { usePosStore } from './posStore'
+import { useSettingsStore } from './settingsStore'
 
 // 1. DEFINISI ROLE & MATRIX HAK AKSES (RBAC) ENTERPRISE
 export const ROLES = {
@@ -140,6 +141,34 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       parsedUser = JSON.parse(savedUserJson)
     } catch (e) {}
+  }
+
+  // Migrasi otomatis ke Master Administrator (Full Akses & Bersih) jika sesi browser masih Budi Santoso
+  const activeAccountMode = localStorage.getItem('cakue_active_account_mode')
+  const isLegacyBudi = !parsedUser || 
+    parsedUser.email === 'budi.santoso@cakue.id' || 
+    parsedUser.email === 'owner@cakuenusantara.com' || 
+    parsedUser.name === 'Budi Santoso' ||
+    !parsedUser.email
+
+  if (isLegacyBudi && activeAccountMode !== 'dummy') {
+    parsedUser = {
+      id: 'usr-master-admin',
+      name: 'Master Administrator',
+      email: 'admin@cakue.id',
+      phone: '0812-0000-0001',
+      account_type: 'business',
+      role: 'owner',
+      branch_id: 'jogja-1',
+      branch_name: 'Cabang 1 - Malioboro'
+    }
+    localStorage.setItem('cakue_current_user', JSON.stringify(parsedUser))
+    localStorage.setItem('cakue_is_authenticated', 'true')
+    localStorage.setItem('cakue_account_type', 'business')
+    localStorage.setItem('cakue_user_name', 'Master Administrator')
+    localStorage.setItem('cakue_user_email', 'admin@cakue.id')
+    localStorage.setItem('cakue_current_branch', 'Cabang 1 - Malioboro')
+    localStorage.setItem('cakue_active_account_mode', 'master')
   }
 
   // Data Pengguna Sesuai Jenis Akun
@@ -599,11 +628,76 @@ export const useAuthStore = defineStore('auth', () => {
       const fStore = useFinanceStore()
       const sStore = useStockStore()
       const pStore = usePosStore()
+      const setStore = useSettingsStore()
       fStore.syncUserData(userObj)
       sStore.syncUserData(userObj)
       pStore.syncUserData(userObj)
+      setStore.syncUser(userObj)
     } catch (e) {
       console.warn('[AUTH] Could not sync stores:', e)
+    }
+  }
+
+  async function switchToAccount(target) {
+    const isMaster = target === 'master' || target === 'admin' || target === 'admin@cakue.id'
+    
+    if (isMaster) {
+      const u = {
+        id: 'usr-master-admin',
+        name: 'Master Administrator',
+        email: 'admin@cakue.id',
+        phone: '0812-0000-0001',
+        account_type: 'business',
+        role: 'owner',
+        branch_id: 'jogja-1',
+        branch_name: 'Cabang 1 - Malioboro'
+      }
+      isAuthenticated.value = true
+      accountType.value = 'business'
+      businessUser.value = {
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        companyName: 'PT CAKUE Nusantara Berkah (Jogja)',
+        role: 'Owner & Direktur',
+        currentBranch: 'Cabang 1 - Malioboro'
+      }
+      setBusinessRole('owner')
+      localStorage.setItem('cakue_active_account_mode', 'master')
+      localStorage.setItem('cakue_current_user', JSON.stringify(u))
+      localStorage.setItem('cakue_is_authenticated', 'true')
+      localStorage.setItem('cakue_account_type', 'business')
+      localStorage.setItem('cakue_current_branch', 'Cabang 1 - Malioboro')
+      syncAllStores(u)
+      return { success: true, user: u, message: 'Berhasil beralih ke Master Administrator (Data Bersih Rp 0)' }
+    } else {
+      const u = {
+        id: 'usr-personal',
+        name: 'Budi Santoso (Dummy / Demo)',
+        email: 'budi.santoso@cakue.id',
+        phone: '081234567890',
+        account_type: 'business',
+        role: 'owner',
+        branch_id: 'jogja-1',
+        branch_name: 'Cabang 1 - Malioboro'
+      }
+      isAuthenticated.value = true
+      accountType.value = 'business'
+      businessUser.value = {
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        companyName: 'PT CAKUE Nusantara Berkah (Jogja)',
+        role: 'Owner & Direktur',
+        currentBranch: 'Cabang 1 - Malioboro'
+      }
+      setBusinessRole('owner')
+      localStorage.setItem('cakue_active_account_mode', 'dummy')
+      localStorage.setItem('cakue_current_user', JSON.stringify(u))
+      localStorage.setItem('cakue_is_authenticated', 'true')
+      localStorage.setItem('cakue_account_type', 'business')
+      syncAllStores(u)
+      return { success: true, user: u, message: 'Berhasil beralih ke Akun Dummy Budi Santoso (Data Sampel)' }
     }
   }
 
@@ -656,6 +750,7 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     loginWithGoogle,
     loginAs,
+    switchToAccount,
     register,
     logout,
     loadBranchesFromServer
