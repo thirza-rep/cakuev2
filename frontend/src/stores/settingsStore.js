@@ -5,10 +5,12 @@ export const useSettingsStore = defineStore('settings', () => {
   // 1. Branding & Identitas Aplikasi
   const defaultAppName = 'CAKUE'
   const defaultAppSubtitle = 'Catatan Keuangan & Usaha'
+  const defaultAppLogo = '/logo.png'
 
   const appName = ref(localStorage.getItem('cakue_app_name') || defaultAppName)
   const appSubtitle = ref(localStorage.getItem('cakue_app_subtitle') || defaultAppSubtitle)
-  const appLogo = ref(localStorage.getItem('cakue_app_logo') || '')
+  const savedLogo = localStorage.getItem('cakue_app_logo')
+  const appLogo = ref((savedLogo && savedLogo.trim().length > 0) ? savedLogo : defaultAppLogo)
 
   // 2. Profil Pengguna & Keamanan
   const defaultUserName = 'Master Administrator'
@@ -154,7 +156,8 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   function removeAppLogo() {
-    appLogo.value = ''
+    appLogo.value = defaultAppLogo
+    localStorage.setItem('cakue_app_logo', defaultAppLogo)
   }
 
   function setUserAvatar(dataUrl) {
@@ -272,7 +275,8 @@ export const useSettingsStore = defineStore('settings', () => {
   function resetToDefault() {
     appName.value = defaultAppName
     appSubtitle.value = defaultAppSubtitle
-    appLogo.value = ''
+    appLogo.value = defaultAppLogo
+    localStorage.setItem('cakue_app_logo', defaultAppLogo)
     userName.value = defaultUserName
     userAvatar.value = ''
     userEmail.value = defaultUserEmail

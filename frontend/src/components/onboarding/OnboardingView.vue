@@ -30,8 +30,8 @@
             <!-- Pulsing Halo Accent -->
             <div class="absolute inset-0 rounded-3xl bg-emerald-400/30 blur-xl animate-pulse"></div>
             
-            <div class="relative w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-emerald-500 text-white flex items-center justify-center font-black text-3xl sm:text-4xl shadow-lg shadow-emerald-600/30 animate-logo-pop">
-              CK
+            <div class="relative w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-white border border-slate-200/90 shadow-xl shadow-emerald-600/20 overflow-hidden flex items-center justify-center p-2.5 animate-logo-pop">
+              <img src="/logo.png" alt="CAKUE Logo" class="w-full h-full object-contain" />
             </div>
           </div>
 

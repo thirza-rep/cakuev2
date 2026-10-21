@@ -8,8 +8,8 @@
       <!-- 1. Header with Gradient Accent -->
       <div class="bg-gradient-to-r from-emerald-950 via-emerald-800 to-teal-800 p-5 text-white flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div class="w-11 h-11 rounded-2xl bg-white/15 backdrop-blur-md border border-emerald-400/30 flex items-center justify-center font-black text-xl text-emerald-300 shadow-inner">
-            CK
+          <div class="w-11 h-11 rounded-2xl bg-white border border-emerald-400/30 flex items-center justify-center overflow-hidden p-1 shadow-inner shrink-0">
+            <img src="/logo.png" alt="CAKUE Logo" class="w-full h-full object-contain" />
           </div>
           <div>
             <div class="flex items-center gap-2">

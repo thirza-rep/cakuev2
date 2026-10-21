@@ -32,14 +32,10 @@
             :title="isSidebarCollapsed ? 'Klik untuk memperbesar sidebar' : ''"
           >
             <img 
-              v-if="settingsStore.appLogo" 
-              :src="settingsStore.appLogo" 
+              :src="settingsStore.appLogo || '/logo.png'" 
               alt="Brand Logo" 
               class="w-full h-full object-contain p-0.5" 
             />
-            <div v-else class="w-full h-full bg-emerald-700 text-white flex items-center justify-center font-extrabold text-base">
-              {{ settingsStore.appName ? settingsStore.appName.substring(0, 2).toUpperCase() : 'CK' }}
-            </div>
           </div>
 
           <!-- App Title (Hidden when collapsed) -->
