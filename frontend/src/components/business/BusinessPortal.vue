@@ -499,19 +499,19 @@
                     type="button"
                     class="w-full text-left p-2 rounded-lg transition-all flex items-center justify-between gap-2 border cursor-pointer"
                     :class="(authStore.user?.email === 'admin@cakue.id') 
-                      ? 'bg-emerald-600/30 border-emerald-500 text-white font-bold' 
+                      ? 'bg-indigo-600/30 border-indigo-500 text-white font-bold' 
                       : 'bg-white/5 border-white/10 hover:bg-white/10 text-slate-200'"
                   >
                     <div class="flex items-center gap-2 min-w-0">
-                      <div class="w-6 h-6 rounded-md bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center shrink-0">
+                      <div class="w-6 h-6 rounded-md bg-indigo-500/20 border border-indigo-400/40 flex items-center justify-center shrink-0">
                         <span class="text-xs">👑</span>
                       </div>
                       <div class="min-w-0">
-                        <div class="text-xs font-bold truncate">Master Admin</div>
-                        <div class="text-[10px] text-slate-400">Data Bersih (Rp 0)</div>
+                        <div class="text-xs font-bold truncate">Master Administrator</div>
+                        <div class="text-[10px] text-slate-400">Root Super Admin (Data Bersih Rp 0)</div>
                       </div>
                     </div>
-                    <span v-if="authStore.user?.email === 'admin@cakue.id'" class="text-[10px] bg-emerald-500 text-slate-900 font-extrabold px-1.5 py-0.5 rounded shadow-xs">Aktif</span>
+                    <span v-if="authStore.user?.email === 'admin@cakue.id'" class="text-[10px] bg-indigo-500 text-white font-extrabold px-1.5 py-0.5 rounded shadow-xs">Aktif</span>
                   </button>
 
                   <!-- Option 2: Dummy Budi Santoso -->
@@ -529,7 +529,7 @@
                       </div>
                       <div class="min-w-0">
                         <div class="text-xs font-bold truncate">Budi Santoso</div>
-                        <div class="text-[10px] text-slate-400">Dummy Demo (Sampel Data)</div>
+                        <div class="text-[10px] text-slate-400">Mitra Owner Sub-Tenant (Sampel Data)</div>
                       </div>
                     </div>
                     <span v-if="authStore.user?.email === 'budi.santoso@cakue.id' || authStore.user?.email?.includes('budi')" class="text-[10px] bg-purple-400 text-purple-950 font-extrabold px-1.5 py-0.5 rounded shadow-xs">Aktif</span>
@@ -645,21 +645,55 @@
 
       <!-- Main Workspace (Screen-filling, generous width) -->
       <main class="flex-1 max-w-[1600px] w-full mx-auto p-3.5 sm:p-5 lg:p-8 space-y-5 sm:space-y-6 pb-24 lg:pb-8">
-        <!-- Demo Budi Mode Notice Banner (Peralihan Cepat ke Master Admin) -->
+        <!-- Mode Supervisi Super Admin Banner (Audit Tenant) -->
         <div 
-          v-if="authStore.user?.email === 'budi.santoso@cakue.id' || authStore.user?.email?.includes('budi')"
-          class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 sm:px-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-300 rounded-2xl text-amber-950 shadow-xs"
+          v-if="authStore.isSupervising"
+          class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 sm:px-4 bg-gradient-to-r from-indigo-950 via-indigo-900 to-purple-950 border border-indigo-700/80 rounded-2xl text-white shadow-md animate-fadeIn"
+        >
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-9 h-9 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-black text-base shrink-0 shadow-xs">
+              👑
+            </div>
+            <div class="min-w-0">
+              <div class="font-extrabold text-xs sm:text-sm text-amber-300 flex items-center gap-2 flex-wrap">
+                <span>MODE SUPERVISI & AUDIT TENANT</span>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded-full font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                  {{ authStore.supervisingOwner?.name }}
+                </span>
+                <span class="text-[10px] font-mono text-purple-200">
+                  ({{ authStore.supervisingOwner?.companyName }})
+                </span>
+              </div>
+              <p class="text-[11px] text-slate-200 mt-0.5 truncate">
+                Anda sedang mengaudit pembukuan dan stok milik akun owner ini. Data operasional Master Admin tetap aman terisolasi.
+              </p>
+            </div>
+          </div>
+          <button 
+            @click="authStore.exitSupervision()"
+            type="button"
+            class="px-3.5 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs rounded-xl transition-all shadow-xs flex items-center gap-1.5 shrink-0 cursor-pointer active:scale-98"
+          >
+            <span>Keluar Supervisi & Kembali</span>
+            <span>➔</span>
+          </button>
+        </div>
+
+        <!-- Demo Budi Mode Notice Banner (Sub-Tenant) -->
+        <div 
+          v-if="!authStore.isSupervising && (authStore.user?.email === 'budi.santoso@cakue.id' || authStore.user?.email?.includes('budi'))"
+          class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 sm:px-4 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-300 rounded-2xl text-purple-950 shadow-xs"
         >
           <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
+            <div class="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
               👤
             </div>
             <div>
-              <div class="font-extrabold text-xs sm:text-sm text-amber-900 flex items-center gap-2">
-                <span>Mode Sesi: Akun Dummy / Demo (Budi Santoso)</span>
-                <span class="text-[10px] font-mono px-2 py-0.5 rounded-full font-bold bg-amber-200 text-amber-900 border border-amber-300">Data Sampel</span>
+              <div class="font-extrabold text-xs sm:text-sm text-purple-900 flex items-center gap-2">
+                <span>Mode Sesi: Akun Mitra Owner (Budi Santoso - CV Cakue Nusantara)</span>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded-full font-bold bg-purple-200 text-purple-900 border border-purple-300">Sub-Tenant</span>
               </div>
-              <p class="text-[11px] text-amber-700 mt-0.5">Data yang tampil saat ini adalah sampel demo. Untuk mengoperasikan pembukuan bersih (Rp 0 & 6 Cabang Jogja), gunakan Master Admin.</p>
+              <p class="text-[11px] text-purple-700 mt-0.5">Sesi ini mengoperasikan data usaha mitra. Untuk mengakses otoritas Super Admin platform (6 Cabang Jogja & Kelola Owner), gunakan Master Admin.</p>
             </div>
           </div>
           <button 
@@ -667,7 +701,7 @@
             type="button"
             class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition-all shadow-xs flex items-center gap-2 shrink-0 cursor-pointer"
           >
-            <span>👑 Beralih ke Master Admin (Bersih Rp 0)</span>
+            <span>👑 Beralih ke Master Admin</span>
             <span>➔</span>
           </button>
         </div>
@@ -1277,6 +1311,13 @@
           <BranchManagementView 
             :auto-open-add="shouldTriggerAddBranch" 
             @reset-auto-open="shouldTriggerAddBranch = false"
+            @navigate="activeTab = $event" 
+          />
+        </div>
+
+        <!-- TAB KHUSUS: MANAJEMEN OWNER & TENANT PLATFORM (SUPERADMIN ONLY) -->
+        <div v-else-if="activeTab === 'owners'" class="space-y-6">
+          <OwnerManagementView 
             @navigate="activeTab = $event" 
           />
         </div>
@@ -2008,6 +2049,7 @@ import PosCashier from '../cakue-pos/PosCashier.vue'
 import BranchStockManager from '../cakue-manage/BranchStockManager.vue'
 import BranchManagementView from '../cakue-manage/BranchManagementView.vue'
 import AssetManager from '../cakue-manage/AssetManager.vue'
+import OwnerManagementView from '../cakue-manage/OwnerManagementView.vue'
 import ProfileView from '../settings/ProfileView.vue'
 import AppSettingsView from '../settings/AppSettingsView.vue'
 import AboutModal from '../about/AboutModal.vue'
@@ -2111,6 +2153,7 @@ const mainNavigation = [
 ]
 
 const systemNavigation = [
+  { id: 'owners', label: 'Manajemen Owner & Tenant', icon: 'shield', badge: 'Root' },
   { id: 'profile', label: 'Profil & Keamanan', icon: 'user', badge: null },
   { id: 'settings', label: 'Pengaturan Aplikasi', icon: 'settings', badge: null }
 ]

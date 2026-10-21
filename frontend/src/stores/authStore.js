@@ -8,10 +8,37 @@ import { useSettingsStore } from './settingsStore'
 
 // 1. DEFINISI ROLE & MATRIX HAK AKSES (RBAC) ENTERPRISE
 export const ROLES = {
+  SUPERADMIN: {
+    id: 'superadmin',
+    title: 'Super Admin (Root Platform)',
+    badge: 'Super Admin (Root)',
+    color: 'bg-indigo-100 text-indigo-900 border-indigo-300 font-extrabold',
+    allowedModules: ['dashboard', 'analytics', 'pos', 'inventory', 'assets', 'journal', 'branches', 'owners', 'settings', 'profile'],
+    defaultModule: 'dashboard',
+    canSwitchBranch: true,
+    canExportReports: true,
+    canViewFinancialAudit: true,
+    canManageStock: true,
+    canAddProduct: true,
+    canEditProductPrice: true,
+    canSyncStockToFinance: true,
+    canDeleteProduct: true,
+    canManageStaff: true,
+    canManageBranches: true,
+    canDeleteBranch: true,
+    canEditAppBranding: true,
+    canEditFinancialSettings: true,
+    canManageAssets: true,
+    canDeleteAsset: true,
+    canRunDepreciation: true,
+    canManageOwners: true,
+    canSuperviseTenant: true,
+    description: 'Otoritas tertinggi platform: kelola akun owner mitra/tenant, audit data tanpa tumpang tindih, operasional cabang dan POS mandiri'
+  },
   OWNER: {
     id: 'owner',
-    title: 'Owner & Direktur',
-    badge: 'Owner (Super Admin)',
+    title: 'Owner & Direktur Bisnis',
+    badge: 'Owner (Tenant)',
     color: 'bg-purple-100 text-purple-800 border-purple-200',
     allowedModules: ['dashboard', 'analytics', 'pos', 'inventory', 'assets', 'journal', 'branches', 'settings', 'profile'],
     defaultModule: 'dashboard',
@@ -31,7 +58,9 @@ export const ROLES = {
     canManageAssets: true,
     canDeleteAsset: true,
     canRunDepreciation: true,
-    description: 'Akses penuh tanpa batas ke semua cabang, buka/tutup/hapus cabang, staf & konfigurasi sistem'
+    canManageOwners: false,
+    canSuperviseTenant: false,
+    description: 'Akses penuh operasional pada cabang milik sendiri, kasir POS & pembukuan'
   },
   MANAGER: {
     id: 'manager',
@@ -124,7 +153,8 @@ export const useAuthStore = defineStore('auth', () => {
 
   // Peran Bisnis Aktif (RBAC)
   const savedRole = localStorage.getItem('cakue_business_role')
-  const activeBusinessRole = ref(savedRole || 'owner')
+  const defaultInitialRole = parsedUser?.role || (parsedUser?.email === 'admin@cakue.id' ? 'superadmin' : 'owner')
+  const activeBusinessRole = ref(savedRole || defaultInitialRole)
 
   const appMode = computed({
     get: () => accountType.value,
@@ -158,7 +188,7 @@ export const useAuthStore = defineStore('auth', () => {
       email: 'admin@cakue.id',
       phone: '0812-0000-0001',
       account_type: 'business',
-      role: 'owner',
+      role: 'superadmin',
       branch_id: 'jogja-1',
       branch_name: 'Cabang 1 - Malioboro'
     }
@@ -334,10 +364,15 @@ export const useAuthStore = defineStore('auth', () => {
 
   // RBAC Helpers & Getters
   const currentRoleConfig = computed(() => {
-    return ROLES[activeBusinessRole.value.toUpperCase()] || ROLES.OWNER
+    return ROLES[activeBusinessRole.value.toUpperCase()] || ROLES.SUPERADMIN
   })
 
-  const isOwner = computed(() => activeBusinessRole.value === 'owner')
+  const isSuperAdmin = computed(() => {
+    return activeBusinessRole.value === 'superadmin' || 
+           businessUser.value?.email === 'admin@cakue.id' ||
+           Boolean(currentRoleConfig.value?.canManageOwners)
+  })
+  const isOwner = computed(() => activeBusinessRole.value === 'owner' || isSuperAdmin.value)
   const isManager = computed(() => activeBusinessRole.value === 'manager')
   const isCashier = computed(() => activeBusinessRole.value === 'cashier')
   const isWarehouse = computed(() => activeBusinessRole.value === 'warehouse')
@@ -358,13 +393,100 @@ export const useAuthStore = defineStore('auth', () => {
   const canManageAssets = computed(() => Boolean(currentRoleConfig.value.canManageAssets))
   const canDeleteAsset = computed(() => Boolean(currentRoleConfig.value.canDeleteAsset))
   const canRunDepreciation = computed(() => Boolean(currentRoleConfig.value.canRunDepreciation))
+  const canManageOwners = computed(() => isSuperAdmin.value || Boolean(currentRoleConfig.value?.canManageOwners))
+  const canSuperviseTenant = computed(() => isSuperAdmin.value || Boolean(currentRoleConfig.value?.canSuperviseTenant))
 
   function canAccess(moduleId) {
     if (moduleId === 'profile') return true
+    if (moduleId === 'owners') return canManageOwners.value
     if (accountType.value === 'personal') {
       return moduleId === 'profile' || moduleId === 'settings'
     }
     return currentRoleConfig.value.allowedModules.includes(moduleId)
+  }
+
+  // --- MANAJEMEN OWNER & TENANT PLATFORM (Khusus Super Admin) ---
+  const defaultOwners = [
+    {
+      id: 'own-budi-01',
+      name: 'Budi Santoso',
+      email: 'budi.santoso@cakue.id',
+      companyName: 'CV Cakue Nusantara (Mitra)',
+      phone: '0812-3456-7890',
+      branchAssigned: 'Cabang 1 - Malioboro',
+      totalBranches: 1,
+      status: 'active', // 'active' | 'suspended'
+      joinedDate: '2026-09-15',
+      storagePrefix: 'cakue_demo',
+      type: 'Mitra Usaha / Tenant',
+      notes: 'Akun Owner Demo & Simulasi Pembukuan Mitra'
+    }
+  ]
+
+  const savedOwners = localStorage.getItem('cakue_owners_list')
+  let initialOwners = defaultOwners
+  if (savedOwners) {
+    try {
+      const parsed = JSON.parse(savedOwners)
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        initialOwners = parsed
+      }
+    } catch (e) {}
+  }
+  const ownersList = ref(initialOwners)
+  watch(ownersList, (val) => localStorage.setItem('cakue_owners_list', JSON.stringify(val)), { deep: true })
+
+  // State Supervisi / Audit Sesi Mitra oleh Super Admin
+  const isSupervising = ref(false)
+  const supervisingOwner = ref(null)
+
+  function addOwner({ name, email, companyName, phone, branchAssigned = 'Cabang 1 - Malioboro', notes = '' }) {
+    if (!name || !email) return { success: false, message: 'Nama dan email owner wajib diisi!' }
+    
+    if (ownersList.value.some(o => o.email.toLowerCase() === email.trim().toLowerCase())) {
+      return { success: false, message: 'Email owner sudah terdaftar!' }
+    }
+
+    const newOwner = {
+      id: `own-${Date.now().toString(36)}`,
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      companyName: companyName?.trim() || `Mitra ${name.trim()}`,
+      phone: phone?.trim() || '0812-0000-0000',
+      branchAssigned: branchAssigned || 'Cabang 1 - Malioboro',
+      totalBranches: 1,
+      status: 'active',
+      joinedDate: new Date().toISOString().split('T')[0],
+      storagePrefix: `cakue_tenant_${email.trim().toLowerCase().replace(/[^a-zA-Z0-9_-]/g, '_')}`,
+      type: 'Mitra Usaha / Tenant',
+      notes: notes?.trim() || 'Owner Cabang Mitra'
+    }
+    ownersList.value.push(newOwner)
+    return { success: true, owner: newOwner, message: 'Akun owner mitra berhasil didaftarkan' }
+  }
+
+  function toggleOwnerStatus(ownerId) {
+    const owner = ownersList.value.find(o => o.id === ownerId)
+    if (owner) {
+      owner.status = owner.status === 'active' ? 'suspended' : 'active'
+      return owner.status
+    }
+    return null
+  }
+
+  function startSupervision(owner) {
+    if (!isSuperAdmin.value) return { success: false, message: 'Hanya Super Admin yang berhak melakukan supervisi tenant!' }
+    isSupervising.value = true
+    supervisingOwner.value = owner
+    syncAllStores({ email: owner.email, name: owner.name })
+    return { success: true, message: `Masuk ke Mode Supervisi: ${owner.name}` }
+  }
+
+  function exitSupervision() {
+    isSupervising.value = false
+    supervisingOwner.value = null
+    syncAllStores(businessUser.value)
+    return { success: true, message: 'Keluar dari Mode Supervisi. Kembali ke sesi Master Administrator.' }
   }
 
   // Aksi CRUD Cabang (Buka Cabang Baru, Tutup Toko, Hapus Cabang)
@@ -426,11 +548,11 @@ export const useAuthStore = defineStore('auth', () => {
   // Ganti Peran Bisnis (Live Role Switcher untuk simulasi dev)
   function setBusinessRole(roleKey) {
     const normalized = (roleKey || '').toLowerCase()
-    if (['owner', 'manager', 'cashier', 'warehouse'].includes(normalized)) {
+    if (['superadmin', 'owner', 'manager', 'cashier', 'warehouse'].includes(normalized)) {
       activeBusinessRole.value = normalized
       localStorage.setItem('cakue_business_role', normalized)
 
-      const roleDef = ROLES[normalized.toUpperCase()]
+      const roleDef = ROLES[normalized.toUpperCase()] || ROLES.SUPERADMIN
       businessUser.value.role = roleDef.title
       
       // Jika peran terkunci pada cabang tertentu, sesuaikan cabang aktif
@@ -536,17 +658,17 @@ export const useAuthStore = defineStore('auth', () => {
         name: 'Master Administrator',
         email: 'admin@cakue.id',
         account_type: 'business',
-        role: 'owner',
+        role: 'superadmin',
         branch_name: 'Cabang 1 - Malioboro'
       }
       isAuthenticated.value = true
       accountType.value = 'business'
       businessUser.value = { ...businessUser.value, ...u }
-      setBusinessRole('owner')
+      setBusinessRole('superadmin')
       localStorage.setItem('cakue_current_user', JSON.stringify(u))
       localStorage.setItem('cakue_is_authenticated', 'true')
       syncAllStores(u)
-      return { success: true, message: 'Masuk sebagai Master Administrator', user: u }
+      return { success: true, message: 'Masuk sebagai Master Administrator (Super Admin)', user: u }
     }
 
     if (lower === 'budi.santoso@cakue.id' || lower.includes('budi')) {
@@ -655,6 +777,10 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function switchToAccount(target) {
+    if (isSupervising.value) {
+      exitSupervision()
+    }
+
     const isMaster = target === 'master' || target === 'admin' || target === 'admin@cakue.id'
     
     if (isMaster) {
@@ -664,7 +790,7 @@ export const useAuthStore = defineStore('auth', () => {
         email: 'admin@cakue.id',
         phone: '0812-0000-0001',
         account_type: 'business',
-        role: 'owner',
+        role: 'superadmin',
         branch_id: 'jogja-1',
         branch_name: 'Cabang 1 - Malioboro'
       }
@@ -675,23 +801,23 @@ export const useAuthStore = defineStore('auth', () => {
         name: u.name,
         email: u.email,
         companyName: 'PT CAKUE Nusantara Berkah (Jogja)',
-        role: 'Owner & Direktur',
+        role: 'Super Admin (Root Platform)',
         currentBranch: 'Cabang 1 - Malioboro'
       }
-      setBusinessRole('owner')
+      setBusinessRole('superadmin')
       localStorage.setItem('cakue_active_account_mode', 'master')
       localStorage.setItem('cakue_current_user', JSON.stringify(u))
       localStorage.setItem('cakue_is_authenticated', 'true')
       localStorage.setItem('cakue_account_type', 'business')
       localStorage.setItem('cakue_current_branch', 'Cabang 1 - Malioboro')
       syncAllStores(u)
-      return { success: true, user: u, message: 'Berhasil beralih ke Master Administrator (Data Bersih Rp 0)' }
+      return { success: true, user: u, message: 'Berhasil beralih ke Master Administrator (Akses Penuh Super Admin)' }
     } else {
       const u = {
         id: 'usr-personal',
-        name: 'Budi Santoso (Dummy / Demo)',
+        name: 'Budi Santoso',
         email: 'budi.santoso@cakue.id',
-        phone: '081234567890',
+        phone: '0812-3456-7890',
         account_type: 'business',
         role: 'owner',
         branch_id: 'jogja-1',
@@ -703,8 +829,8 @@ export const useAuthStore = defineStore('auth', () => {
         id: u.id,
         name: u.name,
         email: u.email,
-        companyName: 'PT CAKUE Nusantara Berkah (Jogja)',
-        role: 'Owner & Direktur',
+        companyName: 'CV Cakue Nusantara (Mitra)',
+        role: 'Owner & Direktur Bisnis',
         currentBranch: 'Cabang 1 - Malioboro'
       }
       setBusinessRole('owner')
@@ -713,13 +839,16 @@ export const useAuthStore = defineStore('auth', () => {
       localStorage.setItem('cakue_is_authenticated', 'true')
       localStorage.setItem('cakue_account_type', 'business')
       syncAllStores(u)
-      return { success: true, user: u, message: 'Berhasil beralih ke Akun Dummy Budi Santoso (Data Sampel)' }
+      return { success: true, user: u, message: 'Berhasil beralih ke Akun Mitra Owner Budi Santoso (Data Sub-Tenant)' }
     }
   }
 
   function logout() {
     isAuthenticated.value = false
     showOnboarding.value = false
+    if (isSupervising.value) {
+      exitSupervision()
+    }
     localStorage.removeItem('cakue_is_authenticated')
     localStorage.removeItem('cakue_current_user')
     syncAllStores(null)
@@ -732,6 +861,7 @@ export const useAuthStore = defineStore('auth', () => {
     appMode,
     activeBusinessRole,
     currentRoleConfig,
+    isSuperAdmin,
     isOwner,
     isManager,
     isCashier,
@@ -751,6 +881,15 @@ export const useAuthStore = defineStore('auth', () => {
     canManageAssets,
     canDeleteAsset,
     canRunDepreciation,
+    canManageOwners,
+    canSuperviseTenant,
+    ownersList,
+    isSupervising,
+    supervisingOwner,
+    addOwner,
+    toggleOwnerStatus,
+    startSupervision,
+    exitSupervision,
     user,
     personalUser,
     businessUser,
