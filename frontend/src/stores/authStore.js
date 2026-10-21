@@ -142,29 +142,7 @@ export const ROLES = {
 }
 
 export const useAuthStore = defineStore('auth', () => {
-  // Session Persistence via LocalStorage (Default ke false agar pengguna baru disambut Onboarding Utama)
-  const savedAuth = localStorage.getItem('cakue_is_authenticated')
-  const isAuthenticated = ref(savedAuth !== null ? savedAuth === 'true' : false)
-  const showOnboarding = ref(false)
-
-  // Jenis akun terpisah mutlak (Opsi B): 'personal' atau 'business'
-  const savedAccountType = localStorage.getItem('cakue_account_type')
-  const accountType = ref(savedAccountType || 'business')
-
-  // Peran Bisnis Aktif (RBAC)
-  const savedRole = localStorage.getItem('cakue_business_role')
-  const defaultInitialRole = parsedUser?.role || (parsedUser?.email === 'admin@cakue.id' ? 'superadmin' : 'owner')
-  const activeBusinessRole = ref(savedRole || defaultInitialRole)
-
-  const appMode = computed({
-    get: () => accountType.value,
-    set: (val) => { 
-      accountType.value = val 
-      localStorage.setItem('cakue_account_type', val)
-    }
-  })
-
-  // Membaca Data Pengguna Aktif dari Sesi LocalStorage
+  // 1. Membaca Data Pengguna Aktif dari Sesi LocalStorage terlebih dahulu
   const savedUserJson = localStorage.getItem('cakue_current_user')
   let parsedUser = null
   if (savedUserJson) {
@@ -200,6 +178,28 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.setItem('cakue_current_branch', 'Cabang 1 - Malioboro')
     localStorage.setItem('cakue_active_account_mode', 'master')
   }
+
+  // 2. Session Persistence via LocalStorage (Default ke false agar pengguna baru disambut Onboarding Utama)
+  const savedAuth = localStorage.getItem('cakue_is_authenticated')
+  const isAuthenticated = ref(savedAuth !== null ? savedAuth === 'true' : false)
+  const showOnboarding = ref(false)
+
+  // 3. Jenis akun terpisah mutlak (Opsi B): 'personal' atau 'business'
+  const savedAccountType = localStorage.getItem('cakue_account_type')
+  const accountType = ref(savedAccountType || parsedUser?.account_type || 'business')
+
+  // 4. Peran Bisnis Aktif (RBAC)
+  const savedRole = localStorage.getItem('cakue_business_role')
+  const defaultInitialRole = parsedUser?.role || (parsedUser?.email === 'admin@cakue.id' ? 'superadmin' : 'owner')
+  const activeBusinessRole = ref(savedRole || defaultInitialRole)
+
+  const appMode = computed({
+    get: () => accountType.value,
+    set: (val) => { 
+      accountType.value = val 
+      localStorage.setItem('cakue_account_type', val)
+    }
+  })
 
   // Data Pengguna Sesuai Jenis Akun
   const personalUser = ref({
