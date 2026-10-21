@@ -81,7 +81,7 @@ export const ROLES = {
     canManageAssets: false,
     canDeleteAsset: false,
     canRunDepreciation: false,
-    assignedBranch: 'Cabang Jakarta Selatan',
+    assignedBranch: 'Cabang 1 - Malioboro',
     description: 'Akses terbatas khusus modul Kasir POS dan profil akun pada cabang penugasan'
   },
   WAREHOUSE: {
@@ -107,7 +107,7 @@ export const ROLES = {
     canManageAssets: false,
     canDeleteAsset: false,
     canRunDepreciation: false,
-    assignedBranch: 'Gudang Pusat (Central Hub)',
+    assignedBranch: 'Gudang Pusat Jogja (Hub Distribusi)',
     description: 'Akses terbatas khusus modul Inventaris Stok, Surat Jalan dan profil akun'
   }
 }
@@ -180,12 +180,18 @@ export const useAuthStore = defineStore('auth', () => {
     joinedDate: 'Oktober 2026'
   })
 
+  let initialBranch = localStorage.getItem('cakue_current_branch') || parsedUser?.branch_name
+  if (!initialBranch || initialBranch.includes('Jakarta') || initialBranch.includes('Bandung') || initialBranch.includes('Surabaya') || initialBranch.includes('Central Hub')) {
+    initialBranch = 'Cabang 1 - Malioboro'
+    localStorage.setItem('cakue_current_branch', initialBranch)
+  }
+
   const businessUser = ref({
     name: parsedUser?.name || 'Master Administrator',
     email: parsedUser?.email || 'admin@cakue.id',
     companyName: 'PT CAKUE Nusantara Berkah (Jogja)',
     role: ROLES[(parsedUser?.role || activeBusinessRole.value).toUpperCase()]?.title || 'Owner & Direktur',
-    currentBranch: localStorage.getItem('cakue_current_branch') || parsedUser?.branch_name || 'Cabang 1 - Malioboro'
+    currentBranch: initialBranch
   })
 
   const user = computed(() => {
@@ -293,27 +299,37 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const parsed = JSON.parse(savedBranches)
       if (Array.isArray(parsed) && parsed.length > 0) {
-        initialBranches = parsed.map(b => {
-          const def = defaultBranches.find(d => d.id === b.id)
-          return {
-            status: 'open',
-            code: b.code || (def ? def.code : 'OUT-01'),
-            city: b.city || (def ? def.city : 'Kota'),
-            address: b.address || (def ? def.address : 'Alamat Toko Cabang'),
-            phone: b.phone || (def ? def.phone : '0812-0000-0000'),
-            managerName: b.managerName || (def ? def.managerName : 'Manajer Cabang'),
-            operatingHours: b.operatingHours || (def ? def.operatingHours : '08:00 - 22:00 WIB'),
-            createdAt: b.createdAt || (def ? def.createdAt : '2025-01-01'),
-            ...b
-          }
-        })
+        // Hapus cabang lama Jakarta, Bandung, Surabaya, wh-1
+        const cleanJogja = parsed
+          .filter(b => !['br-1', 'br-2', 'br-3', 'wh-1'].includes(b.id) && !b.name?.includes('Jakarta') && !b.name?.includes('Bandung') && !b.name?.includes('Surabaya') && !b.name?.includes('Central Hub'))
+          .map(b => {
+            const def = defaultBranches.find(d => d.id === b.id)
+            return {
+              status: 'open',
+              code: b.code || (def ? def.code : 'JOG-01'),
+              city: b.city || (def ? def.city : 'D.I. Yogyakarta'),
+              address: b.address || (def ? def.address : 'Alamat Cabang'),
+              phone: b.phone || (def ? def.phone : '0812-0000-0000'),
+              managerName: b.managerName || (def ? def.managerName : 'Manajer Cabang'),
+              operatingHours: b.operatingHours || (def ? def.operatingHours : '08:00 - 22:00 WIB'),
+              createdAt: b.createdAt || (def ? def.createdAt : '2026-10-21'),
+              ...b
+            }
+          })
+        if (cleanJogja.length >= 6) {
+          initialBranches = cleanJogja
+        } else {
+          initialBranches = defaultBranches
+        }
       }
     } catch (e) {
       initialBranches = defaultBranches
     }
   }
+  localStorage.setItem('cakue_branches', JSON.stringify(initialBranches))
 
   const branches = ref(initialBranches)
+  loadBranchesFromServer()
   watch(branches, (val) => localStorage.setItem('cakue_branches', JSON.stringify(val)), { deep: true })
 
   // RBAC Helpers & Getters

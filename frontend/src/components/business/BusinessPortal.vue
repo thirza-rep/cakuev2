@@ -801,7 +801,7 @@
               </div>
               <div class="flex items-center justify-between pt-1 gap-2 min-w-0">
                 <div class="text-xs text-teal-700 font-semibold truncate">
-                  Net Margin 39.9%
+                  Net Margin {{ financeStore.totalIncome > 0 ? ((financeStore.netSavings / financeStore.totalIncome) * 100).toFixed(1) + '%' : '0.0%' }}
                 </div>
                 <span class="text-[11px] font-bold text-teal-800 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200 shrink-0 group-hover:bg-teal-600 group-hover:text-white transition-all flex items-center gap-0.5">
                   P&L →
@@ -884,7 +884,9 @@
                 <div class="text-lg sm:text-xl xl:text-2xl font-black text-slate-800 tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">
                   Rp {{ formatNumber(rdRealizationTotal) }}
                 </div>
-                <div class="text-[11px] text-emerald-700 font-semibold truncate">Terserap pada 3 proyek</div>
+                <div class="text-[11px] text-emerald-700 font-semibold truncate">
+                  {{ rdProjects.length > 0 ? `Terserap pada ${rdProjects.length} proyek` : '0 proyek aktif' }}
+                </div>
               </div>
 
               <div class="p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-1 min-w-0">
@@ -901,7 +903,7 @@
               <div class="text-xs font-bold uppercase tracking-wider text-slate-400">
                 Portofolio Proyek Riset Aktif (Inovasi Produk & Proses)
               </div>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+              <div v-if="rdProjects.length > 0" class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
                 <div 
                   v-for="proj in rdProjects" 
                   :key="proj.id"
@@ -934,6 +936,15 @@
                     </div>
                   </div>
                 </div>
+              </div>
+              <div v-else class="p-6 sm:p-8 rounded-2xl bg-white border border-slate-200 text-center space-y-2 shadow-2xs">
+                <div class="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 mx-auto flex items-center justify-center font-bold text-lg">
+                  💡
+                </div>
+                <div class="text-xs sm:text-sm font-extrabold text-slate-800">Portofolio R&D Bersih (0 Proyek Aktif)</div>
+                <p class="text-[11px] text-slate-500 max-w-md mx-auto">
+                  Akun Master Admin siap digunakan untuk mengalokasikan inovasi bahan baku, efisiensi HPP, dan standarisasi resep dari surplus laba usaha riil.
+                </p>
               </div>
             </div>
           </div>
@@ -2197,8 +2208,8 @@ const rdAllocationTotal = computed(() => {
   return Math.max(0, Math.round((financeStore.netSavings || 0) * (rdAllocationPercent / 100)))
 })
 
-// Daftar Proyek Inovasi R&D
-const rdProjects = ref([
+// Daftar Proyek Inovasi R&D Dummy (Hanya untuk mode simulasi demo Budi Santoso)
+const DUMMY_RD_PROJECTS = [
   {
     id: 'rd-01',
     code: 'R&D-01',
@@ -2235,13 +2246,25 @@ const rdProjects = ref([
     status: 'Final Kalibrasi Pabrikasi',
     badgeColor: 'bg-purple-50 text-purple-800 border-purple-200'
   }
-])
+]
+
+const isDemoAccount = computed(() => {
+  const email = (authStore.user?.email || '').toLowerCase()
+  return email === 'budi.santoso@cakue.id' || email.includes('budi')
+})
+
+const rdProjects = computed(() => {
+  return isDemoAccount.value ? DUMMY_RD_PROJECTS : []
+})
 
 const rdRealizationTotal = computed(() => {
   return rdProjects.value.reduce((sum, p) => sum + p.realization, 0)
 })
 
 const rdRemainingBudget = computed(() => {
+  if (rdProjects.value.length === 0) {
+    return rdAllocationTotal.value
+  }
   const initialReserve = 5000000
   return (initialReserve + rdAllocationTotal.value) - rdRealizationTotal.value
 })
