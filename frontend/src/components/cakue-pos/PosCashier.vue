@@ -83,7 +83,7 @@
         </div>
 
         <!-- Products Grid (Fluid across all device sizes) -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-4">
+        <div v-if="filteredProducts.length > 0" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-4">
           <div 
             v-for="p in filteredProducts" 
             :key="p.id"
@@ -110,6 +110,19 @@
                 <Icon name="plus" custom-class="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </span>
             </div>
+          </div>
+        </div>
+
+        <!-- Empty State jika Katalog Kosong (Akun Baru / Master Admin) -->
+        <div v-else class="saas-card p-8 sm:p-12 text-center space-y-3">
+          <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+            <Icon name="box" custom-class="w-6 h-6" />
+          </div>
+          <div class="space-y-1">
+            <h4 class="text-sm font-bold text-slate-800">Katalog Produk Masih Bersih (0 Produk)</h4>
+            <p class="text-xs text-slate-500 max-w-sm mx-auto">
+              Akun baru siap digunakan. Silakan tambahkan master produk dan atur stok di menu <strong>Inventaris & Stok</strong> agar produk dapat dipilih pada mesin kasir POS.
+            </p>
           </div>
         </div>
       </div>
@@ -331,7 +344,7 @@ const showReceiptModal = ref(false)
 const completedOrder = ref(null)
 
 const currentBranchName = computed(() => {
-  return authStore.businessUser?.currentBranch || 'Cabang Jakarta Selatan'
+  return authStore.businessUser?.currentBranch || 'Cabang 1 - Malioboro'
 })
 
 const currentBranchObj = computed(() => {
@@ -339,7 +352,7 @@ const currentBranchObj = computed(() => {
 })
 
 const currentBranchId = computed(() => {
-  return currentBranchObj.value?.id || 'br-1'
+  return currentBranchObj.value?.id || 'jogja-1'
 })
 
 const isBranchOpen = computed(() => {

@@ -1,6 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import { api } from '../api/client.js'
+import { useFinanceStore } from './financeStore'
+import { useStockStore } from './stockStore'
+import { usePosStore } from './posStore'
 
 // 1. DEFINISI ROLE & MATRIX HAK AKSES (RBAC) ENTERPRISE
 export const ROLES = {
@@ -468,6 +471,7 @@ export const useAuthStore = defineStore('auth', () => {
 
         // Muat cabang terbaru jika terhubung
         loadBranchesFromServer()
+        syncAllStores(u)
         return { success: true, message: res.message || 'Login berhasil', user: u }
       }
 
@@ -496,7 +500,8 @@ export const useAuthStore = defineStore('auth', () => {
       setBusinessRole('owner')
       localStorage.setItem('cakue_current_user', JSON.stringify(u))
       localStorage.setItem('cakue_is_authenticated', 'true')
-      return { success: true, message: 'Masuk sebagai Master Administrator (Offline Mode)', user: u }
+      syncAllStores(u)
+      return { success: true, message: 'Masuk sebagai Master Administrator', user: u }
     }
 
     if (lower === 'budi.santoso@cakue.id' || lower.includes('budi')) {
@@ -514,6 +519,7 @@ export const useAuthStore = defineStore('auth', () => {
       setBusinessRole('owner')
       localStorage.setItem('cakue_current_user', JSON.stringify(u))
       localStorage.setItem('cakue_is_authenticated', 'true')
+      syncAllStores(u)
       return { success: true, message: 'Masuk sebagai Akun Dummy Budi Santoso', user: u }
     }
 
@@ -578,6 +584,7 @@ export const useAuthStore = defineStore('auth', () => {
           }
           setBusinessRole(u.role || 'owner')
         }
+        syncAllStores(u)
         return { success: true, message: res.message || 'Pendaftaran berhasil!', user: u }
       }
 
@@ -587,11 +594,25 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  function syncAllStores(userObj) {
+    try {
+      const fStore = useFinanceStore()
+      const sStore = useStockStore()
+      const pStore = usePosStore()
+      fStore.syncUserData(userObj)
+      sStore.syncUserData(userObj)
+      pStore.syncUserData(userObj)
+    } catch (e) {
+      console.warn('[AUTH] Could not sync stores:', e)
+    }
+  }
+
   function logout() {
     isAuthenticated.value = false
     showOnboarding.value = false
     localStorage.removeItem('cakue_is_authenticated')
     localStorage.removeItem('cakue_current_user')
+    syncAllStores(null)
   }
 
   return {

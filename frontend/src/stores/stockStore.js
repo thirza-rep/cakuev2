@@ -1,168 +1,203 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 
-export const useStockStore = defineStore('stock', () => {
-  // Master Produk & Stok Pusat (Warehouse)
-  const products = ref([
-    { id: 'PRD-01', sku: 'CKU-KOP-01', name: 'Biji Kopi Arabika Gayo 1kg', category: 'Bahan Baku', hpp: 110000, price: 165000, centralStock: 250, minAlert: 50 },
-    { id: 'PRD-02', sku: 'CKU-SSU-02', name: 'Susu UHT Plain 1 Liter', category: 'Bahan Baku', hpp: 16500, price: 24000, centralStock: 480, minAlert: 100 },
-    { id: 'PRD-03', sku: 'CKU-SIR-03', name: 'Sirup Karamel Monin 750ml', category: 'Sirup', hpp: 145000, price: 195000, centralStock: 35, minAlert: 15 },
-    { id: 'PRD-04', sku: 'CKU-CUP-04', name: 'Paper Cup Hot 8oz (Slop/50pcs)', category: 'Packaging', hpp: 28000, price: 45000, centralStock: 120, minAlert: 30 },
-    { id: 'PRD-05', sku: 'CKU-CKU-05', name: 'Cakue Crispy Original (Pack 10)', category: 'Makanan Jadi', hpp: 18000, price: 30000, centralStock: 80, minAlert: 20 },
-    { id: 'PRD-06', sku: 'CKU-CKU-06', name: 'Cakue Keju Mozzarella (Pack 10)', category: 'Makanan Jadi', hpp: 24000, price: 40000, centralStock: 65, minAlert: 20 }
-  ])
+// --- 1. DATA DUMMY / DEMO (Khusus untuk Akun Budi Santoso) ---
+export const DUMMY_PRODUCTS = [
+  { id: 'PRD-01', sku: 'CKU-KOP-01', name: 'Biji Kopi Arabika Gayo 1kg', category: 'Bahan Baku', hpp: 110000, price: 165000, centralStock: 250, minAlert: 50 },
+  { id: 'PRD-02', sku: 'CKU-SSU-02', name: 'Susu UHT Plain 1 Liter', category: 'Bahan Baku', hpp: 16500, price: 24000, centralStock: 480, minAlert: 100 },
+  { id: 'PRD-03', sku: 'CKU-SIR-03', name: 'Sirup Karamel Monin 750ml', category: 'Sirup', hpp: 145000, price: 195000, centralStock: 35, minAlert: 15 },
+  { id: 'PRD-04', sku: 'CKU-CUP-04', name: 'Paper Cup Hot 8oz (Slop/50pcs)', category: 'Packaging', hpp: 28000, price: 45000, centralStock: 120, minAlert: 30 },
+  { id: 'PRD-05', sku: 'CKU-CKU-05', name: 'Cakue Crispy Original (Pack 10)', category: 'Makanan Jadi', hpp: 18000, price: 30000, centralStock: 80, minAlert: 20 },
+  { id: 'PRD-06', sku: 'CKU-CKU-06', name: 'Cakue Keju Mozzarella (Pack 10)', category: 'Makanan Jadi', hpp: 24000, price: 40000, centralStock: 65, minAlert: 20 }
+]
 
-  // Distribusi Stok per Cabang (Persisten)
-  const defaultBranchStocks = {
-    'br-1': { // Jakarta Selatan
-      'PRD-01': 32,
-      'PRD-02': 64,
-      'PRD-03': 8,
-      'PRD-04': 25,
-      'PRD-05': 18,
-      'PRD-06': 15
-    },
-    'br-2': { // Bandung Dago
-      'PRD-01': 14,
-      'PRD-02': 28,
-      'PRD-03': 4,
-      'PRD-04': 10,
-      'PRD-05': 8,
-      'PRD-06': 5
-    },
-    'br-3': { // Surabaya Gubeng
-      'PRD-01': 5, // Status: Low stock!
-      'PRD-02': 12,
-      'PRD-03': 2, // Status: Low stock!
-      'PRD-04': 6,
-      'PRD-05': 4,
-      'PRD-06': 2
+export const DUMMY_BRANCH_STOCKS = {
+  'jogja-1': { 'PRD-01': 32, 'PRD-02': 64, 'PRD-03': 8, 'PRD-04': 25, 'PRD-05': 18, 'PRD-06': 15 },
+  'jogja-2': { 'PRD-01': 14, 'PRD-02': 28, 'PRD-03': 4, 'PRD-04': 10, 'PRD-05': 8, 'PRD-06': 5 },
+  'jogja-3': { 'PRD-01': 5, 'PRD-02': 12, 'PRD-03': 2, 'PRD-04': 6, 'PRD-05': 4, 'PRD-06': 2 },
+  'jogja-4': { 'PRD-01': 20, 'PRD-02': 30, 'PRD-03': 6, 'PRD-04': 15, 'PRD-05': 10, 'PRD-06': 8 },
+  'jogja-5': { 'PRD-01': 12, 'PRD-02': 24, 'PRD-03': 3, 'PRD-04': 8, 'PRD-05': 6, 'PRD-06': 4 },
+  'jogja-6': { 'PRD-01': 15, 'PRD-02': 25, 'PRD-03': 5, 'PRD-04': 10, 'PRD-05': 8, 'PRD-06': 6 },
+  'br-1': { 'PRD-01': 32, 'PRD-02': 64, 'PRD-03': 8, 'PRD-04': 25, 'PRD-05': 18, 'PRD-06': 15 },
+  'br-2': { 'PRD-01': 14, 'PRD-02': 28, 'PRD-03': 4, 'PRD-04': 10, 'PRD-05': 8, 'PRD-06': 5 },
+  'br-3': { 'PRD-01': 5, 'PRD-02': 12, 'PRD-03': 2, 'PRD-04': 6, 'PRD-05': 4, 'PRD-06': 2 }
+}
+
+export const DUMMY_STOCK_TRANSFERS = [
+  {
+    id: 'SJ-2026-008',
+    date: '2026-10-14 01:15',
+    from: 'Gudang Pusat Jogja (Hub Distribusi)',
+    to: 'Cabang 3 - Kaliurang',
+    targetBranchId: 'jogja-3',
+    items: [
+      { productName: 'Biji Kopi Arabika Gayo 1kg', qty: 25, productId: 'PRD-01' },
+      { productName: 'Sirup Karamel Monin 750ml', qty: 10, productId: 'PRD-03' }
+    ],
+    driver: 'Ekspedisi Logistik Truk 03',
+    status: 'IN_TRANSIT'
+  },
+  {
+    id: 'SJ-2026-007',
+    date: '2026-10-12 09:30',
+    from: 'Gudang Pusat Jogja (Hub Distribusi)',
+    to: 'Cabang 1 - Malioboro',
+    targetBranchId: 'jogja-1',
+    items: [
+      { productName: 'Susu UHT Plain 1 Liter', qty: 40, productId: 'PRD-02' },
+      { productName: 'Cakue Crispy Original (Pack 10)', qty: 20, productId: 'PRD-05' }
+    ],
+    driver: 'Kurir Internal Pak Joko',
+    status: 'RECEIVED'
+  }
+]
+
+export const DUMMY_ASSETS = [
+  {
+    id: 'AST-01',
+    name: 'Mesin Espresso La Marzocco 2 Group',
+    category: 'Mesin & Peralatan',
+    branch: 'Cabang 1 - Malioboro',
+    purchaseDate: '2025-01-15',
+    cost: 125000000,
+    usefulLifeYears: 5,
+    salvageValue: 20000000,
+    currentValue: 97000000,
+    monthlyDepreciation: 1750000,
+    accumulatedDepreciation: 28000000,
+    notes: 'Unit operasional bar kopi utama'
+  },
+  {
+    id: 'AST-02',
+    name: 'Deep Fryer Komersial 20 Liter (Penggoreng Cakue)',
+    category: 'Mesin & Peralatan',
+    branch: 'Cabang 2 - Gejayan',
+    purchaseDate: '2025-06-10',
+    cost: 18500000,
+    usefulLifeYears: 4,
+    salvageValue: 2500000,
+    currentValue: 14500000,
+    monthlyDepreciation: 333333,
+    accumulatedDepreciation: 4000000,
+    notes: 'Penggoreng otomatis suhu presisi'
+  }
+]
+
+export const DUMMY_STOCK_LEDGER = [
+  {
+    id: 'LED-001',
+    timestamp: '2026-10-14 08:30',
+    productId: 'PRD-01',
+    productName: 'Biji Kopi Arabika Gayo 1kg',
+    sku: 'CKU-KOP-01',
+    locationName: 'Cabang 1 - Malioboro',
+    branchId: 'jogja-1',
+    type: 'IN',
+    qty: 25,
+    reason: 'Penerimaan Surat Jalan SJ-2026-007',
+    actorRole: 'Manajer Cabang',
+    balanceAfter: 32
+  }
+]
+
+function getActiveEmail() {
+  try {
+    const raw = localStorage.getItem('cakue_current_user')
+    if (raw) {
+      const u = JSON.parse(raw)
+      return (u?.email || '').toLowerCase()
     }
+  } catch (e) {}
+  return ''
+}
+
+function isDemoUser(email) {
+  const e = (email || getActiveEmail()).toLowerCase()
+  return e === 'budi.santoso@cakue.id' || e.includes('budi')
+}
+
+function getStockStorageKey(email) {
+  const e = (email || getActiveEmail()).toLowerCase()
+  if (isDemoUser(e)) {
+    return 'cakue_demo_stock'
+  }
+  const safeName = (e || 'admin').replace(/[^a-zA-Z0-9_-]/g, '_')
+  return `cakue_stock_${safeName}`
+}
+
+function loadInitialStockData(email) {
+  const isDemo = isDemoUser(email)
+  const key = getStockStorageKey(email)
+  const raw = localStorage.getItem(key)
+
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw)
+      return {
+        products: parsed.products || (isDemo ? DUMMY_PRODUCTS : []),
+        branchStocks: parsed.branchStocks || (isDemo ? DUMMY_BRANCH_STOCKS : {}),
+        stockTransfers: parsed.stockTransfers || (isDemo ? DUMMY_STOCK_TRANSFERS : []),
+        assets: parsed.assets || (isDemo ? DUMMY_ASSETS : []),
+        stockLedger: parsed.stockLedger || (isDemo ? DUMMY_STOCK_LEDGER : [])
+      }
+    } catch (e) {}
   }
 
-  const savedBranchStocks = localStorage.getItem('cakue_branch_stocks')
-  const branchStocks = ref(savedBranchStocks ? JSON.parse(savedBranchStocks) : defaultBranchStocks)
-  watch(branchStocks, (val) => localStorage.setItem('cakue_branch_stocks', JSON.stringify(val)), { deep: true })
+  return {
+    products: isDemo ? JSON.parse(JSON.stringify(DUMMY_PRODUCTS)) : [],
+    branchStocks: isDemo ? JSON.parse(JSON.stringify(DUMMY_BRANCH_STOCKS)) : {},
+    stockTransfers: isDemo ? JSON.parse(JSON.stringify(DUMMY_STOCK_TRANSFERS)) : [],
+    assets: isDemo ? JSON.parse(JSON.stringify(DUMMY_ASSETS)) : [],
+    stockLedger: isDemo ? JSON.parse(JSON.stringify(DUMMY_STOCK_LEDGER)) : []
+  }
+}
 
-  // Surat Jalan & Mutasi Penyaluran (In-Transit)
-  const stockTransfers = ref([
-    {
-      id: 'SJ-2026-008',
-      date: '2026-10-14 01:15',
-      from: 'Gudang Pusat (Central Hub)',
-      to: 'Cabang Surabaya Gubeng',
-      items: [
-        { productName: 'Biji Kopi Arabika Gayo 1kg', qty: 25 },
-        { productName: 'Sirup Karamel Monin 750ml', qty: 10 }
-      ],
-      driver: 'Ekspedisi Logistik Truk 03',
-      status: 'IN_TRANSIT' // IN_TRANSIT, RECEIVED
-    },
-    {
-      id: 'SJ-2026-007',
-      date: '2026-10-12 09:30',
-      from: 'Gudang Pusat (Central Hub)',
-      to: 'Cabang Bandung Dago',
-      items: [
-        { productName: 'Susu UHT Plain 1 Liter', qty: 40 },
-        { productName: 'Cakue Crispy Original (Pack 10)', qty: 20 }
-      ],
-      driver: 'Kurir Internal Pak Joko',
-      status: 'RECEIVED'
-    }
-  ])
+export const useStockStore = defineStore('stock', () => {
+  const initial = loadInitialStockData()
 
-  // Manajemen Data Aset & Depresiasi (Persisten)
-  const defaultAssets = [
-    {
-      id: 'AST-01',
-      name: 'Mesin Espresso La Marzocco 2 Group',
-      category: 'Mesin & Peralatan',
-      branch: 'Cabang Jakarta Selatan',
-      purchaseDate: '2025-01-15',
-      cost: 125000000,
-      usefulLifeYears: 5,
-      salvageValue: 20000000,
-      currentValue: 97000000,
-      monthlyDepreciation: 1750000,
-      accumulatedDepreciation: 28000000,
-      notes: 'Unit operasional bar kopi utama'
-    },
-    {
-      id: 'AST-02',
-      name: 'Deep Fryer Komersial 20 Liter (Penggoreng Cakue)',
-      category: 'Mesin & Peralatan',
-      branch: 'Cabang Bandung Dago',
-      purchaseDate: '2025-06-10',
-      cost: 18500000,
-      usefulLifeYears: 4,
-      salvageValue: 2500000,
-      currentValue: 14500000,
-      monthlyDepreciation: 333333,
-      accumulatedDepreciation: 4000000,
-      notes: 'Penggorengan kapasitas besar dapur cakue'
-    },
-    {
-      id: 'AST-03',
-      name: 'Tablet POS & Thermal Printer Sunmi',
-      category: 'Elektronik & POS',
-      branch: 'Cabang Surabaya Gubeng',
-      purchaseDate: '2026-02-01',
-      cost: 6500000,
-      usefulLifeYears: 3,
-      salvageValue: 500000,
-      currentValue: 5166000,
-      monthlyDepreciation: 166666,
-      accumulatedDepreciation: 1334000,
-      notes: 'Terminal kasir transaksi POS'
-    }
-  ]
+  // State Reaktif
+  const products = ref(initial.products)
+  const branchStocks = ref(initial.branchStocks)
+  const stockTransfers = ref(initial.stockTransfers)
+  const assets = ref(initial.assets)
+  const stockLedger = ref(initial.stockLedger)
 
-  const savedAssets = localStorage.getItem('cakue_assets')
-  const assets = ref(savedAssets ? JSON.parse(savedAssets) : defaultAssets)
-  watch(assets, (val) => localStorage.setItem('cakue_assets', JSON.stringify(val)), { deep: true })
+  // Auto-save State per-User
+  function saveCurrentState() {
+    const key = getStockStorageKey()
+    localStorage.setItem(key, JSON.stringify({
+      products: products.value,
+      branchStocks: branchStocks.value,
+      stockTransfers: stockTransfers.value,
+      assets: assets.value,
+      stockLedger: stockLedger.value
+    }))
+  }
 
-  // Buku Catatan Mutasi Stok Fisik (Inventory Movement Ledger)
-  const stockLedger = ref([
-    {
-      id: 'LED-001',
-      timestamp: '2026-10-15 03:30',
-      productId: 'PRD-01',
-      productName: 'Biji Kopi Arabika Gayo 1kg',
-      sku: 'CKU-KOP-01',
-      locationName: 'Gudang Pusat (Central Hub)',
-      branchId: 'central',
-      type: 'IN',
-      qty: 50,
-      reason: 'Restock Pembelian Supplier',
-      actorRole: 'Owner & Direktur',
-      balanceAfter: 250
-    },
-    {
-      id: 'LED-002',
-      timestamp: '2026-10-14 18:45',
-      productId: 'PRD-02',
-      productName: 'Susu UHT Plain 1 Liter',
-      sku: 'CKU-SSU-02',
-      locationName: 'Cabang Jakarta Selatan',
-      branchId: 'br-1',
-      type: 'OUT',
-      qty: 2,
-      reason: 'Kemasan Bocor Saat Bongkar Muat',
-      actorRole: 'Staff Gudang & Logistik',
-      balanceAfter: 64
-    }
-  ])
+  watch([products, branchStocks, stockTransfers, assets, stockLedger], () => {
+    saveCurrentState()
+  }, { deep: true })
+
+  // Sinkronisasi Dinamis saat Pengguna Login / Beralih Akun
+  function syncUserData(userObj) {
+    const email = userObj?.email || getActiveEmail()
+    const data = loadInitialStockData(email)
+    products.value = data.products
+    branchStocks.value = data.branchStocks
+    stockTransfers.value = data.stockTransfers
+    assets.value = data.assets
+    stockLedger.value = data.stockLedger
+  }
 
   // Kurangi stok di cabang saat POS transaksi (RBAC & Audit Trail Granular)
   function deductBranchStock(branchId, productId, qty, customLocationName = '', actorRole = 'Kasir POS Toko') {
-    if (branchStocks.value[branchId] && branchStocks.value[branchId][productId] !== undefined) {
+    if (!branchStocks.value[branchId]) branchStocks.value[branchId] = {}
+    if (branchStocks.value[branchId][productId] !== undefined) {
       branchStocks.value[branchId][productId] = Math.max(0, branchStocks.value[branchId][productId] - qty)
       
       const prod = products.value.find(p => p.id === productId)
       if (prod) {
-        const resolvedLocationName = customLocationName || 
-          (branchId === 'br-1' ? 'Cabang Jakarta Selatan' : branchId === 'br-2' ? 'Cabang Bandung Dago' : branchId === 'br-3' ? 'Cabang Surabaya Gubeng' : 'Cabang Toko')
+        const resolvedLocationName = customLocationName || branchId
         stockLedger.value.unshift({
           id: `LED-${Date.now().toString().slice(-6)}`,
           timestamp: new Date().toISOString().replace('T', ' ').slice(0, 16),
@@ -187,16 +222,16 @@ export const useStockStore = defineStore('stock', () => {
     if (!prod || qty <= 0) return { success: false, message: 'Produk tidak ditemukan atau kuantitas tidak valid' }
 
     let balanceAfter = 0
-    let locName = 'Gudang Pusat (Central Hub)'
+    let locName = 'Gudang Pusat (Hub Distribusi)'
 
-    if (location === 'central') {
+    if (location === 'central' || location === 'jogja-wh') {
       if (type === 'in') {
         prod.centralStock += qty
       } else {
         prod.centralStock = Math.max(0, prod.centralStock - qty)
       }
       balanceAfter = prod.centralStock
-      locName = 'Gudang Pusat (Central Hub)'
+      locName = 'Gudang Pusat (Hub Distribusi)'
     } else {
       if (!branchStocks.value[location]) branchStocks.value[location] = {}
       const current = branchStocks.value[location][productId] || 0
@@ -206,7 +241,7 @@ export const useStockStore = defineStore('stock', () => {
         branchStocks.value[location][productId] = Math.max(0, current - qty)
       }
       balanceAfter = branchStocks.value[location][productId]
-      locName = location === 'br-1' ? 'Cabang Jakarta Selatan' : location === 'br-2' ? 'Cabang Bandung Dago' : 'Cabang Surabaya Gubeng'
+      locName = location
     }
 
     // Catat ke Buku Log Mutasi Stok
@@ -243,49 +278,34 @@ export const useStockStore = defineStore('stock', () => {
     }
     products.value.push(newProd)
 
-    // Inisialisasi stok cabang
+    // Inisialisasi stok di semua cabang
     Object.keys(branchStocks.value).forEach(bId => {
       branchStocks.value[bId][newId] = 0
     })
 
-    // Log awal jika ada stok awal
-    if (newProd.centralStock > 0) {
-      stockLedger.value.unshift({
-        id: `LED-${Date.now().toString().slice(-6)}`,
-        timestamp: new Date().toISOString().replace('T', ' ').slice(0, 16),
-        productId: newProd.id,
-        productName: newProd.name,
-        sku: newProd.sku,
-        locationName: 'Gudang Pusat (Central Hub)',
-        branchId: 'central',
-        type: 'IN',
-        qty: newProd.centralStock,
-        reason: 'Pendaftaran Master Produk & Stok Awal',
-        actorRole: 'Owner & Direktur',
-        balanceAfter: newProd.centralStock
-      })
-    }
-
     return newProd
   }
 
-  // Update Data Produk
-  function updateProduct(productId, fields) {
-    const prod = products.value.find(p => p.id === productId)
-    if (prod) {
-      Object.assign(prod, fields)
+  // Update Master Produk
+  function updateProduct(id, updatedData) {
+    const idx = products.value.findIndex(p => p.id === id)
+    if (idx !== -1) {
+      products.value[idx] = { ...products.value[idx], ...updatedData }
       return true
     }
     return false
   }
 
-  // Hapus Produk
-  function deleteProduct(productId) {
-    const idx = products.value.findIndex(p => p.id === productId)
+  // Hapus Master Produk
+  function deleteProduct(id) {
+    const idx = products.value.findIndex(p => p.id === id)
     if (idx !== -1) {
       products.value.splice(idx, 1)
+      // Hapus referensi dari branchStocks
       Object.keys(branchStocks.value).forEach(bId => {
-        delete branchStocks.value[bId][productId]
+        if (branchStocks.value[bId]?.[id] !== undefined) {
+          delete branchStocks.value[bId][id]
+        }
       })
       return true
     }
@@ -294,7 +314,6 @@ export const useStockStore = defineStore('stock', () => {
 
   // Kirim stok dari Pusat ke Cabang (Status: IN_TRANSIT)
   function createTransfer(toBranchId, branchName, items, driver) {
-    // Kurangi stok pusat secara deterministik
     items.forEach(item => {
       const p = products.value.find(prod => prod.id === item.productId)
       if (p) {
@@ -320,7 +339,7 @@ export const useStockStore = defineStore('stock', () => {
     stockTransfers.value.unshift({
       id: `SJ-${Date.now().toString().slice(-6)}`,
       date: new Date().toISOString().replace('T', ' ').slice(0, 16),
-      from: 'Gudang Pusat (Central Hub)',
+      from: 'Gudang Pusat Jogja (Hub Distribusi)',
       to: branchName,
       targetBranchId: toBranchId,
       items: items.map(i => ({ productName: i.name, qty: i.qty, productId: i.productId })),
@@ -334,7 +353,7 @@ export const useStockStore = defineStore('stock', () => {
     const tf = stockTransfers.value.find(t => t.id === transferId)
     if (tf && tf.status === 'IN_TRANSIT') {
       tf.status = 'RECEIVED'
-      const bId = tf.targetBranchId || 'br-1'
+      const bId = tf.targetBranchId || 'jogja-1'
       if (!branchStocks.value[bId]) branchStocks.value[bId] = {}
       tf.items.forEach(item => {
         if (item.productId) {
@@ -390,8 +409,6 @@ export const useStockStore = defineStore('stock', () => {
   }
 
   // --- MANAJEMEN ASET TETAP & DEPRESIASI BULANAN ---
-
-  // 1. Tambah Aset Baru
   function addAsset({ name, category = 'Mesin & Peralatan', branch, purchaseDate, cost, usefulLifeYears, salvageValue = 0, notes = '' }) {
     const numCost = Math.max(0, Number(cost) || 0)
     const numSalvage = Math.max(0, Number(salvageValue) || 0)
@@ -403,7 +420,7 @@ export const useStockStore = defineStore('stock', () => {
       id: newId,
       name: name.trim(),
       category: category || 'Mesin & Peralatan',
-      branch: branch || 'Cabang Jakarta Selatan',
+      branch: branch || 'Cabang 1 - Malioboro',
       purchaseDate: purchaseDate || new Date().toISOString().slice(0, 10),
       cost: numCost,
       usefulLifeYears: numYears,
@@ -417,7 +434,6 @@ export const useStockStore = defineStore('stock', () => {
     return newAsset
   }
 
-  // 2. Update Aset
   function updateAsset(id, updatedData) {
     const idx = assets.value.findIndex(a => a.id === id)
     if (idx !== -1) {
@@ -440,7 +456,6 @@ export const useStockStore = defineStore('stock', () => {
     return false
   }
 
-  // 3. Hapus Aset
   function deleteAsset(id) {
     const idx = assets.value.findIndex(a => a.id === id)
     if (idx !== -1) {
@@ -450,7 +465,6 @@ export const useStockStore = defineStore('stock', () => {
     return false
   }
 
-  // 4. Depresiasi Aset Tunggal (1 Bulan)
   function depreciateAsset(id) {
     const ast = assets.value.find(a => a.id === id)
     if (!ast) return { success: false, message: 'Aset tidak ditemukan' }
@@ -472,7 +486,6 @@ export const useStockStore = defineStore('stock', () => {
     }
   }
 
-  // 5. Eksekusi Depresiasi Bulanan Semua Aset
   function runBatchDepreciation() {
     let totalDepreciated = 0
     let count = 0
@@ -510,6 +523,7 @@ export const useStockStore = defineStore('stock', () => {
     updateAsset,
     deleteAsset,
     depreciateAsset,
-    runBatchDepreciation
+    runBatchDepreciation,
+    syncUserData
   }
 })

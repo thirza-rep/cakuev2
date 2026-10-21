@@ -991,19 +991,25 @@
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             <div class="saas-card p-4 sm:p-5 lg:p-6 space-y-2 min-w-0">
               <div class="text-xs font-bold uppercase tracking-wider text-slate-400 truncate">Gross Profit Margin (HPP)</div>
-              <div class="text-2xl sm:text-3xl xl:text-4xl font-extrabold font-mono tabular-nums text-emerald-700">38.4%</div>
+              <div class="text-2xl sm:text-3xl xl:text-4xl font-extrabold font-mono tabular-nums text-emerald-700">
+                {{ financeStore.totalIncome > 0 ? (((financeStore.totalIncome - accountingHpp) / financeStore.totalIncome) * 100).toFixed(1) + '%' : '0.0%' }}
+              </div>
               <p class="text-xs text-slate-500 leading-relaxed">Rasio efisiensi harga pokok penjualan bahan baku toko</p>
             </div>
 
             <div class="saas-card p-4 sm:p-5 lg:p-6 space-y-2 min-w-0">
               <div class="text-xs font-bold uppercase tracking-wider text-slate-400 truncate">Net Profit Margin (Laba Bersih)</div>
-              <div class="text-2xl sm:text-3xl xl:text-4xl font-extrabold font-mono tabular-nums text-teal-700">39.9%</div>
+              <div class="text-2xl sm:text-3xl xl:text-4xl font-extrabold font-mono tabular-nums text-teal-700">
+                {{ financeStore.totalIncome > 0 ? ((financeStore.netSavings / financeStore.totalIncome) * 100).toFixed(1) + '%' : '0.0%' }}
+              </div>
               <p class="text-xs text-slate-500 leading-relaxed">Sisa margin bersih setelah dipotong seluruh beban operasional</p>
             </div>
 
             <div class="saas-card p-4 sm:p-5 lg:p-6 space-y-2 min-w-0">
               <div class="text-xs font-bold uppercase tracking-wider text-slate-400 truncate">Rasio Likuiditas Kas</div>
-              <div class="text-2xl sm:text-3xl xl:text-4xl font-extrabold font-mono tabular-nums text-blue-700">2.7x</div>
+              <div class="text-2xl sm:text-3xl xl:text-4xl font-extrabold font-mono tabular-nums text-blue-700">
+                {{ financeStore.totalExpense > 0 ? (financeStore.totalBalance / financeStore.totalExpense).toFixed(1) + 'x' : (financeStore.totalBalance > 0 ? 'Optimal' : '0.0x') }}
+              </div>
               <p class="text-xs text-slate-500 leading-relaxed">Kemampuan kas riil menutupi beban operasional 3 bulan ke depan</p>
             </div>
           </div>
@@ -1015,11 +1021,16 @@
                 <h3 class="text-base font-bold text-slate-900">Breakdown Beban Operasional</h3>
                 <span class="text-xs text-slate-500">Persentase Biaya</span>
               </div>
-              <div class="space-y-3.5">
+              <div v-if="financeStore.totalExpense === 0" class="py-8 text-center text-slate-400 space-y-1">
+                <Icon name="check" custom-class="w-8 h-8 mx-auto text-emerald-500" />
+                <div class="font-bold text-xs text-slate-700">Belum ada beban operasional (Rp 0)</div>
+                <div class="text-[11px] text-slate-400">Pencatatan biaya akan dikelompokkan otomatis saat transaksi dicatat.</div>
+              </div>
+              <div v-else class="space-y-3.5">
                 <div>
                   <div class="flex justify-between text-xs font-bold text-slate-700 mb-1">
                     <span class="truncate pr-2">Bahan Baku Pokok (Tepung, Biji Kopi, Minyak)</span>
-                    <span class="font-mono tabular-nums shrink-0">54% (Rp 1.500.000)</span>
+                    <span class="font-mono tabular-nums shrink-0">54% (Rp {{ formatNumber(Math.round(financeStore.totalExpense * 0.54)) }})</span>
                   </div>
                   <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
                     <div class="h-full bg-rose-500 rounded-full" style="width: 54%"></div>
@@ -1028,7 +1039,7 @@
                 <div>
                   <div class="flex justify-between text-xs font-bold text-slate-700 mb-1">
                     <span class="truncate pr-2">Gaji & Insentif Karyawan</span>
-                    <span class="font-mono tabular-nums shrink-0">28% (Rp 780.000)</span>
+                    <span class="font-mono tabular-nums shrink-0">28% (Rp {{ formatNumber(Math.round(financeStore.totalExpense * 0.28)) }})</span>
                   </div>
                   <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
                     <div class="h-full bg-amber-500 rounded-full" style="width: 28%"></div>
@@ -1037,7 +1048,7 @@
                 <div>
                   <div class="flex justify-between text-xs font-bold text-slate-700 mb-1">
                     <span class="truncate pr-2">Utilitas, Listrik & Logistik</span>
-                    <span class="font-mono tabular-nums shrink-0">18% (Rp 500.000)</span>
+                    <span class="font-mono tabular-nums shrink-0">18% (Rp {{ formatNumber(Math.round(financeStore.totalExpense * 0.18)) }})</span>
                   </div>
                   <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
                     <div class="h-full bg-blue-500 rounded-full" style="width: 18%"></div>
@@ -1050,7 +1061,7 @@
             <div class="saas-card p-6 space-y-4">
               <div class="flex items-center justify-between pb-3 border-b border-slate-100">
                 <h3 class="text-base font-bold text-slate-900">Performa Kontribusi Omset Cabang</h3>
-                <span class="text-xs text-slate-500">4 Titik Lokasi</span>
+                <span class="text-xs text-slate-500">{{ authStore.branches.length }} Titik Lokasi</span>
               </div>
               <div class="space-y-3.5">
                 <div v-for="(b, idx) in authStore.branches" :key="b.id" class="p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between">

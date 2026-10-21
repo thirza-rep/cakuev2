@@ -30,38 +30,46 @@
       <!-- Drawer Body: Automated Real-time Insights -->
       <div class="p-5 flex-1 overflow-y-auto space-y-4 text-xs">
         <!-- Stock Replenishment Alert -->
-        <div class="p-4 bg-rose-50 border border-rose-200 rounded-xl space-y-2">
+        <div v-if="stockStore.products.length > 0" class="p-4 bg-rose-50 border border-rose-200 rounded-xl space-y-2">
           <div class="flex items-center gap-2 text-rose-800 font-bold">
             <Icon name="alert" custom-class="w-4 h-4 text-rose-600" />
-            <span>Peringatan Stok Kritis Cabang</span>
+            <span>Peringatan Stok Cabang</span>
           </div>
           <p class="text-slate-700 leading-relaxed text-[11px]">
-            Sistem mendeteksi stok <strong>Biji Kopi Arabika Gayo</strong> di <strong>Cabang Surabaya Gubeng</strong> tersisa <span class="text-rose-700 font-bold">5 pcs</span> (estimasi habis dalam 2 hari ke depan).
+            Sistem memantau stok produk aktif di 6 cabang Jogja. Periksa matriks saldo di modul Inventaris secara berkala.
           </p>
           <div class="p-2.5 bg-white rounded-lg border border-rose-200 text-[11px] text-rose-900 font-medium">
-            Rekomendasi: Terbitkan surat jalan penyaluran minimal 25 pcs dari Gudang Pusat melalui modul Inventaris.
+            Rekomendasi: Terbitkan surat jalan penyaluran dari Gudang Pusat Jogja jika stok cabang menipis.
           </div>
+        </div>
+        <div v-else class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+          <div class="flex items-center gap-2 text-slate-800 font-bold">
+            <Icon name="check" custom-class="w-4 h-4 text-emerald-600" />
+            <span>Inventaris Cabang: Siap Digunakan</span>
+          </div>
+          <p class="text-slate-600 text-[11px] leading-relaxed">
+            Katalog produk masih bersih (0 produk). Tambahkan produk perdana di modul Inventaris & Stok untuk mengaktifkan pemantauan otomatis.
+          </p>
         </div>
 
         <!-- Profit Margin Intelligence -->
-        <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl space-y-2">
+        <div v-if="financeStore.transactions.length > 0" class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl space-y-2">
           <div class="flex items-center gap-2 text-emerald-900 font-bold">
             <Icon name="chart" custom-class="w-4 h-4 text-emerald-700" />
             <span>Analisis Efisiensi & Margin Produk</span>
           </div>
           <p class="text-slate-700 leading-relaxed text-[11px]">
-            Rata-rata margin kotor produk F&B CAKUE berada pada rasio sehat <strong>38.4%</strong>. Kontributor omset tertinggi di kasir POS:
+            Total omset masuk tercatat <strong class="text-emerald-800 font-mono">Rp {{ formatNumber(financeStore.totalIncome) }}</strong> dengan laba bersih <strong class="text-emerald-800 font-mono">Rp {{ formatNumber(financeStore.netSavings) }}</strong>.
           </p>
-          <div class="space-y-1 text-[11px] text-slate-700 font-medium">
-            <div class="flex justify-between py-1 border-b border-emerald-100">
-              <span>Cakue Crispy Original</span>
-              <span class="font-bold text-emerald-800">Margin 40.0%</span>
-            </div>
-            <div class="flex justify-between py-1">
-              <span>Biji Kopi Arabika Gayo</span>
-              <span class="font-bold text-emerald-800">Margin 33.3%</span>
-            </div>
+        </div>
+        <div v-else class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+          <div class="flex items-center gap-2 text-slate-800 font-bold">
+            <Icon name="chart" custom-class="w-4 h-4 text-teal-600" />
+            <span>Analisis Margin & Omset</span>
           </div>
+          <p class="text-slate-600 text-[11px] leading-relaxed">
+            Belum ada transaksi penjualan atau pengeluaran tercatat (Saldo Rp 0). Mulai input transaksi atau jalankan Kasir POS.
+          </p>
         </div>
 
         <!-- Cashflow Health -->
@@ -71,7 +79,7 @@
             <span>Likuiditas & Ketahanan Kas</span>
           </div>
           <p class="text-slate-600 text-[11px] leading-relaxed">
-            Total kas likuid aktif saat ini adalah <strong class="text-slate-900 font-mono">Rp {{ formatNumber(financeStore.totalBalance) }}</strong>. Rasio kecukupan modal mampu melunasi kewajiban utang jatuh tempo sebesar <strong class="text-slate-900 font-mono">Rp {{ formatNumber(financeStore.totalUtang) }}</strong> hingga 15x lipat.
+            Total kas likuid aktif saat ini adalah <strong class="text-slate-900 font-mono">Rp {{ formatNumber(financeStore.totalBalance) }}</strong>. Utang jatuh tempo: <strong class="text-slate-900 font-mono">Rp {{ formatNumber(financeStore.totalUtang) }}</strong>.
           </p>
         </div>
 

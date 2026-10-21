@@ -110,6 +110,15 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 font-medium text-slate-800">
+              <tr v-if="financeStore.transactions.length === 0">
+                <td colspan="7" class="py-12 text-center text-slate-400">
+                  <div class="flex flex-col items-center justify-center gap-1.5">
+                    <Icon name="document-text" custom-class="w-8 h-8 text-slate-300" />
+                    <span class="font-bold text-slate-600 text-xs">Belum ada transaksi tercatat pada akun ini (Saldo Rp 0)</span>
+                    <span class="text-[11px] text-slate-400">Gunakan Kasir POS atau modul Keuangan untuk memulai pembukuan perdana.</span>
+                  </div>
+                </td>
+              </tr>
               <tr v-for="t in financeStore.transactions" :key="t.id" class="hover:bg-slate-50/80 transition-colors">
                 <td class="py-3 px-6 font-mono text-[11px] text-slate-500">{{ t.id }}</td>
                 <td class="py-3 px-4 text-slate-600">{{ t.date }}</td>

@@ -81,6 +81,26 @@ app.get('/api/transactions', async (req, res) => {
 
 // 5. AI Data Aggregator Endpoint (Deterministic aggregates passed to LLM)
 app.get('/api/ai/metrics-summary', (req, res) => {
+  const email = (req.query.email || '').toLowerCase().trim()
+  const isDemo = email === 'budi.santoso@cakue.id' || email.includes('budi')
+
+  if (!isDemo && email) {
+    return res.json({
+      deterministicMetrics: {
+        totalCashBalance: 0,
+        monthlyIncome: 0,
+        monthlyExpense: 0,
+        surplus: 0,
+        criticalStockBranches: [],
+        grossProfitMargin: '0.0%'
+      },
+      aiRecommendations: [
+        'Akun Master Admin baru aktif dengan status pembukuan bersih (Rp 0).',
+        'Seluruh 6 Cabang Wilayah Jogja & Hub Distribusi telah siap dioperasikan. Silakan tambahkan master produk di menu Inventaris atau mulai catat transaksi kas.'
+      ]
+    })
+  }
+
   res.json({
     deterministicMetrics: {
       totalCashBalance: 76170000,
@@ -88,12 +108,12 @@ app.get('/api/ai/metrics-summary', (req, res) => {
       monthlyExpense: 2780000,
       surplus: 1850000,
       criticalStockBranches: [
-        { branch: 'Cabang Surabaya Gubeng', product: 'Biji Kopi Arabika Gayo 1kg', remaining: 5, alertThreshold: 10 }
+        { branch: 'Cabang 3 - Kaliurang', product: 'Biji Kopi Arabika Gayo 1kg', remaining: 5, alertThreshold: 10 }
       ],
       grossProfitMargin: '38.4%'
     },
     aiRecommendations: [
-      'Segera konfirmasi penerimaan surat jalan SJ-2026-008 di Cabang Surabaya untuk mencegah kekosongan stok kopi.',
+      'Segera konfirmasi penerimaan surat jalan di Cabang Jogja untuk mencegah kekosongan stok kopi.',
       'Margin produk Cakue Crispy Original sangat sehat (40%), pertahankan volume penjualan di kasir POS.'
     ]
   })
