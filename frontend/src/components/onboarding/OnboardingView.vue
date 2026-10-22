@@ -139,15 +139,7 @@
               type="button"
               class="w-full py-2.5 rounded-xl bg-white border border-slate-300 text-slate-800 hover:bg-slate-50 font-bold text-xs sm:text-sm transition-all cursor-pointer"
             >
-              Daftar Akun Baru
-            </button>
-
-            <button 
-              @click="authStore.loginAs('personal')"
-              type="button"
-              class="w-full py-2 text-xs font-semibold text-emerald-700 hover:text-emerald-900 transition-colors cursor-pointer"
-            >
-              ⚡ Atau Langsung Coba Demo Instan
+              Daftar Akun Baru (Bebas Biaya)
             </button>
           </div>
         </div>
@@ -202,7 +194,7 @@
 
     <!-- Subtle Footer Attribution -->
     <div class="relative z-10 text-center text-[11px] text-slate-400 pb-2">
-      <span>CAKUE v2.4 • Open Source Financial System</span>
+      <span>CAKUE • Platform Keuangan & Manajemen Bisnis Modern</span>
     </div>
   </div>
 </template>
@@ -212,7 +204,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '../../stores/authStore'
 import Icon from '../common/Icon.vue'
 
-defineEmits(['go-login', 'go-register'])
+const emit = defineEmits(['go-login', 'go-register'])
 const authStore = useAuthStore()
 
 const currentSlide = ref(0)
@@ -231,7 +223,7 @@ function prevSlide() {
 }
 
 function handleSkip() {
-  authStore.loginAs('personal')
+  emit('go-login')
 }
 
 // Keyboard Navigation

@@ -151,37 +151,9 @@ export const useAuthStore = defineStore('auth', () => {
     } catch (e) {}
   }
 
-  // Migrasi otomatis ke Master Administrator (Full Akses & Bersih) jika sesi browser masih Budi Santoso
-  const activeAccountMode = localStorage.getItem('cakue_active_account_mode')
-  const isLegacyBudi = !parsedUser || 
-    parsedUser.email === 'budi.santoso@cakue.id' || 
-    parsedUser.email === 'owner@cakuenusantara.com' || 
-    parsedUser.name === 'Budi Santoso' ||
-    !parsedUser.email
-
-  if (isLegacyBudi && activeAccountMode !== 'dummy') {
-    parsedUser = {
-      id: 'usr-master-admin',
-      name: 'Master Administrator',
-      email: 'admin@cakue.id',
-      phone: '0812-0000-0001',
-      account_type: 'business',
-      role: 'superadmin',
-      branch_id: 'jogja-1',
-      branch_name: 'Cabang 1 - Malioboro'
-    }
-    localStorage.setItem('cakue_current_user', JSON.stringify(parsedUser))
-    localStorage.setItem('cakue_is_authenticated', 'true')
-    localStorage.setItem('cakue_account_type', 'business')
-    localStorage.setItem('cakue_user_name', 'Master Administrator')
-    localStorage.setItem('cakue_user_email', 'admin@cakue.id')
-    localStorage.setItem('cakue_current_branch', 'Cabang 1 - Malioboro')
-    localStorage.setItem('cakue_active_account_mode', 'master')
-  }
-
-  // 2. Session Persistence via LocalStorage (Default ke false agar pengguna baru disambut Onboarding Utama)
+  // 2. Session Persistence via LocalStorage (Hanya aktif jika sesi tersimpan riil dan parsedUser ada)
   const savedAuth = localStorage.getItem('cakue_is_authenticated')
-  const isAuthenticated = ref(savedAuth !== null ? savedAuth === 'true' : false)
+  const isAuthenticated = ref(savedAuth === 'true' && Boolean(parsedUser))
   const showOnboarding = ref(false)
 
   // 3. Jenis akun terpisah mutlak (Opsi B): 'personal' atau 'business'
@@ -203,8 +175,8 @@ export const useAuthStore = defineStore('auth', () => {
 
   // Data Pengguna Sesuai Jenis Akun
   const personalUser = ref({
-    name: parsedUser?.account_type === 'personal' ? parsedUser.name : 'Budi Santoso (Dummy / Demo)',
-    email: parsedUser?.account_type === 'personal' ? parsedUser.email : 'budi.santoso@cakue.id',
+    name: parsedUser?.account_type === 'personal' ? parsedUser.name : 'Pengguna Personal',
+    email: parsedUser?.account_type === 'personal' ? parsedUser.email : '',
     accountNumber: parsedUser?.phone || '5420-8819-2041',
     role: 'Nasabah Pribadi',
     joinedDate: 'Oktober 2026'
@@ -218,8 +190,8 @@ export const useAuthStore = defineStore('auth', () => {
 
   const businessUser = ref({
     name: parsedUser?.name || 'Master Administrator',
-    email: parsedUser?.email || 'admin@cakue.id',
-    companyName: 'PT CAKUE Nusantara Berkah (Jogja)',
+    email: parsedUser?.email || '',
+    companyName: parsedUser?.companyName || (parsedUser?.email === 'admin@cakue.id' ? 'PT CAKUE Nusantara Berkah (Jogja)' : 'Usaha Saya'),
     role: ROLES[(parsedUser?.role || activeBusinessRole.value).toUpperCase()]?.title || 'Owner & Direktur',
     currentBranch: initialBranch
   })
@@ -419,7 +391,7 @@ export const useAuthStore = defineStore('auth', () => {
       joinedDate: '2026-09-15',
       storagePrefix: 'cakue_demo',
       type: 'Mitra Usaha / Tenant',
-      notes: 'Akun Owner Demo & Simulasi Pembukuan Mitra'
+      notes: 'Kemitraan Usaha Cabang Malioboro'
     }
   ]
 
@@ -671,10 +643,10 @@ export const useAuthStore = defineStore('auth', () => {
       return { success: true, message: 'Masuk sebagai Master Administrator (Super Admin)', user: u }
     }
 
-    if (lower === 'budi.santoso@cakue.id' || lower.includes('budi')) {
+    if (lower === 'budi.santoso@cakue.id' || lower === 'owner@cakuenusantara.com') {
       const u = {
-        id: 'usr-dummy-budi',
-        name: 'Budi Santoso (Dummy / Demo)',
+        id: 'usr-budi',
+        name: 'Budi Santoso',
         email: 'budi.santoso@cakue.id',
         account_type: 'business',
         role: 'owner',
@@ -687,7 +659,7 @@ export const useAuthStore = defineStore('auth', () => {
       localStorage.setItem('cakue_current_user', JSON.stringify(u))
       localStorage.setItem('cakue_is_authenticated', 'true')
       syncAllStores(u)
-      return { success: true, message: 'Masuk sebagai Akun Dummy Budi Santoso', user: u }
+      return { success: true, message: 'Masuk sebagai Budi Santoso (Mitra Usaha)', user: u }
     }
 
     return { 
@@ -696,8 +668,133 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  function loginWithGoogle() {
-    login('admin@cakue.id', 'admin123')
+  async function loginWithGoogle(rawCredential = null, options = {}) {
+    const { accountTypeTarget = 'business', roleTarget = 'owner', branchIdTarget = 'jogja-1' } = options
+
+    // Jika sudah ada credential token dari Google Identity Services callback
+    if (rawCredential) {
+      try {
+        const res = await api.post('/api/auth/google', {
+          credential: rawCredential,
+          account_type: accountTypeTarget,
+          role: roleTarget,
+          branch_id: branchIdTarget
+        })
+
+        if (res.success && res.user) {
+          const u = res.user
+          isAuthenticated.value = true
+          accountType.value = u.account_type || accountTypeTarget
+          
+          if (accountType.value === 'business') {
+            const roleKey = u.role || (u.email === 'admin@cakue.id' ? 'superadmin' : roleTarget)
+            setBusinessRole(roleKey)
+            businessUser.value = {
+              name: u.name,
+              email: u.email,
+              companyName: u.companyName || (roleKey === 'superadmin' ? 'PT CAKUE Nusantara Berkah (Jogja)' : 'CV Cakue Nusantara (Mitra)'),
+              role: ROLES[roleKey.toUpperCase()]?.title || 'Owner & Direktur Bisnis',
+              currentBranch: u.branch_name || 'Cabang 1 - Malioboro'
+            }
+          } else {
+            personalUser.value = {
+              name: u.name,
+              email: u.email,
+              accountNumber: u.phone || '5420-8819-2041',
+              role: 'Nasabah Pribadi',
+              joinedDate: 'Oktober 2026'
+            }
+          }
+
+          localStorage.setItem('cakue_current_user', JSON.stringify(u))
+          localStorage.setItem('cakue_is_authenticated', 'true')
+          localStorage.setItem('cakue_account_type', accountType.value)
+          localStorage.setItem('cakue_user_name', u.name)
+          localStorage.setItem('cakue_user_email', u.email)
+          if (u.branch_name) {
+            localStorage.setItem('cakue_current_branch', u.branch_name)
+          }
+
+          syncAllStores(u)
+          return { success: true, user: u, message: res.message || 'Berhasil masuk dengan akun Google' }
+        } else {
+          return { success: false, message: res.message || 'Autentikasi Google gagal di server.' }
+        }
+      } catch (err) {
+        return { success: false, message: `Gagal verifikasi Google: ${err.message}` }
+      }
+    }
+
+    // Jika dipanggil dari tombol tanpa token: inisialisasi GSI dan panggil prompt
+    const settingsStore = useSettingsStore()
+    const clientId = settingsStore.googleClientId || '889806958266-8dqi4vgh5of26927chk7vkcibc95emrt.apps.googleusercontent.com'
+
+    return new Promise((resolve) => {
+      const handleGsiCallback = async (response) => {
+        if (response && response.credential) {
+          const result = await loginWithGoogle(response.credential, options)
+          resolve(result)
+        } else {
+          resolve({ success: false, message: 'Google tidak mengembalikan credential login.' })
+        }
+      }
+
+      if (typeof window === 'undefined') {
+        resolve({ success: false, message: 'Environment browser tidak terdeteksi.' })
+        return
+      }
+
+      const launchGsi = () => {
+        if (window.google?.accounts?.id) {
+          try {
+            window.google.accounts.id.initialize({
+              client_id: clientId,
+              callback: handleGsiCallback,
+              auto_select: false,
+              cancel_on_tap_outside: true
+            })
+
+            window.google.accounts.id.prompt((notification) => {
+              if (notification.isNotDisplayed()) {
+                const reason = notification.getNotDisplayedReason()
+                console.warn('[GSI] Prompt not displayed:', reason)
+                resolve({ 
+                  success: false, 
+                  needsOriginWhitelist: true,
+                  origin: window.location.origin,
+                  message: `Origin ${window.location.origin} belum didaftarkan di Authorized JavaScript origins Google Cloud Console (Client ID: ${clientId}).` 
+                })
+              } else if (notification.isSkippedMoment()) {
+                resolve({ success: false, message: 'Login Google dibatalkan oleh pengguna.' })
+              }
+            })
+          } catch (e) {
+            resolve({ success: false, message: `Inisialisasi Google Auth gagal: ${e.message}` })
+          }
+        } else {
+          resolve({ success: false, message: 'Library Google Sign-In belum siap.' })
+        }
+      }
+
+      if (window.google?.accounts?.id) {
+        launchGsi()
+      } else {
+        const scriptId = 'google-gsi-client'
+        let script = document.getElementById(scriptId)
+        if (!script) {
+          script = document.createElement('script')
+          script.id = scriptId
+          script.src = 'https://accounts.google.com/gsi/client'
+          script.async = true
+          script.defer = true
+          script.onload = launchGsi
+          script.onerror = () => resolve({ success: false, message: 'Gagal mengunduh script Google Sign-In.' })
+          document.head.appendChild(script)
+        } else {
+          script.onload = launchGsi
+        }
+      }
+    })
   }
 
   function loginAs(type) {

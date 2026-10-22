@@ -482,55 +482,7 @@
                   </div>
                 </div>
 
-                <!-- Quick Switch Account Card (1-Klik Ganti Akun) -->
-                <div class="p-2 bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl text-white shadow-sm space-y-1.5">
-                  <div class="px-1 text-[10px] font-mono font-bold tracking-wider text-slate-400 uppercase flex items-center justify-between">
-                    <span>Peralihan Akun Cepat</span>
-                    <span class="text-[9px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.2 rounded border border-emerald-500/30">1-Klik</span>
-                  </div>
-                  
-                  <!-- Option 1: Master Admin -->
-                  <button 
-                    @click="authStore.switchToAccount('master'); isProfileMenuOpen = false"
-                    type="button"
-                    class="w-full text-left p-2 rounded-lg transition-all flex items-center justify-between gap-2 border cursor-pointer"
-                    :class="(authStore.user?.email === 'admin@cakue.id') 
-                      ? 'bg-indigo-600/30 border-indigo-500 text-white font-bold' 
-                      : 'bg-white/5 border-white/10 hover:bg-white/10 text-slate-200'"
-                  >
-                    <div class="flex items-center gap-2 min-w-0">
-                      <div class="w-6 h-6 rounded-md bg-indigo-500/20 border border-indigo-400/40 flex items-center justify-center shrink-0">
-                        <span class="text-xs">👑</span>
-                      </div>
-                      <div class="min-w-0">
-                        <div class="text-xs font-bold truncate">Master Administrator</div>
-                        <div class="text-[10px] text-slate-400">Root Super Admin (Data Bersih Rp 0)</div>
-                      </div>
-                    </div>
-                    <span v-if="authStore.user?.email === 'admin@cakue.id'" class="text-[10px] bg-indigo-500 text-white font-extrabold px-1.5 py-0.5 rounded shadow-xs">Aktif</span>
-                  </button>
 
-                  <!-- Option 2: Dummy Budi Santoso -->
-                  <button 
-                    @click="authStore.switchToAccount('budi'); isProfileMenuOpen = false"
-                    type="button"
-                    class="w-full text-left p-2 rounded-lg transition-all flex items-center justify-between gap-2 border cursor-pointer"
-                    :class="(authStore.user?.email === 'budi.santoso@cakue.id' || authStore.user?.email?.includes('budi')) 
-                      ? 'bg-purple-600/30 border-purple-500 text-white font-bold' 
-                      : 'bg-white/5 border-white/10 hover:bg-white/10 text-slate-200'"
-                  >
-                    <div class="flex items-center gap-2 min-w-0">
-                      <div class="w-6 h-6 rounded-md bg-purple-500/20 border border-purple-400/40 flex items-center justify-center shrink-0">
-                        <span class="text-xs">👤</span>
-                      </div>
-                      <div class="min-w-0">
-                        <div class="text-xs font-bold truncate">Budi Santoso</div>
-                        <div class="text-[10px] text-slate-400">Mitra Owner Sub-Tenant (Sampel Data)</div>
-                      </div>
-                    </div>
-                    <span v-if="authStore.user?.email === 'budi.santoso@cakue.id' || authStore.user?.email?.includes('budi')" class="text-[10px] bg-purple-400 text-purple-950 font-extrabold px-1.5 py-0.5 rounded shadow-xs">Aktif</span>
-                  </button>
-                </div>
 
                 <!-- Menu 1: Profil & Keamanan Pengguna (Semua Role) -->
                 <button 
@@ -568,39 +520,6 @@
                   <Icon name="sparkles" custom-class="w-4 h-4 text-emerald-600" />
                   <span>AI R&D Business Advisor</span>
                 </button>
-
-                <!-- Seksi Simulasi Hak Akses (RBAC Dev Tools) -->
-                <div class="pt-2 border-t border-slate-100 space-y-1.5">
-                  <div class="px-2 pb-0.5 flex items-center justify-between text-[10px] font-mono font-extrabold text-slate-400 uppercase tracking-wider">
-                    <span>Simulasi Hak Akses</span>
-                    <span class="bg-purple-100 text-purple-800 px-1.5 py-0.5 rounded font-bold text-[9px]">RBAC Mode</span>
-                  </div>
-                  <div class="grid grid-cols-1 gap-1">
-                    <button 
-                      v-for="r in Object.values(ROLES)" 
-                      :key="r.id"
-                      @click="handleRoleChange(r.id)"
-                      type="button"
-                      :class="[
-                        'w-full flex items-center justify-between px-3 py-2 rounded-xl text-left text-xs transition-all cursor-pointer font-bold',
-                        authStore.activeBusinessRole === r.id 
-                          ? 'bg-slate-900 text-white shadow-xs' 
-                          : 'text-slate-700 hover:bg-slate-100'
-                      ]"
-                    >
-                      <div class="flex items-center gap-2">
-                        <Icon :name="r.id === 'owner' ? 'building' : r.id === 'cashier' ? 'store' : r.id === 'warehouse' ? 'box' : 'users'" custom-class="w-3.5 h-3.5" />
-                        <div>
-                          <div>{{ r.title }}</div>
-                          <div class="text-[10px] font-normal" :class="authStore.activeBusinessRole === r.id ? 'text-slate-300' : 'text-slate-400'">
-                            {{ r.id === 'owner' ? 'Semua Akses' : r.id === 'cashier' ? 'Kasir POS Saja' : r.id === 'warehouse' ? 'Inventaris Saja' : 'Kasir + Stok + KPI' }}
-                          </div>
-                        </div>
-                      </div>
-                      <Icon v-if="authStore.activeBusinessRole === r.id" name="check" custom-class="w-4 h-4 text-emerald-400 shrink-0" />
-                    </button>
-                  </div>
-                </div>
 
                 <div class="border-t border-slate-100 my-1"></div>
 
@@ -675,32 +594,7 @@
           </button>
         </div>
 
-        <!-- Demo Budi Mode Notice Banner (Sub-Tenant) -->
-        <div 
-          v-if="!authStore.isSupervising && (authStore.user?.email === 'budi.santoso@cakue.id' || authStore.user?.email?.includes('budi'))"
-          class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 sm:px-4 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-300 rounded-2xl text-purple-950 shadow-xs"
-        >
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
-              👤
-            </div>
-            <div>
-              <div class="font-extrabold text-xs sm:text-sm text-purple-900 flex items-center gap-2">
-                <span>Mode Sesi: Akun Mitra Owner (Budi Santoso - CV Cakue Nusantara)</span>
-                <span class="text-[10px] font-mono px-2 py-0.5 rounded-full font-bold bg-purple-200 text-purple-900 border border-purple-300">Sub-Tenant</span>
-              </div>
-              <p class="text-[11px] text-purple-700 mt-0.5">Sesi ini mengoperasikan data usaha mitra. Untuk mengakses otoritas Super Admin platform (6 Cabang Jogja & Kelola Owner), gunakan Master Admin.</p>
-            </div>
-          </div>
-          <button 
-            @click="authStore.switchToAccount('master')"
-            type="button"
-            class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition-all shadow-xs flex items-center gap-2 shrink-0 cursor-pointer"
-          >
-            <span>👑 Beralih ke Master Admin</span>
-            <span>➔</span>
-          </button>
-        </div>
+
 
         <!-- Restrictive Role Notice Banner (Tampil saat bukan Owner) -->
         <div 
@@ -2072,16 +1966,6 @@ function toggleSidebar() {
 
 function toggleMobileSidebar() {
   isMobileSidebarOpen.value = !isMobileSidebarOpen.value
-}
-
-// Handler Ganti Peran Simulasi RBAC
-function handleRoleChange(roleId) {
-  authStore.setBusinessRole(roleId)
-  isProfileMenuOpen.value = false
-  const roleConfig = authStore.currentRoleConfig
-  if (!roleConfig.allowedModules.includes(activeTab.value)) {
-    activeTab.value = roleConfig.defaultModule
-  }
 }
 
 // Pintasan Keyboard (Cmd+B / Ctrl+B) untuk Buka-Tutup Sidebar

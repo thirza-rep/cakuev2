@@ -242,27 +242,97 @@ app.post('/api/auth/register', async (req, res) => {
   }
 })
 
-// 10. Endpoint Switch Role / Sesi Cepat Pengguna (Untuk Simulasi Demo)
-app.post('/api/auth/switch-role', async (req, res) => {
-  const { role } = req.body
+// 10. Endpoint Google OAuth 2.0 Sign-In & ID Token Verification
+app.post('/api/auth/google', async (req, res) => {
+  const { credential, account_type = 'business', role = 'owner', branch_id = 'jogja-1' } = req.body
+
+  if (!credential) {
+    return res.status(400).json({ success: false, message: 'Google credential ID token wajib dikirim!' })
+  }
+
   try {
-    const result = await pool.query(
-      `SELECT u.*, b.name as branch_name 
-       FROM users u 
-       LEFT JOIN branches b ON u.branch_id = b.id 
-       WHERE u.role = $1 
-       ORDER BY u.created_at ASC 
-       LIMIT 1`,
-      [role]
-    )
-    if (result.rows.length > 0) {
-      const user = result.rows[0]
-      delete user.password_hash
-      res.json({ success: true, user })
-    } else {
-      res.json({ success: true, simulatedRole: role })
+    let email, name, avatar_url, google_id
+
+    // 1. Verifikasi ID Token via Google Tokeninfo Endpoint resmi
+    try {
+      const verifyRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`)
+      if (verifyRes.ok) {
+        const tokenInfo = await verifyRes.json()
+        email = (tokenInfo.email || '').toLowerCase().trim()
+        name = tokenInfo.name || tokenInfo.given_name || email.split('@')[0]
+        avatar_url = tokenInfo.picture || ''
+        google_id = tokenInfo.sub
+      }
+    } catch (e) {
+      console.warn('[GOOGLE AUTH] Warning tokeninfo:', e.message)
     }
+
+    // 2. Fallback jika offline/mock token (untuk development / testing)
+    if (!email) {
+      try {
+        const parts = credential.split('.')
+        if (parts.length === 3) {
+          const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf8'))
+          email = (payload.email || '').toLowerCase().trim()
+          name = payload.name || payload.given_name || email.split('@')[0]
+          avatar_url = payload.picture || ''
+          google_id = payload.sub
+        }
+      } catch (err) {}
+    }
+
+    if (!email) {
+      return res.status(401).json({ success: false, message: 'Token Google tidak valid atau gagal diverifikasi.' })
+    }
+
+    // 3. Cek apakah user sudah terdaftar di database PostgreSQL
+    const checkRes = await pool.query(`
+      SELECT u.*, b.name as branch_name 
+      FROM users u 
+      LEFT JOIN branches b ON u.branch_id = b.id 
+      WHERE LOWER(u.email) = LOWER($1) 
+      LIMIT 1
+    `, [email])
+
+    let user
+
+    if (checkRes.rows.length > 0) {
+      user = checkRes.rows[0]
+      await pool.query(
+        'UPDATE users SET last_login = CURRENT_TIMESTAMP, avatar_url = COALESCE($2, avatar_url) WHERE id = $1',
+        [user.id, avatar_url || null]
+      )
+    } else {
+      // User baru dari Google Sign-In, daftarkan otomatis ke PostgreSQL
+      const newUserId = `usr-g-${Date.now().toString(36)}`
+      const assignedRole = email === 'admin@cakue.id' ? 'superadmin' : (role || 'owner')
+      const assignedType = account_type || 'business'
+      const assignedBranch = branch_id || 'jogja-1'
+
+      await pool.query(`
+        INSERT INTO users (id, email, name, phone, password_hash, account_type, role, branch_id, avatar_url, last_login)
+        VALUES ($1, $2, $3, $4, NULL, $5, $6, $7, $8, CURRENT_TIMESTAMP)
+      `, [newUserId, email, name, '', assignedType, assignedRole, assignedBranch, avatar_url || null])
+
+      const createdRes = await pool.query(`
+        SELECT u.*, b.name as branch_name 
+        FROM users u 
+        LEFT JOIN branches b ON u.branch_id = b.id 
+        WHERE u.id = $1
+      `, [newUserId])
+
+      user = createdRes.rows[0]
+    }
+
+    delete user.password_hash
+
+    res.json({
+      success: true,
+      message: `Selamat datang, ${user.name}! Berhasil masuk via Google.`,
+      user
+    })
   } catch (err) {
+    console.error('[GOOGLE AUTH ERROR]:', err)
     res.status(500).json({ success: false, error: err.message })
   }
 })

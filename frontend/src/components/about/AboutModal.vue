@@ -151,7 +151,7 @@
               <li><strong>Kasir POS Toko:</strong> Pilih produk atau ketik barcode, tentukan diskon jika ada, dan proses transaksi pembayaran tunai/transfer.</li>
               <li><strong>Kirim Struk WhatsApp:</strong> Pada jendela struk, klik "Kirim via WhatsApp" untuk mengirim bukti transaksi digital ke HP pelanggan secara otomatis.</li>
               <li><strong>Multi-Cabang & Surat Jalan:</strong> Lakukan mutasi stok dari Gudang Pusat ke Cabang Toko. Stok in-transit tercatat rapi sampai dikonfirmasi sampai.</li>
-              <li><strong>Simulasi Hak Akses (RBAC):</strong> Di pojok kanan atas, Anda dapat beralih peran antara Owner, Manajer, Kasir, atau Staff Gudang untuk menguji izin menu.</li>
+              <li><strong>Manajemen Hak Akses (RBAC):</strong> Hak akses menu dibatasi secara presisi berdasarkan peran pengguna terdaftar (Owner, Manajer Cabang, Kasir POS, dan Staff Gudang Distribusi).</li>
             </ul>
           </div>
         </div>

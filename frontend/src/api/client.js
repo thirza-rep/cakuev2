@@ -14,8 +14,8 @@ export function getServerUrl() {
   if (typeof window !== 'undefined' && window.location && window.location.hostname) {
     const host = window.location.hostname
     if (host !== 'localhost' && host !== '127.0.0.1' && !host.startsWith('192.168.') && !host.startsWith('100.')) {
-      // Misal via domain https://mini.codevits.site
-      return `${window.location.origin}/api`
+      // Misal via domain publik Cloudflare Tunnel (https://mini.codevits.site)
+      return window.location.origin
     }
     if (host.startsWith('192.168.') || host.startsWith('100.')) {
       return `http://${host}:3001`
@@ -38,8 +38,9 @@ export function setServerUrl(url) {
 
 export async function checkServerHealth() {
   const base = getServerUrl()
+  const healthUrl = base.endsWith('/api') ? `${base}/health` : `${base}/api/health`
   try {
-    const res = await fetch(`${base}/api/health`, { method: 'GET', signal: AbortSignal.timeout(3000) })
+    const res = await fetch(healthUrl, { method: 'GET', signal: AbortSignal.timeout(3000) })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const data = await res.json()
     return { ok: true, data, serverUrl: base }
@@ -62,8 +63,11 @@ export async function checkServerHealth() {
 }
 
 export async function apiFetch(path, options = {}) {
-  const base = getServerUrl()
-  const cleanPath = path.startsWith('/') ? path : `/${path}`
+  let base = getServerUrl()
+  let cleanPath = path.startsWith('/') ? path : `/${path}`
+  if (base.endsWith('/api') && cleanPath.startsWith('/api/')) {
+    cleanPath = cleanPath.substring(4)
+  }
   const url = `${base}${cleanPath}`
 
   const headers = {

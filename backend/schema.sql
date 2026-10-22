@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS users (
     phone VARCHAR(30),
     password_hash VARCHAR(255),
     account_type VARCHAR(20) NOT NULL CHECK (account_type IN ('personal', 'business')),
-    role VARCHAR(30) NOT NULL CHECK (role IN ('owner', 'manager', 'cashier', 'warehouse', 'personal')),
+    role VARCHAR(30) NOT NULL CHECK (role IN ('superadmin', 'owner', 'manager', 'cashier', 'warehouse', 'personal')),
     branch_id VARCHAR(50) REFERENCES branches(id),
     avatar_url TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -103,8 +103,8 @@ ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, type = EXCLUDED.type, addre
 
 -- Seed Data Pengguna untuk Hak Akses (RBAC)
 INSERT INTO users (id, email, name, phone, password_hash, account_type, role, branch_id) VALUES
-('usr-master-admin', 'admin@cakue.id', 'Master Administrator', '0812-0000-0001', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 'business', 'owner', 'jogja-1'),
-('usr-dummy-budi', 'budi.santoso@cakue.id', 'Budi Santoso (Dummy / Demo)', '0812-3456-7890', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'business', 'owner', 'jogja-1'),
+('usr-master-admin', 'admin@cakue.id', 'Master Administrator', '0812-0000-0001', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 'business', 'superadmin', 'jogja-1'),
+('usr-dummy-budi', 'budi.santoso@cakue.id', 'Budi Santoso', '0812-3456-7890', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'business', 'owner', 'jogja-1'),
 ('usr-owner', 'owner@cakuenusantara.com', 'Budi Santoso', '081234567890', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'business', 'owner', 'br-1'),
 ('usr-manager', 'manager.dago@cakuenusantara.com', 'Siti Rahmawati', '081298765432', NULL, 'business', 'manager', 'br-2'),
 ('usr-cashier', 'kasir.jaksel@cakuenusantara.com', 'Andi Pratama', '081311223344', NULL, 'business', 'cashier', 'br-1'),

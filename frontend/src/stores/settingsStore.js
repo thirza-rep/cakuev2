@@ -6,11 +6,13 @@ export const useSettingsStore = defineStore('settings', () => {
   const defaultAppName = 'CAKUE'
   const defaultAppSubtitle = 'Catatan Keuangan & Usaha'
   const defaultAppLogo = '/logo.png'
+  const defaultGoogleClientId = '889806958266-8dqi4vgh5of26927chk7vkcibc95emrt.apps.googleusercontent.com'
 
   const appName = ref(localStorage.getItem('cakue_app_name') || defaultAppName)
   const appSubtitle = ref(localStorage.getItem('cakue_app_subtitle') || defaultAppSubtitle)
   const savedLogo = localStorage.getItem('cakue_app_logo')
   const appLogo = ref((savedLogo && savedLogo.trim().length > 0) ? savedLogo : defaultAppLogo)
+  const googleClientId = ref(localStorage.getItem('cakue_google_client_id') || defaultGoogleClientId)
 
   // 2. Profil Pengguna & Keamanan
   const defaultUserName = 'Master Administrator'
@@ -32,7 +34,7 @@ export const useSettingsStore = defineStore('settings', () => {
   const defaultStaffList = [
     // Kantor Pusat & Gudang Hub Jogja
     { id: 'usr-1', name: 'Master Administrator', email: 'admin@cakue.id', phone: '0812-0000-0001', role: 'owner', branch: 'Semua Cabang (Kantor Pusat Jogja)', active: true, pin: '123456', joinedAt: '2026-10-21' },
-    { id: 'usr-demo-budi', name: 'Budi Santoso (Dummy / Demo)', email: 'budi.santoso@cakue.id', phone: '081234567890', role: 'owner', branch: 'Cabang 1 - Malioboro', active: true, pin: '123456', joinedAt: '2026-10-14' },
+    { id: 'usr-demo-budi', name: 'Budi Santoso', email: 'budi.santoso@cakue.id', phone: '081234567890', role: 'owner', branch: 'Cabang 1 - Malioboro', active: true, pin: '123456', joinedAt: '2026-10-14' },
     { id: 'usr-wh-jog', name: 'Hendra Wijaya', email: 'hendra.gudang@cakue.id', phone: '0811-2233-4455', role: 'warehouse', branch: 'Gudang Pusat Jogja (Hub Distribusi)', active: true, pin: '998877', joinedAt: '2026-10-21' },
     
     // Cabang 1 - Malioboro
@@ -288,6 +290,13 @@ export const useSettingsStore = defineStore('settings', () => {
     receiptSettings.value = { ...defaultReceiptSettings }
     financialSettings.value = { ...defaultFinancialSettings }
     whatsappSettings.value = { ...defaultWhatsappSettings }
+    googleClientId.value = defaultGoogleClientId
+    localStorage.setItem('cakue_google_client_id', defaultGoogleClientId)
+  }
+
+  function setGoogleClientId(id) {
+    googleClientId.value = id ? id.trim() : defaultGoogleClientId
+    localStorage.setItem('cakue_google_client_id', googleClientId.value)
   }
 
   return {
@@ -295,6 +304,8 @@ export const useSettingsStore = defineStore('settings', () => {
     appName,
     appSubtitle,
     appLogo,
+    googleClientId,
+    setGoogleClientId,
     userName,
     userAvatar,
     userEmail,
