@@ -860,6 +860,10 @@ const copiedOriginKey = ref('')
 
 const authorizedOriginsList = [
   {
+    url: 'https://cakue.codevits.site',
+    description: 'Domain Publik Resmi CAKUE (Cloudflare Tunnel HTTPS)'
+  },
+  {
     url: 'http://192.168.1.13:5173',
     description: 'Server Lokal / Akses LAN Rumah (Port 5173)'
   },
@@ -869,7 +873,7 @@ const authorizedOriginsList = [
   },
   {
     url: 'https://mini.codevits.site',
-    description: 'Domain Produksi Publik Cloudflare Tunnel'
+    description: 'Akses Portal CasaOS'
   }
 ]
 
