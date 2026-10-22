@@ -6,13 +6,21 @@ export const useSettingsStore = defineStore('settings', () => {
   const defaultAppName = 'CAKUE'
   const defaultAppSubtitle = 'Catatan Keuangan & Usaha'
   const defaultAppLogo = '/logo.png'
-  const defaultGoogleClientId = '889806958266-8dqi4vgh5of26927chk7vkcibc95emrt.apps.googleusercontent.com'
+  const defaultGoogleClientId = '889806958266-7vki80et2obrnsp8ke79c24fd32ur99m.apps.googleusercontent.com'
 
   const appName = ref(localStorage.getItem('cakue_app_name') || defaultAppName)
   const appSubtitle = ref(localStorage.getItem('cakue_app_subtitle') || defaultAppSubtitle)
   const savedLogo = localStorage.getItem('cakue_app_logo')
   const appLogo = ref((savedLogo && savedLogo.trim().length > 0) ? savedLogo : defaultAppLogo)
-  const googleClientId = ref(localStorage.getItem('cakue_google_client_id') || defaultGoogleClientId)
+  
+  const savedGoogleClientId = localStorage.getItem('cakue_google_client_id')
+  const activeClientId = (!savedGoogleClientId || savedGoogleClientId.includes('8dqi4vgh5of26927chk7vkcibc95emrt'))
+    ? defaultGoogleClientId
+    : savedGoogleClientId
+  const googleClientId = ref(activeClientId)
+  if (savedGoogleClientId?.includes('8dqi4vgh5of26927chk7vkcibc95emrt')) {
+    localStorage.setItem('cakue_google_client_id', defaultGoogleClientId)
+  }
 
   // 2. Profil Pengguna & Keamanan
   const defaultUserName = 'Master Administrator'

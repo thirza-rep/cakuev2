@@ -727,7 +727,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     // Jika dipanggil dari tombol tanpa token: inisialisasi GSI dan panggil prompt
     const settingsStore = useSettingsStore()
-    const clientId = settingsStore.googleClientId || '889806958266-8dqi4vgh5of26927chk7vkcibc95emrt.apps.googleusercontent.com'
+    const clientId = settingsStore.googleClientId || '889806958266-7vki80et2obrnsp8ke79c24fd32ur99m.apps.googleusercontent.com'
 
     return new Promise((resolve) => {
       const handleGsiCallback = async (response) => {
