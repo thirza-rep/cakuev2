@@ -378,7 +378,7 @@
             </div>
             <div>
               <div class="font-extrabold text-xs sm:text-sm text-blue-950">Pindah Dana Antar Rekening</div>
-              <p class="text-[11px] text-blue-800">Tarik tunai, isi e-wallet, atau mutasi internal bebas biaya</p>
+              <p class="text-[11px] text-blue-800">Tarik tunai, isi e-wallet, atau mutasi internal instan</p>
             </div>
           </div>
 

@@ -116,7 +116,7 @@ export const useSettingsStore = defineStore('settings', () => {
   const savedFinancial = localStorage.getItem('cakue_financial_settings')
   const financialSettings = ref(savedFinancial ? JSON.parse(savedFinancial) : defaultFinancialSettings)
 
-  // 6. Notifikasi Otomatis WhatsApp (Baileys WA Gateway $0 Cost)
+  // 6. Notifikasi Otomatis WhatsApp (Baileys WA Gateway)
   const defaultWhatsappSettings = {
     autoSendReceipt: true,
     ownerPhoneAlert: '081234567890',

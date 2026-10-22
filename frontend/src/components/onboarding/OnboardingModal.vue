@@ -90,7 +90,7 @@
           </div>
         </div>
 
-        <!-- Slide 3: Struk WhatsApp $0 Cost & AI Finansial -->
+        <!-- Slide 3: Struk WhatsApp & AI Finansial -->
         <div v-if="currentSlide === 2" class="space-y-5 animate-fade-in">
           <div class="flex justify-center">
             <div class="w-full max-w-sm p-4 bg-emerald-50/70 border border-emerald-200/80 rounded-2xl space-y-2.5 shadow-xs">

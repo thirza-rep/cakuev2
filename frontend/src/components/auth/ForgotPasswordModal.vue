@@ -12,7 +12,7 @@
       </div>
 
       <p class="text-xs text-slate-600 leading-relaxed">
-        Masukkan alamat email terdaftar Anda. Tautan pemulihan kata sandi akan otomatis dikirimkan ke kotak masuk Gmail Anda melalui layanan <strong>Gmail SMTP (Nodemailer 100% Gratis)</strong>.
+        Masukkan alamat email terdaftar Anda. Tautan pemulihan kata sandi akan otomatis dikirimkan ke kotak masuk Gmail Anda melalui layanan <strong>Gmail SMTP Resmi</strong>.
       </p>
 
       <div class="space-y-3">
