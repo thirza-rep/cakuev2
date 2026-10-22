@@ -116,13 +116,13 @@
 
           <div class="space-y-2 max-w-md mx-auto">
             <span class="text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-teal-50 text-teal-800 border border-teal-200">
-              Bebas Biaya Langganan ($0 Cost)
+              Otomasi Ritel & Kasir POS
             </span>
             <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
               Kasir POS & Struk WhatsApp
             </h2>
             <p class="text-xs sm:text-sm text-slate-600 leading-relaxed pt-1">
-              Catat penjualan ritel secara cepat, dan kirim bukti struk langsung ke nomor WhatsApp pembeli tanpa biaya langganan bulanan.
+              Catat penjualan ritel secara cepat, dan kirim bukti struk langsung ke nomor WhatsApp pembeli secara instan.
             </p>
           </div>
 

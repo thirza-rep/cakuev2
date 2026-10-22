@@ -98,18 +98,18 @@
                 <div class="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center">
                   <Icon name="sparkles" custom-class="w-4 h-4" />
                 </div>
-                <span>Struk WhatsApp $0 Cost & AI Copilot</span>
+                <span>Struk WhatsApp & AI Copilot</span>
               </div>
               <p class="text-[11px] text-emerald-900/90 leading-relaxed">
-                Struk kasir dikirim otomatis ke nomor pembeli via Baileys WhatsApp Gateway lokal tanpa biaya per pesan. Asisten AI membaca data mutasi untuk mendeteksi stok tipis dan analisis margin laba kotor.
+                Struk kasir dikirim otomatis ke nomor pembeli via Baileys WhatsApp Gateway lokal secara instan. Asisten AI membaca data mutasi untuk mendeteksi stok tipis dan analisis margin laba kotor.
               </p>
             </div>
           </div>
 
           <div class="text-center space-y-2">
-            <h3 class="text-lg sm:text-xl font-black text-slate-900">Kecerdasan Buatan & 100% Bebas Biaya</h3>
+            <h3 class="text-lg sm:text-xl font-black text-slate-900">Kecerdasan Buatan & Otomasi Finansial</h3>
             <p class="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">
-              Seluruh sistem berjalan di server lokal Anda sendiri (PostgreSQL 16 @ CasaOS) dengan integritas data aman tanpa biaya langganan bulanan.
+              Seluruh sistem berjalan di server lokal Anda sendiri (PostgreSQL 16 @ CasaOS) dengan integritas data aman secara mandiri dan efisien.
             </p>
           </div>
         </div>

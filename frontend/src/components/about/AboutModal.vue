@@ -119,9 +119,9 @@
           </div>
 
           <div class="space-y-2">
-            <h3 class="font-extrabold text-sm text-slate-900">Komitmen $0 Biaya Langganan</h3>
+            <h3 class="font-extrabold text-sm text-slate-900">Kedaulatan & Kontrol Mandiri</h3>
             <p class="text-slate-600">
-              CAKUE dirancang untuk berjalan mandiri di infrastruktur Anda sendiri tanpa kewajiban membayar biaya SaaS bulanan ataupun komisi penjualan.
+              CAKUE dirancang untuk berjalan mandiri di infrastruktur Anda sendiri dengan fleksibilitas penuh untuk kebutuhan operasional maupun komersial.
             </p>
           </div>
         </div>
@@ -178,7 +178,7 @@
 
             <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
               <div class="font-bold text-slate-900">WhatsApp Gateway</div>
-              <div class="text-xs text-slate-600">Baileys WebSocket WhatsApp Engine lokal (Port 3333) bebas biaya per pesan.</div>
+              <div class="text-xs text-slate-600">Baileys WebSocket WhatsApp Engine lokal (Port 3333) handal dan siap komersial.</div>
             </div>
           </div>
 
@@ -203,7 +203,7 @@
               <div class="text-xs text-slate-500 font-mono mt-0.5">Warga Sipil & Antigravity AI Pair Programmer</div>
             </div>
             <p class="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">
-              Aplikasi ini dikembangkan secara mandiri pada mesin Apple Silicon Mac dan Home Server CasaOS lokal untuk mewujudkan sistem keuangan yang berdaulat, bebas biaya sewa, dan mudah dipelihara.
+              Aplikasi ini dikembangkan secara mandiri pada mesin Apple Silicon Mac dan Home Server CasaOS lokal untuk mewujudkan sistem keuangan yang berdaulat, terintegrasi penuh, dan mudah dipelihara.
             </p>
           </div>
 

@@ -289,7 +289,7 @@
               Fase 3 / 3
             </span>
             <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-teal-50 text-teal-800 border border-teal-200 font-bold">
-              Gateway WA $0 Cost
+              WhatsApp Gateway
             </span>
           </div>
           <h3 class="text-base font-bold text-slate-900">Verifikasi Nomor WhatsApp</h3>
@@ -306,7 +306,7 @@
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2">
               <h4 class="text-xs font-bold text-slate-900">Enkripsi WhatsApp Gateway</h4>
-              <span class="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-teal-100 text-teal-800 border border-teal-200">$0 Biaya</span>
+              <span class="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-teal-100 text-teal-800 border border-teal-200">Aktif</span>
             </div>
             <p class="text-[11px] text-slate-500 leading-tight">Keamanan multi-faktor untuk pengiriman kode OTP dan proteksi aset kas Anda.</p>
           </div>

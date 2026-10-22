@@ -192,7 +192,7 @@ async function sendWhatsAppReceipt() {
 
     const resData = await response.json()
     if (resData.success) {
-      waStatusMessage.value = `✓ Struk berhasil terkirim ke WA ${props.order.phone} ($0 Cost)!`
+      waStatusMessage.value = `✓ Struk berhasil terkirim ke WA ${props.order.phone}!`
       setTimeout(() => { waStatusMessage.value = '' }, 4000)
       return
     } else {

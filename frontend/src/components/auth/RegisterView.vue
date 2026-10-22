@@ -131,7 +131,7 @@
           class="w-full py-2.5 px-4 bg-emerald-700 hover:bg-emerald-800 disabled:bg-emerald-400 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer flex items-center justify-center gap-2"
         >
           <span v-if="isLoading">Mendaftarkan ke Database...</span>
-          <span v-else>Daftar Akun Baru (100% Bebas Biaya)</span>
+          <span v-else>Daftar Akun Baru</span>
         </button>
       </form>
 

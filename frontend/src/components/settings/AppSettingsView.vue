@@ -602,7 +602,7 @@
             <div class="flex items-center justify-between pb-3 border-b border-slate-100">
               <div>
                 <h2 class="text-base sm:text-lg font-black text-slate-900">Notifikasi WhatsApp Gateway</h2>
-                <p class="text-xs text-slate-500">Integrasi Baileys WA Gateway lokal ($0 cost) untuk nota & alert stok kritis.</p>
+                <p class="text-xs text-slate-500">Integrasi Baileys WA Gateway lokal mandiri untuk nota & alert stok kritis.</p>
               </div>
               <span class="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
                 Gateway :3333

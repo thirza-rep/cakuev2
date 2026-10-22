@@ -18,7 +18,7 @@
           <img src="/logo.png" alt="CAKUE Logo" class="w-full h-full object-contain" />
         </div>
         <h2 class="text-2xl font-bold tracking-tight text-slate-900">Masuk ke CAKUE</h2>
-        <p class="text-xs text-slate-500">Catatan Keuangan Gue — Terpercaya, Bebas Biaya & Aman</p>
+        <p class="text-xs text-slate-500">Catatan Keuangan Gue — Terpercaya, Modern & Aman</p>
       </div>
 
       <!-- Google One-Click Login -->
@@ -101,7 +101,7 @@
         <div class="text-center pt-2 text-xs text-slate-500">
           Belum memiliki akun? 
           <button @click="$emit('switch-view', 'register')" class="text-emerald-700 font-bold hover:underline">
-            Daftar Akun Baru (Bebas Biaya)
+            Daftar Akun Baru
           </button>
         </div>
 
