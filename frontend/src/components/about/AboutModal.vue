@@ -14,7 +14,7 @@
           <div>
             <div class="flex items-center gap-2">
               <h2 class="text-base sm:text-lg font-black tracking-tight">Tentang Aplikasi CAKUE</h2>
-              <span class="text-[9px] font-mono px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-300 border border-emerald-300/30 font-bold uppercase">
+              <span class="text-xs font-bold px-2 py-0.5 rounded-md bg-white/20 text-white border border-white/25">
                 v2.4 Live
               </span>
             </div>

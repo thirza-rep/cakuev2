@@ -3,92 +3,83 @@
     <div class="relative w-full max-w-md bg-white border border-slate-200 rounded-3xl shadow-2xl p-6 sm:p-8 space-y-6 my-auto text-slate-900 transition-all">
       
       <!-- TOP HEADER: LOGO RESMI CAKUE DENGAN AKSEN BERSIH -->
-      <div class="text-center space-y-2">
-        <div class="relative inline-flex items-center justify-center">
-          <!-- Subtle Soft Halo Glow -->
-          <div class="absolute inset-0 rounded-2xl bg-emerald-400/20 blur-lg animate-pulse pointer-events-none"></div>
-          
-          <!-- Logo Badge Rapi & Jelas -->
-          <div class="relative w-16 h-16 rounded-2xl bg-white border border-slate-200/90 shadow-md shadow-emerald-700/10 flex items-center justify-center p-2.5">
-            <img src="/logo.png" alt="CAKUE Logo" class="w-full h-full object-contain" />
-          </div>
+      <div class="text-center space-y-2.5">
+        <div class="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-200 shadow-sm flex items-center justify-center p-2.5 mx-auto">
+          <img src="/logo.png" alt="CAKUE Logo" class="w-full h-full object-contain" />
         </div>
         
         <div class="space-y-1">
-          <div class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] font-mono font-bold uppercase tracking-wider">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
-            <span>Aktivasi Wajib Pengguna Baru</span>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-bold">
+            <Icon name="shield-check" custom-class="w-3.5 h-3.5 text-emerald-700" />
+            <span>Aktivasi Akun Pengguna</span>
           </div>
-          <h2 class="text-2xl font-black text-slate-900 tracking-tight">Aktivasi Akun CAKUE</h2>
+          <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Lengkapi Profil Akun</h2>
           <p class="text-xs text-slate-500 max-w-xs mx-auto leading-relaxed">
-            Selesaikan 3 fase aktivasi berikut untuk membuka akses penuh ke fitur transaksi portal Anda.
+            Selesaikan 3 langkah verifikasi di bawah ini untuk mengaktifkan seluruh fitur transaksi Anda.
           </p>
         </div>
       </div>
 
-      <!-- STEP PROGRESS INDICATOR PILLS (FASE 1 - FASE 2 - FASE 3) -->
-      <div class="flex items-center justify-between gap-1.5 p-1.5 bg-slate-50 rounded-2xl border border-slate-200">
-        <!-- Pill 1: Foto Profil -->
+      <!-- STEP PROGRESS INDICATOR (LANGKAH 1 - 2 - 3) -->
+      <div class="flex items-center justify-between gap-2 p-1.5 bg-slate-50 rounded-2xl border border-slate-200">
+        <!-- Step 1: Foto Profil -->
         <button 
           type="button"
           @click="currentStep = 1"
-          class="flex-1 py-2 px-1 rounded-xl text-center transition-all cursor-pointer flex flex-col items-center gap-0.5"
+          class="flex-1 py-2 px-1.5 rounded-xl text-center transition-all cursor-pointer flex flex-col items-center gap-0.5"
           :class="[
             currentStep === 1 
-              ? 'bg-white text-emerald-800 font-extrabold shadow-xs border border-slate-200/80 ring-1 ring-emerald-500/20' 
-              : avatarUrl ? 'text-emerald-700 hover:bg-slate-200/50 font-bold' : 'text-slate-400 hover:bg-slate-200/40 font-medium'
+              ? 'bg-white text-emerald-800 font-bold shadow-xs border border-slate-200 ring-1 ring-emerald-500/20' 
+              : avatarUrl ? 'text-emerald-700 hover:bg-slate-200/50 font-semibold' : 'text-slate-400 hover:bg-slate-200/40 font-medium'
           ]"
         >
-          <div class="flex items-center gap-1 text-[11px]">
-            <Icon v-if="avatarUrl && currentStep !== 1" name="check" custom-class="w-3 h-3 text-emerald-600" />
-            <span v-else class="w-3.5 h-3.5 rounded-full bg-slate-200 text-slate-700 text-[9px] flex items-center justify-center font-bold" :class="currentStep === 1 ? 'bg-emerald-700 text-white' : ''">1</span>
-            <span class="truncate">Foto</span>
+          <div class="flex items-center gap-1.5 text-xs">
+            <Icon v-if="avatarUrl && currentStep !== 1" name="check" custom-class="w-3.5 h-3.5 text-emerald-600" />
+            <span v-else class="w-4 h-4 rounded-md text-[10px] flex items-center justify-center font-bold" :class="currentStep === 1 ? 'bg-emerald-700 text-white' : 'bg-slate-200 text-slate-700'">1</span>
+            <span class="truncate">Foto Profil</span>
           </div>
-          <span class="text-[9px] text-slate-400 font-normal">Fase 1</span>
         </button>
 
         <span class="text-slate-300 text-xs font-bold">•</span>
 
-        <!-- Pill 2: Nama Lengkap -->
+        <!-- Step 2: Nama Lengkap -->
         <button 
           type="button"
           @click="goToStep(2)"
           :disabled="!avatarUrl"
-          class="flex-1 py-2 px-1 rounded-xl text-center transition-all cursor-pointer disabled:cursor-not-allowed flex flex-col items-center gap-0.5"
+          class="flex-1 py-2 px-1.5 rounded-xl text-center transition-all cursor-pointer disabled:cursor-not-allowed flex flex-col items-center gap-0.5"
           :class="[
             currentStep === 2 
-              ? 'bg-white text-emerald-800 font-extrabold shadow-xs border border-slate-200/80 ring-1 ring-emerald-500/20' 
-              : (name.trim().length >= 3) ? 'text-emerald-700 hover:bg-slate-200/50 font-bold' : 'text-slate-400 font-medium'
+              ? 'bg-white text-emerald-800 font-bold shadow-xs border border-slate-200 ring-1 ring-emerald-500/20' 
+              : (name.trim().length >= 3) ? 'text-emerald-700 hover:bg-slate-200/50 font-semibold' : 'text-slate-400 font-medium'
           ]"
         >
-          <div class="flex items-center gap-1 text-[11px]">
-            <Icon v-if="name.trim().length >= 3 && currentStep !== 2" name="check" custom-class="w-3 h-3 text-emerald-600" />
-            <span v-else class="w-3.5 h-3.5 rounded-full bg-slate-200 text-slate-700 text-[9px] flex items-center justify-center font-bold" :class="currentStep === 2 ? 'bg-emerald-700 text-white' : ''">2</span>
+          <div class="flex items-center gap-1.5 text-xs">
+            <Icon v-if="name.trim().length >= 3 && currentStep !== 2" name="check" custom-class="w-3.5 h-3.5 text-emerald-600" />
+            <span v-else class="w-4 h-4 rounded-md text-[10px] flex items-center justify-center font-bold" :class="currentStep === 2 ? 'bg-emerald-700 text-white' : 'bg-slate-200 text-slate-700'">2</span>
             <span class="truncate">Nama</span>
           </div>
-          <span class="text-[9px] text-slate-400 font-normal">Fase 2</span>
         </button>
 
         <span class="text-slate-300 text-xs font-bold">•</span>
 
-        <!-- Pill 3: OTP WhatsApp -->
+        <!-- Step 3: OTP WhatsApp -->
         <button 
           type="button"
           @click="goToStep(3)"
           :disabled="!avatarUrl || name.trim().length < 3"
-          class="flex-1 py-2 px-1 rounded-xl text-center transition-all cursor-pointer disabled:cursor-not-allowed flex flex-col items-center gap-0.5"
+          class="flex-1 py-2 px-1.5 rounded-xl text-center transition-all cursor-pointer disabled:cursor-not-allowed flex flex-col items-center gap-0.5"
           :class="[
             currentStep === 3 
-              ? 'bg-white text-emerald-800 font-extrabold shadow-xs border border-slate-200/80 ring-1 ring-emerald-500/20' 
-              : isOtpSuccess ? 'text-emerald-700 hover:bg-slate-200/50 font-bold' : 'text-slate-400 font-medium'
+              ? 'bg-white text-emerald-800 font-bold shadow-xs border border-slate-200 ring-1 ring-emerald-500/20' 
+              : isOtpSuccess ? 'text-emerald-700 hover:bg-slate-200/50 font-semibold' : 'text-slate-400 font-medium'
           ]"
         >
-          <div class="flex items-center gap-1 text-[11px]">
-            <Icon v-if="isOtpSuccess" name="check" custom-class="w-3 h-3 text-emerald-600" />
-            <span v-else class="w-3.5 h-3.5 rounded-full bg-slate-200 text-slate-700 text-[9px] flex items-center justify-center font-bold" :class="currentStep === 3 ? 'bg-emerald-700 text-white' : ''">3</span>
-            <span class="truncate">OTP WA</span>
+          <div class="flex items-center gap-1.5 text-xs">
+            <Icon v-if="isOtpSuccess" name="check" custom-class="w-3.5 h-3.5 text-emerald-600" />
+            <span v-else class="w-4 h-4 rounded-md text-[10px] flex items-center justify-center font-bold" :class="currentStep === 3 ? 'bg-emerald-700 text-white' : 'bg-slate-200 text-slate-700'">3</span>
+            <span class="truncate">WhatsApp OTP</span>
           </div>
-          <span class="text-[9px] text-slate-400 font-normal">Fase 3</span>
         </button>
       </div>
 
@@ -109,48 +100,47 @@
       <div v-if="currentStep === 1" class="space-y-5 animate-fade-in">
         <div class="text-left space-y-1 border-b border-slate-100 pb-3">
           <div class="flex items-center justify-between">
-            <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
-              Fase 1 / 3
+            <span class="text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-md">
+              Langkah 1 dari 3
             </span>
-            <span class="text-[11px] text-slate-400">Identitas Visual</span>
+            <span class="text-xs text-slate-500">Identitas Visual</span>
           </div>
           <h3 class="text-base font-bold text-slate-900">Tentukan Foto Profil Anda</h3>
           <p class="text-xs text-slate-500">
-            Pilih avatar representatif atau unggah foto asli untuk profil akun Anda.
+            Pilih avatar atau unggah foto asli untuk identitas akun resmi Anda.
           </p>
         </div>
 
-        <!-- Aksen Grafik: Avatar Studio Card -->
-        <div class="relative p-4 rounded-2xl bg-gradient-to-b from-emerald-50/50 to-slate-50 border border-slate-200/80 flex flex-col items-center justify-center space-y-3">
+        <!-- Aksen Grafik: Avatar Studio Card (Clean & Tegas) -->
+        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col items-center justify-center space-y-3">
           <div class="relative group">
-            <div class="absolute -inset-1 rounded-3xl bg-emerald-500/20 blur-md group-hover:bg-emerald-500/30 transition-all"></div>
             <img 
               :src="avatarUrl || defaultAvatar" 
               alt="Avatar Pengguna"
-              class="relative w-24 h-24 rounded-3xl object-cover border-4 border-white shadow-lg bg-white transition-transform group-hover:scale-105" 
+              class="w-24 h-24 rounded-2xl object-cover border-2 border-white shadow-md bg-white transition-transform group-hover:scale-102" 
             />
-            <label class="absolute -bottom-1 -right-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full p-2 shadow-md cursor-pointer transition-colors" title="Ganti Foto">
-              <Icon name="camera" custom-class="w-3.5 h-3.5" />
+            <label class="absolute -bottom-1 -right-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl p-2 shadow-md cursor-pointer transition-colors" title="Ganti Foto">
+              <Icon name="camera" custom-class="w-4 h-4" />
               <input type="file" accept="image/*" class="hidden" @change="handleFileUpload" />
             </label>
           </div>
-          <div class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-800 bg-white px-3 py-1 rounded-full border border-emerald-200 shadow-2xs">
-            <Icon name="check" custom-class="w-3 h-3 text-emerald-600" />
-            <span>Foto Profil Aktif</span>
+          <div class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-100/70 px-3 py-1 rounded-md border border-emerald-200">
+            <Icon name="check" custom-class="w-3.5 h-3.5 text-emerald-700" />
+            <span>Foto Profil Terpasang</span>
           </div>
         </div>
 
         <!-- Avatar Presets -->
         <div class="space-y-2 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-          <span class="text-[11px] font-bold text-slate-700 block text-left">Pilih Cepat Avatar:</span>
+          <span class="text-xs font-bold text-slate-700 block text-left">Pilih Cepat Avatar:</span>
           <div class="grid grid-cols-6 gap-2">
             <button 
               v-for="(av, idx) in avatarPresets" 
               :key="idx"
               type="button"
               @click="avatarUrl = av"
-              class="w-full aspect-square rounded-xl overflow-hidden border-2 transition-all cursor-pointer hover:scale-110 shadow-xs"
-              :class="avatarUrl === av ? 'border-emerald-600 ring-2 ring-emerald-500 shadow-md scale-105' : 'border-slate-200 opacity-70 hover:opacity-100'"
+              class="w-full aspect-square rounded-xl overflow-hidden border-2 transition-all cursor-pointer hover:scale-105 shadow-2xs"
+              :class="avatarUrl === av ? 'border-emerald-700 ring-2 ring-emerald-500/30 shadow-xs' : 'border-slate-200 opacity-80 hover:opacity-100'"
             >
               <img :src="av" alt="Preset" class="w-full h-full object-cover" />
             </button>
@@ -172,9 +162,9 @@
             type="button"
             @click="goToStep(2)"
             :disabled="!avatarUrl"
-            class="w-full py-3 px-4 bg-emerald-700 hover:bg-emerald-800 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+            class="w-full py-3 px-4 bg-emerald-700 hover:bg-emerald-800 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold text-xs sm:text-sm rounded-xl shadow-xs transition-all cursor-pointer flex items-center justify-center gap-2"
           >
-            <span>Lanjut ke Fase 2: Nama Lengkap</span>
+            <span>Lanjut ke Langkah 2: Nama Lengkap</span>
             <Icon name="chevron-right" custom-class="w-4 h-4 text-white" />
           </button>
         </div>
@@ -186,31 +176,29 @@
       <div v-else-if="currentStep === 2" class="space-y-5 animate-fade-in">
         <div class="text-left space-y-1 border-b border-slate-100 pb-3">
           <div class="flex items-center justify-between">
-            <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
-              Fase 2 / 3
+            <span class="text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-md">
+              Langkah 2 dari 3
             </span>
-            <span class="text-[11px] text-slate-400">Identitas Resmi</span>
+            <span class="text-xs text-slate-500">Identitas Resmi</span>
           </div>
           <h3 class="text-base font-bold text-slate-900">Konfirmasi Nama Lengkap</h3>
           <p class="text-xs text-slate-500">
-            Nama ini akan dicantumkan pada struk transaksi, laporan akuntansi, dan tanda tangan resmi.
+            Nama ini akan dicantumkan pada struk transaksi, laporan akuntansi, dan nota resmi.
           </p>
         </div>
 
-        <!-- Aksen Grafik: Sleek Live Member ID Card Preview -->
-        <div class="p-4 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 text-white shadow-lg relative overflow-hidden border border-slate-700/80">
-          <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-emerald-500/10 rounded-full blur-xl pointer-events-none"></div>
-          
-          <div class="flex items-center justify-between mb-3 border-b border-white/10 pb-2.5">
+        <!-- Aksen Grafik: Pratinjau Identitas Pengguna Resmi (Elegan & Tegas) -->
+        <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3 text-left">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
             <div class="flex items-center gap-2">
-              <div class="w-6 h-6 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center p-1">
+              <div class="w-6 h-6 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center p-1">
                 <img src="/logo.png" alt="CAKUE" class="w-full h-full object-contain" />
               </div>
-              <span class="text-[10px] font-mono tracking-widest uppercase font-bold text-emerald-400">CAKUE ID CARD</span>
+              <span class="text-xs font-bold text-slate-800">Pratinjau Identitas Akun</span>
             </div>
-            <span class="text-[9px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold flex items-center gap-1">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              TERVERIFIKASI
+            <span class="text-xs font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+              <Icon name="check" custom-class="w-3 h-3 text-emerald-600" />
+              <span>Terverifikasi</span>
             </span>
           </div>
           
@@ -218,14 +206,14 @@
             <img 
               :src="avatarUrl || defaultAvatar" 
               alt="Preview Avatar"
-              class="w-12 h-12 rounded-2xl object-cover border-2 border-emerald-400/60 shadow-md bg-white/10 shrink-0"
+              class="w-13 h-13 rounded-xl object-cover border border-slate-200 shadow-xs bg-slate-100 shrink-0"
             />
-            <div class="space-y-0.5 text-left min-w-0">
-              <div class="text-[10px] text-slate-400 font-medium">Pemilik Akun Resmi:</div>
-              <div class="text-sm font-black text-white truncate tracking-wide">
+            <div class="space-y-0.5 min-w-0 flex-1">
+              <div class="text-[11px] text-slate-400 font-medium">Nama Pemilik Akun:</div>
+              <div class="text-base font-bold text-slate-900 truncate">
                 {{ name.trim() || 'Nama Lengkap Anda' }}
               </div>
-              <div class="text-[10px] text-emerald-300 font-mono truncate">
+              <div class="text-xs text-slate-500 truncate font-medium">
                 {{ authStore.currentUser?.email || 'email@cakue.id' }}
               </div>
             </div>
@@ -271,9 +259,9 @@
             type="button"
             @click="goToStep(3)"
             :disabled="name.trim().length < 3"
-            class="flex-1 py-3 px-4 bg-emerald-700 hover:bg-emerald-800 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+            class="flex-1 py-3 px-4 bg-emerald-700 hover:bg-emerald-800 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold text-xs sm:text-sm rounded-xl shadow-xs transition-all cursor-pointer flex items-center justify-center gap-2"
           >
-            <span>Lanjut ke Fase 3: WhatsApp OTP</span>
+            <span>Lanjut ke Langkah 3: WhatsApp OTP</span>
             <Icon name="chevron-right" custom-class="w-4 h-4 text-white" />
           </button>
         </div>
@@ -285,30 +273,30 @@
       <div v-else-if="currentStep === 3" class="space-y-5 animate-fade-in">
         <div class="text-left space-y-1 border-b border-slate-100 pb-3">
           <div class="flex items-center justify-between">
-            <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
-              Fase 3 / 3
+            <span class="text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-md">
+              Langkah 3 dari 3
             </span>
-            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-teal-50 text-teal-800 border border-teal-200 font-bold">
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200">
               WhatsApp Gateway
             </span>
           </div>
           <h3 class="text-base font-bold text-slate-900">Verifikasi Nomor WhatsApp</h3>
           <p class="text-xs text-slate-500">
-            Nomor WhatsApp digunakan untuk autentikasi keamanan, alert transaksi, dan pengiriman nota struk.
+            Nomor WhatsApp digunakan untuk keamanan akun, alert transaksi, dan nota struk.
           </p>
         </div>
 
-        <!-- Aksen Grafik: WhatsApp Gateway Security Badge -->
-        <div class="p-3 bg-gradient-to-r from-emerald-50 via-teal-50 to-slate-50 border border-emerald-200/80 rounded-2xl flex items-center gap-3 text-left">
-          <div class="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+        <!-- Aksen Grafik: WhatsApp Gateway Security Badge (Clean & Tegas) -->
+        <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl flex items-center gap-3 text-left">
+          <div class="w-10 h-10 rounded-xl bg-emerald-700 text-white flex items-center justify-center shrink-0 shadow-xs">
             <Icon name="share" custom-class="w-5 h-5 text-white" />
           </div>
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2">
               <h4 class="text-xs font-bold text-slate-900">Enkripsi WhatsApp Gateway</h4>
-              <span class="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-teal-100 text-teal-800 border border-teal-200">Aktif</span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-200">Aktif</span>
             </div>
-            <p class="text-[11px] text-slate-500 leading-tight">Keamanan multi-faktor untuk pengiriman kode OTP dan proteksi aset kas Anda.</p>
+            <p class="text-[11px] text-slate-500 leading-tight">Pengiriman kode OTP multi-faktor untuk memverifikasi kepemilikan nomor resmi Anda.</p>
           </div>
         </div>
 
@@ -323,7 +311,7 @@
                 type="tel"
                 placeholder="812-3456-7890"
                 :disabled="isOtpSuccess"
-                class="w-full pl-16 pr-3 py-2.5 text-xs font-mono bg-white border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-emerald-600 disabled:bg-slate-100 disabled:text-slate-400 font-bold transition-all shadow-xs"
+                class="w-full pl-16 pr-3 py-2.5 text-xs bg-white border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-emerald-600 disabled:bg-slate-100 disabled:text-slate-400 font-bold transition-all shadow-xs"
               />
             </div>
 
@@ -355,13 +343,13 @@
               maxlength="6"
               placeholder="••••••"
               :disabled="isOtpSuccess"
-              class="w-full text-center tracking-[0.6em] font-mono text-xl font-black px-4 py-2.5 bg-white border-2 border-emerald-500/40 focus:border-emerald-600 rounded-xl text-slate-900 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 disabled:bg-emerald-50 disabled:text-emerald-800 transition-all shadow-xs"
+              class="w-full text-center tracking-[0.5em] font-bold text-xl px-4 py-2.5 bg-white border-2 border-emerald-600 focus:border-emerald-700 rounded-xl text-slate-900 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 disabled:bg-emerald-50 disabled:text-emerald-800 transition-all shadow-xs"
               @keyup.enter="handleVerifyAndActivate"
             />
 
             <div class="flex items-center justify-between text-[11px] text-slate-500 pt-0.5">
               <span>Periksa pesan masuk WhatsApp Anda.</span>
-              <span class="text-[10px] text-slate-400 font-mono">(Bypass testing: 777888)</span>
+              <span class="text-[10px] text-slate-400 font-medium">(Bypass testing: 777888)</span>
             </div>
           </div>
         </div>
@@ -381,7 +369,7 @@
             type="button"
             @click="handleVerifyAndActivate"
             :disabled="isVerifying || otpCode.length < 6 || isOtpSuccess"
-            class="flex-1 py-3 px-4 bg-emerald-700 hover:bg-emerald-800 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+            class="flex-1 py-3 px-4 bg-emerald-700 hover:bg-emerald-800 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold text-xs sm:text-sm rounded-xl shadow-xs transition-all cursor-pointer flex items-center justify-center gap-2"
           >
             <svg v-if="isVerifying" class="animate-spin w-4 h-4 text-white" viewBox="0 0 24 24" fill="none">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -397,12 +385,12 @@
       <!-- FASE 4: SUKSES AKTIVASI (ANIMASI CHECKMARK & PERAYAAN) -->
       <!-- ============================================================== -->
       <div v-else-if="currentStep === 4" class="py-6 space-y-4 text-center animate-fade-in">
-        <div class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto shadow-md animate-bounce">
+        <div class="w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center mx-auto shadow-xs">
           <Icon name="check" custom-class="w-8 h-8" stroke-width="3" />
         </div>
 
         <div class="space-y-1">
-          <h3 class="text-xl font-black text-slate-900 tracking-tight">Akun Berhasil Diaktivasi!</h3>
+          <h3 class="text-xl font-bold text-slate-900 tracking-tight">Akun Berhasil Diaktivasi!</h3>
           <p class="text-xs text-slate-600 max-w-xs mx-auto">
             Selamat datang di CAKUE! Seluruh fitur transaksi dan dashboard kini terbuka penuh untuk Anda.
           </p>

@@ -66,7 +66,7 @@
           <span 
             v-if="stockStore.stockTransfers.length"
             :class="[
-              'text-[10px] px-1.5 py-0.2 rounded-full font-mono font-black',
+              'text-[10px] px-1.5 py-0.2 rounded-md font-sans font-bold',
               activeSubTab === 'transfers' ? 'bg-emerald-400 text-slate-950' : 'bg-slate-200 text-slate-700'
             ]"
           >

@@ -67,7 +67,7 @@
         <!-- SLIDE 2: FITUR UTAMA 1 - DUA PORTAL TERPISAH -->
         <!-- ============================================== -->
         <div v-else-if="currentSlide === 1" class="my-auto space-y-5 animate-fade-in">
-          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold mx-auto">
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-slate-800 text-xs font-bold mx-auto">
             <img src="/logo.png" alt="CAKUE" class="w-4 h-4 object-contain" />
             <span>CAKUE</span>
           </div>
@@ -83,8 +83,8 @@
           </div>
 
           <div class="space-y-2 max-w-md mx-auto">
-            <span class="text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
-              Dua Dunia Finansial
+            <span class="inline-block text-xs font-bold px-3 py-1 rounded-lg bg-emerald-50 text-emerald-900 border border-emerald-200">
+              Dua Portal Finansial
             </span>
             <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
               Pemisahan Kas Mutlak
@@ -99,7 +99,7 @@
         <!-- SLIDE 3: FITUR UTAMA 2 - KASIR POS & STRUK WA -->
         <!-- ============================================== -->
         <div v-else-if="currentSlide === 2" class="my-auto space-y-5 animate-fade-in">
-          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold mx-auto">
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-slate-800 text-xs font-bold mx-auto">
             <img src="/logo.png" alt="CAKUE" class="w-4 h-4 object-contain" />
             <span>CAKUE</span>
           </div>
@@ -115,8 +115,8 @@
           </div>
 
           <div class="space-y-2 max-w-md mx-auto">
-            <span class="text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-teal-50 text-teal-800 border border-teal-200">
-              Otomasi Ritel & Kasir POS
+            <span class="inline-block text-xs font-bold px-3 py-1 rounded-lg bg-emerald-50 text-emerald-900 border border-emerald-200">
+              Kasir Ritel & Struk WhatsApp
             </span>
             <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
               Kasir POS & Struk WhatsApp

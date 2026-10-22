@@ -64,7 +64,7 @@
       <div class="px-5 py-3 border-b border-slate-800 flex items-center justify-between bg-slate-900/90">
         <div class="flex items-center gap-2">
           <span class="text-base font-bold text-white">Buku Besar Transaksi Keuangan</span>
-          <span class="text-[11px] font-mono text-slate-400 bg-slate-800 px-2 py-0.5 rounded">Editable Spreadsheet Mode</span>
+          <span class="text-xs font-semibold text-slate-300 bg-slate-800 border border-slate-700 px-2.5 py-0.5 rounded-md">Mode Spreadsheet</span>
         </div>
         <div class="text-xs text-slate-400 flex items-center gap-2">
           <span>💡 <em>Klik sel mana saja untuk mengedit langsung layaknya Microsoft Excel</em></span>
