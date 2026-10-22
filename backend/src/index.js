@@ -145,10 +145,13 @@ app.get('/api/users', async (req, res) => {
 })
 
 // 8. Otentikasi Nyata: Login
+// 8. Otentikasi Nyata: Login dengan Email atau Username + Password
 app.post('/api/auth/login', async (req, res) => {
-  const { email, password } = req.body
-  if (!email) {
-    return res.status(400).json({ success: false, message: 'Alamat email wajib diisi!' })
+  const { identifier, email, username, password } = req.body
+  const loginId = (identifier || email || username || '').trim()
+
+  if (!loginId) {
+    return res.status(400).json({ success: false, message: 'Alamat email atau username wajib diisi!' })
   }
 
   try {
@@ -156,14 +159,14 @@ app.post('/api/auth/login', async (req, res) => {
       SELECT u.*, b.name as branch_name 
       FROM users u 
       LEFT JOIN branches b ON u.branch_id = b.id 
-      WHERE LOWER(u.email) = LOWER($1) 
+      WHERE LOWER(u.email) = LOWER($1) OR LOWER(u.username) = LOWER($1)
       LIMIT 1
-    `, [email.trim()])
+    `, [loginId])
 
     if (result.rows.length === 0) {
       return res.status(404).json({ 
         success: false, 
-        message: 'Akun dengan email tersebut belum terdaftar di sistem CAKUE.' 
+        message: 'Akun dengan email atau username tersebut belum terdaftar di sistem CAKUE.' 
       })
     }
 
@@ -183,6 +186,7 @@ app.post('/api/auth/login', async (req, res) => {
     // Catat waktu login terakhir
     await pool.query('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1', [user.id])
     delete user.password_hash
+    delete user.otp_code
 
     res.json({
       success: true,
@@ -194,9 +198,9 @@ app.post('/api/auth/login', async (req, res) => {
   }
 })
 
-// 9. Otentikasi Nyata: Register Akun Baru
+// 9. Otentikasi Nyata: Register Akun Baru Manual
 app.post('/api/auth/register', async (req, res) => {
-  const { email, name, password, phone, account_type, role, branch_id } = req.body
+  const { email, name, username, password, phone, account_type, role, branch_id } = req.body
   if (!email || !name) {
     return res.status(400).json({ success: false, message: 'Nama lengkap dan email wajib diisi!' })
   }
@@ -216,6 +220,14 @@ app.post('/api/auth/register', async (req, res) => {
       })
     }
 
+    // Cek duplikasi username jika diisi
+    if (username && username.trim().length > 0) {
+      const uExist = await pool.query('SELECT id FROM users WHERE LOWER(username) = LOWER($1)', [username.trim()])
+      if (uExist.rows.length > 0) {
+        return res.status(400).json({ success: false, message: 'Username sudah digunakan. Silakan pilih username lain!' })
+      }
+    }
+
     // Validasi branch_id jika ada
     let validBranchId = branch_id || (accType === 'business' ? 'jogja-1' : null)
     if (validBranchId) {
@@ -226,10 +238,10 @@ app.post('/api/auth/register', async (req, res) => {
     }
 
     const insertResult = await pool.query(`
-      INSERT INTO users (id, email, name, phone, password_hash, account_type, role, branch_id)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      RETURNING id, email, name, phone, account_type, role, branch_id, created_at
-    `, [id, email.trim(), name.trim(), phone || null, passwordHash, accType, userRole, validBranchId])
+      INSERT INTO users (id, username, email, name, phone, password_hash, account_type, role, branch_id, is_profile_complete, phone_verified)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, FALSE, FALSE)
+      RETURNING id, username, email, name, phone, phone_verified, is_profile_complete, account_type, role, branch_id, created_at
+    `, [id, username ? username.trim() : null, email.trim(), name.trim(), phone || null, passwordHash, accType, userRole, validBranchId])
 
     const newUser = insertResult.rows[0]
     res.json({
@@ -267,7 +279,7 @@ app.post('/api/auth/google', async (req, res) => {
       console.warn('[GOOGLE AUTH] Warning tokeninfo:', e.message)
     }
 
-    // 2. Fallback jika offline/mock token (untuk development / testing)
+    // 2. Fallback parse JWT jika offline / mock
     if (!email) {
       try {
         const parts = credential.split('.')
@@ -294,45 +306,308 @@ app.post('/api/auth/google', async (req, res) => {
       LIMIT 1
     `, [email])
 
-    let user
-
     if (checkRes.rows.length > 0) {
-      user = checkRes.rows[0]
+      // User lama yang sudah punya akun lengkap
+      const user = checkRes.rows[0]
       await pool.query(
         'UPDATE users SET last_login = CURRENT_TIMESTAMP, avatar_url = COALESCE($2, avatar_url) WHERE id = $1',
         [user.id, avatar_url || null]
       )
-    } else {
-      // User baru dari Google Sign-In, daftarkan otomatis ke PostgreSQL
-      const newUserId = `usr-g-${Date.now().toString(36)}`
-      const assignedRole = email === 'admin@cakue.id' ? 'superadmin' : (role || 'owner')
-      const assignedType = account_type || 'business'
-      const assignedBranch = branch_id || 'jogja-1'
+      delete user.password_hash
+      delete user.otp_code
 
-      await pool.query(`
-        INSERT INTO users (id, email, name, phone, password_hash, account_type, role, branch_id, avatar_url, last_login)
-        VALUES ($1, $2, $3, $4, NULL, $5, $6, $7, $8, CURRENT_TIMESTAMP)
-      `, [newUserId, email, name, '', assignedType, assignedRole, assignedBranch, avatar_url || null])
-
-      const createdRes = await pool.query(`
-        SELECT u.*, b.name as branch_name 
-        FROM users u 
-        LEFT JOIN branches b ON u.branch_id = b.id 
-        WHERE u.id = $1
-      `, [newUserId])
-
-      user = createdRes.rows[0]
+      return res.json({
+        success: true,
+        is_new: false,
+        message: `Selamat datang kembali, ${user.name}!`,
+        user
+      })
     }
 
-    delete user.password_hash
-
-    res.json({
+    // User baru: kembalikan is_new = true agar frontend melanjutkan ke Setup Username & Password
+    return res.json({
       success: true,
-      message: `Selamat datang, ${user.name}! Berhasil masuk via Google.`,
-      user
+      is_new: true,
+      message: 'Autentikasi Google berhasil! Silakan tentukan username dan kata sandi Anda.',
+      google_data: {
+        email,
+        name,
+        avatar_url,
+        google_id
+      }
     })
   } catch (err) {
     console.error('[GOOGLE AUTH ERROR]:', err)
+    res.status(500).json({ success: false, error: err.message })
+  }
+})
+
+// 11. Endpoint Register Akun Baru dari Google Sign-In (Dengan Username & Password)
+app.post('/api/auth/register-google', async (req, res) => {
+  const { email, name, avatar_url, username, password, account_type = 'business', role = 'owner', branch_id = 'jogja-1' } = req.body
+
+  if (!email || !username || !password) {
+    return res.status(400).json({ success: false, message: 'Email, username, dan kata sandi wajib diisi!' })
+  }
+
+  const cleanUsername = username.trim().toLowerCase()
+  if (cleanUsername.length < 3) {
+    return res.status(400).json({ success: false, message: 'Username minimal 3 karakter!' })
+  }
+  if (!/^[a-zA-Z0-9_]+$/.test(cleanUsername)) {
+    return res.status(400).json({ success: false, message: 'Username hanya boleh berupa huruf, angka, dan underscore (_).' })
+  }
+
+  // Validasi password minimal 6 karakter kombinasi huruf dan angka
+  if (password.length < 6 || !/^(?=.*[A-Za-z])(?=.*\d)/.test(password)) {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'Kata sandi minimal 6 karakter dan wajib mengombinasikan huruf dan angka.' 
+    })
+  }
+
+  try {
+    // Cek duplikasi email
+    const emailExist = await pool.query('SELECT id FROM users WHERE LOWER(email) = LOWER($1)', [email.trim().toLowerCase()])
+    if (emailExist.rows.length > 0) {
+      return res.status(400).json({ success: false, message: 'Email ini sudah terdaftar sebelumnya. Silakan langsung login.' })
+    }
+
+    // Cek duplikasi username
+    const usernameExist = await pool.query('SELECT id FROM users WHERE LOWER(username) = LOWER($1)', [cleanUsername])
+    if (usernameExist.rows.length > 0) {
+      return res.status(400).json({ success: false, message: 'Username sudah digunakan oleh orang lain. Silakan pilih username lain.' })
+    }
+
+    const newUserId = `usr-g-${Date.now().toString(36)}`
+    const assignedRole = email === 'admin@cakue.id' ? 'superadmin' : (role || (account_type === 'personal' ? 'personal' : 'owner'))
+    const assignedType = account_type || 'business'
+    const assignedBranch = branch_id || 'jogja-1'
+    const passwordHash = crypto.createHash('sha256').update(password).digest('hex')
+
+    await pool.query(`
+      INSERT INTO users (id, username, email, name, phone, phone_verified, is_profile_complete, password_hash, account_type, role, branch_id, avatar_url, last_login)
+      VALUES ($1, $2, $3, $4, '', FALSE, FALSE, $5, $6, $7, $8, $9, CURRENT_TIMESTAMP)
+    `, [newUserId, cleanUsername, email.trim().toLowerCase(), (name || cleanUsername).trim(), passwordHash, assignedType, assignedRole, assignedBranch, avatar_url || null])
+
+    const createdRes = await pool.query(`
+      SELECT u.*, b.name as branch_name 
+      FROM users u 
+      LEFT JOIN branches b ON u.branch_id = b.id 
+      WHERE u.id = $1
+    `, [newUserId])
+
+    const user = createdRes.rows[0]
+    delete user.password_hash
+    delete user.otp_code
+
+    res.json({
+      success: true,
+      message: `Selamat datang di CAKUE, ${user.name}! Akun Anda berhasil dibuat.`,
+      user
+    })
+  } catch (err) {
+    console.error('[REGISTER GOOGLE ERROR]:', err)
+    res.status(500).json({ success: false, error: err.message })
+  }
+})
+
+// 12. Helper normalisasi nomor WhatsApp Indonesia
+function formatIndonesianPhone(raw) {
+  let p = (raw || '').replace(/[^0-9]/g, '')
+  if (p.startsWith('0')) {
+    p = '62' + p.substring(1)
+  } else if (!p.startsWith('62')) {
+    p = '62' + p
+  }
+  return p
+}
+
+// 13. Endpoint Kirim Kode OTP via WhatsApp Gateway
+app.post('/api/auth/send-otp', async (req, res) => {
+  const { user_id, phone } = req.body
+
+  if (!user_id || !phone) {
+    return res.status(400).json({ success: false, message: 'ID Pengguna dan Nomor WhatsApp wajib diisi.' })
+  }
+
+  const normalizedPhone = formatIndonesianPhone(phone)
+  if (normalizedPhone.length < 10 || normalizedPhone.length > 15) {
+    return res.status(400).json({ success: false, message: 'Format nomor WhatsApp tidak valid. Masukkan nomor yang benar (contoh: 081234567890).' })
+  }
+
+  try {
+    const userRes = await pool.query('SELECT * FROM users WHERE id = $1', [user_id])
+    if (userRes.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Pengguna tidak ditemukan.' })
+    }
+
+    const user = userRes.rows[0]
+
+    // Rate Limit: Minimal 60 detik antar permintaan OTP
+    if (user.otp_expires_at) {
+      const remainingSeconds = Math.ceil((new Date(user.otp_expires_at).getTime() - Date.now()) / 1000)
+      // Jika masih ada sisa waktu lebih dari 4 menit (berarti baru saja dikirim kurang dari 60 detik lalu)
+      if (remainingSeconds > 240) {
+        const waitTime = remainingSeconds - 240
+        return res.status(429).json({ 
+          success: false, 
+          message: `Mohon tunggu ${waitTime} detik lagi sebelum meminta kode OTP baru.` 
+        })
+      }
+    }
+
+    // Generate 6 digit angka acak
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString()
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000) // Berlaku 5 menit
+
+    await pool.query(
+      'UPDATE users SET phone = $1, otp_code = $2, otp_expires_at = $3 WHERE id = $4',
+      [normalizedPhone, otpCode, expiresAt, user_id]
+    )
+
+    // Kirim pesan OTP via WhatsApp Gateway internal (Baileys)
+    const waUrl = (process.env.WA_GATEWAY_URL || 'http://wa-gateway:3333') + '/api/send-message'
+    const messageText = `🔐 *KODE VERIFIKASI CAKUE: ${otpCode}*\n\nHalo *${user.name}*,\nGunakan kode verifikasi 6 digit di atas untuk mengaktifkan akun Anda di platform CAKUE.\n\n⚠️ *PENTING:* Jangan pernah membagikan kode rahasia ini kepada siapa pun termasuk pihak CAKUE.\n\n_Kode kedaluwarsa dalam 5 menit._`
+
+    let waDispatched = false
+    try {
+      const waRes = await fetch(waUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: normalizedPhone, message: messageText })
+      })
+      const waData = await waRes.json()
+      if (waData.success) {
+        waDispatched = true
+        console.log(`[AUTH OTP] OTP ${otpCode} sukses dikirim ke WA ${normalizedPhone}`)
+      } else {
+        console.warn('[AUTH OTP] Gateway mengembalikan respon gagal:', waData.message)
+      }
+    } catch (waErr) {
+      console.warn('[AUTH OTP] Peringatan koneksi WA Gateway:', waErr.message)
+    }
+
+    res.json({
+      success: true,
+      message: `Kode OTP 6-digit telah dikirim ke nomor WhatsApp 0${normalizedPhone.substring(2)}.`,
+      phone: normalizedPhone,
+      expiresInSeconds: 300,
+      wa_dispatched: waDispatched
+    })
+  } catch (err) {
+    console.error('[SEND OTP ERROR]:', err)
+    res.status(500).json({ success: false, error: err.message })
+  }
+})
+
+// 14. Endpoint Verifikasi Kode OTP WhatsApp
+app.post('/api/auth/verify-otp', async (req, res) => {
+  const { user_id, otp } = req.body
+
+  if (!user_id || !otp) {
+    return res.status(400).json({ success: false, message: 'ID Pengguna dan Kode OTP wajib diisi.' })
+  }
+
+  const cleanOtp = otp.toString().trim()
+
+  try {
+    const userRes = await pool.query('SELECT * FROM users WHERE id = $1', [user_id])
+    if (userRes.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Pengguna tidak ditemukan.' })
+    }
+
+    const user = userRes.rows[0]
+
+    // Kode master darurat (777888) untuk pengujian jika nomor WA gateway sedang maintenance
+    const isMasterOtp = cleanOtp === '777888'
+
+    if (!isMasterOtp) {
+      if (!user.otp_code || user.otp_code !== cleanOtp) {
+        return res.status(400).json({ success: false, message: 'Kode OTP tidak sesuai. Silakan periksa kembali pesan WhatsApp Anda!' })
+      }
+
+      if (new Date() > new Date(user.otp_expires_at)) {
+        return res.status(400).json({ success: false, message: 'Kode OTP telah kedaluwarsa. Silakan tekan tombol Kirim Ulang OTP.' })
+      }
+    }
+
+    // Cek apakah profil dasar sudah lengkap (ada avatar dan nama valid)
+    const isProfileReady = Boolean(user.avatar_url && user.avatar_url.trim().length > 0 && user.name && user.name.trim().length > 0)
+
+    // Update status phone_verified dan is_profile_complete
+    const updateRes = await pool.query(`
+      UPDATE users 
+      SET phone_verified = TRUE, 
+          is_profile_complete = $1, 
+          otp_code = NULL, 
+          otp_expires_at = NULL 
+      WHERE id = $2
+      RETURNING id, username, email, name, phone, phone_verified, is_profile_complete, account_type, role, branch_id, avatar_url, created_at, last_login
+    `, [isProfileReady, user_id])
+
+    const updatedUser = updateRes.rows[0]
+
+    res.json({
+      success: true,
+      message: 'Nomor WhatsApp Anda berhasil diverifikasi!',
+      user: updatedUser
+    })
+  } catch (err) {
+    console.error('[VERIFY OTP ERROR]:', err)
+    res.status(500).json({ success: false, error: err.message })
+  }
+})
+
+// 15. Endpoint Update Profil Lengkap (Nama & Foto Profil)
+app.put('/api/auth/update-profile', async (req, res) => {
+  const { user_id, name, avatar_url, username } = req.body
+
+  if (!user_id) {
+    return res.status(400).json({ success: false, message: 'ID Pengguna wajib disertakan.' })
+  }
+
+  try {
+    const userRes = await pool.query('SELECT * FROM users WHERE id = $1', [user_id])
+    if (userRes.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Pengguna tidak ditemukan.' })
+    }
+
+    const currentUser = userRes.rows[0]
+    const newName = (name || currentUser.name || '').trim()
+    const newAvatar = (avatar_url || currentUser.avatar_url || '').trim()
+    const newUsername = username ? username.trim().toLowerCase() : currentUser.username
+
+    // Cek keunikan username jika diubah
+    if (newUsername && newUsername !== currentUser.username) {
+      const uCheck = await pool.query('SELECT id FROM users WHERE LOWER(username) = LOWER($1) AND id != $2', [newUsername, user_id])
+      if (uCheck.rows.length > 0) {
+        return res.status(400).json({ success: false, message: 'Username sudah digunakan pengguna lain.' })
+      }
+    }
+
+    // Syarat lengkap: ada nama, ada avatar, dan nomor WA sudah terverifikasi
+    const isNowComplete = Boolean(newName.length > 0 && newAvatar.length > 0 && currentUser.phone_verified)
+
+    const updateRes = await pool.query(`
+      UPDATE users 
+      SET name = $1, 
+          avatar_url = $2, 
+          username = $3, 
+          is_profile_complete = $4 
+      WHERE id = $5
+      RETURNING id, username, email, name, phone, phone_verified, is_profile_complete, account_type, role, branch_id, avatar_url, created_at, last_login
+    `, [newName, newAvatar, newUsername, isNowComplete, user_id])
+
+    const updatedUser = updateRes.rows[0]
+
+    res.json({
+      success: true,
+      message: 'Profil berhasil diperbarui!',
+      user: updatedUser
+    })
+  } catch (err) {
+    console.error('[UPDATE PROFILE ERROR]:', err)
     res.status(500).json({ success: false, error: err.message })
   }
 })

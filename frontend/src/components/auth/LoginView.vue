@@ -57,12 +57,12 @@
         <!-- Form Email & Password -->
         <form @submit.prevent="handleSubmit" class="space-y-3.5">
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Email</label>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Email atau Username</label>
             <input 
               v-model="email" 
-              type="email" 
+              type="text" 
               required
-              placeholder="nama@email.com" 
+              placeholder="nama@email.com atau username" 
               class="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:border-emerald-500"
             />
           </div>
@@ -221,6 +221,15 @@
 
     <!-- Forgot Password Modal -->
     <ForgotPasswordModal :show="showForgotModal" @close="showForgotModal = false" />
+
+    <!-- Google Credential Setup Modal -->
+    <GoogleCredentialModal 
+      :is-open="showCredentialModal"
+      :google-data="pendingGoogleData"
+      account-type="business"
+      @close="showCredentialModal = false"
+      @success="showCredentialModal = false"
+    />
   </div>
 </template>
 
@@ -230,6 +239,7 @@ import { useAuthStore } from '../../stores/authStore'
 import { getServerUrl, setServerUrl, checkServerHealth } from '../../api/client.js'
 import Icon from '../common/Icon.vue'
 import ForgotPasswordModal from './ForgotPasswordModal.vue'
+import GoogleCredentialModal from './GoogleCredentialModal.vue'
 
 const emit = defineEmits(['switch-view', 'go-onboarding'])
 const authStore = useAuthStore()
@@ -240,6 +250,8 @@ const errorMessage = ref('')
 const isLoading = ref(false)
 const isGoogleLoading = ref(false)
 const showForgotModal = ref(false)
+const showCredentialModal = ref(false)
+const pendingGoogleData = ref(null)
 const showOriginModal = ref(false)
 const showServerConfig = ref(false)
 const currentServerUrl = ref('')
@@ -267,7 +279,12 @@ async function handleGoogleLogin() {
       roleTarget: 'owner',
       branchIdTarget: 'jogja-1'
     })
-    if (!res.success) {
+    if (res.success) {
+      if (res.is_new) {
+        pendingGoogleData.value = res.google_data
+        showCredentialModal.value = true
+      }
+    } else {
       if (res.needsOriginWhitelist) {
         showOriginModal.value = true
       } else {

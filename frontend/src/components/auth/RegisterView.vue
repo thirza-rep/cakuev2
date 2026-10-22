@@ -221,6 +221,15 @@
         </div>
       </div>
     </div>
+
+    <!-- Google Credential Setup Modal -->
+    <GoogleCredentialModal 
+      :is-open="showCredentialModal"
+      :google-data="pendingGoogleData"
+      :account-type="accountType"
+      @close="showCredentialModal = false"
+      @success="showCredentialModal = false"
+    />
   </div>
 </template>
 
@@ -228,6 +237,7 @@
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '../../stores/authStore'
 import Icon from '../common/Icon.vue'
+import GoogleCredentialModal from './GoogleCredentialModal.vue'
 
 const emit = defineEmits(['switch-view', 'go-onboarding'])
 const authStore = useAuthStore()
@@ -241,6 +251,8 @@ const errorMessage = ref('')
 const isLoading = ref(false)
 const isGoogleLoading = ref(false)
 const showOriginModal = ref(false)
+const showCredentialModal = ref(false)
+const pendingGoogleData = ref(null)
 const detectedOrigin = ref(typeof window !== 'undefined' ? window.location.origin : 'http://192.168.1.13:5173')
 const copiedOrigin = ref(false)
 
@@ -260,7 +272,12 @@ async function handleGoogleRegister() {
       roleTarget: roleTarget,
       branchIdTarget: 'jogja-1'
     })
-    if (!res.success) {
+    if (res.success) {
+      if (res.is_new) {
+        pendingGoogleData.value = res.google_data
+        showCredentialModal.value = true
+      }
+    } else {
       if (res.needsOriginWhitelist) {
         showOriginModal.value = true
       } else {

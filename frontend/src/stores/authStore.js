@@ -151,6 +151,13 @@ export const useAuthStore = defineStore('auth', () => {
     } catch (e) {}
   }
 
+  const currentUser = ref(parsedUser)
+  const pendingGoogleData = ref(null)
+
+  // Status Verifikasi Profil & WhatsApp OTP
+  const isPhoneVerified = computed(() => Boolean(currentUser.value?.phone_verified))
+  const isProfileComplete = computed(() => Boolean(currentUser.value?.is_profile_complete && currentUser.value?.phone_verified))
+
   // 2. Session Persistence via LocalStorage (Hanya aktif jika sesi tersimpan riil dan parsedUser ada)
   const savedAuth = localStorage.getItem('cakue_is_authenticated')
   const isAuthenticated = ref(savedAuth === 'true' && Boolean(parsedUser))
@@ -681,8 +688,24 @@ export const useAuthStore = defineStore('auth', () => {
           branch_id: branchIdTarget
         })
 
+        if (res.success && res.is_new) {
+          pendingGoogleData.value = {
+            ...res.google_data,
+            account_type: accountTypeTarget,
+            role: roleTarget,
+            branch_id: branchIdTarget
+          }
+          return {
+            success: true,
+            is_new: true,
+            google_data: pendingGoogleData.value,
+            message: res.message || 'Google terhubung! Silakan tentukan username dan kata sandi Anda.'
+          }
+        }
+
         if (res.success && res.user) {
           const u = res.user
+          currentUser.value = u
           isAuthenticated.value = true
           accountType.value = u.account_type || accountTypeTarget
           
@@ -692,6 +715,7 @@ export const useAuthStore = defineStore('auth', () => {
             businessUser.value = {
               name: u.name,
               email: u.email,
+              username: u.username,
               companyName: u.companyName || (roleKey === 'superadmin' ? 'PT CAKUE Nusantara Berkah (Jogja)' : 'CV Cakue Nusantara (Mitra)'),
               role: ROLES[roleKey.toUpperCase()]?.title || 'Owner & Direktur Bisnis',
               currentBranch: u.branch_name || 'Cabang 1 - Malioboro'
@@ -700,6 +724,7 @@ export const useAuthStore = defineStore('auth', () => {
             personalUser.value = {
               name: u.name,
               email: u.email,
+              username: u.username,
               accountNumber: u.phone || '5420-8819-2041',
               role: 'Nasabah Pribadi',
               joinedDate: 'Oktober 2026'
@@ -716,7 +741,7 @@ export const useAuthStore = defineStore('auth', () => {
           }
 
           syncAllStores(u)
-          return { success: true, user: u, message: res.message || 'Berhasil masuk dengan akun Google' }
+          return { success: true, is_new: false, user: u, message: res.message || 'Berhasil masuk dengan akun Google' }
         } else {
           return { success: false, message: res.message || 'Autentikasi Google gagal di server.' }
         }
@@ -795,6 +820,139 @@ export const useAuthStore = defineStore('auth', () => {
         }
       }
     })
+  }
+
+  // 11. Register Akun Baru dari Google Sign-In (Dengan Username & Password)
+  async function registerWithGoogle({ username, password, accountType: targetAccountType = null }) {
+    if (!pendingGoogleData.value) {
+      return { success: false, message: 'Data pendaftaran Google tidak ditemukan. Silakan ulangi autentikasi Google.' }
+    }
+
+    try {
+      const payload = {
+        ...pendingGoogleData.value,
+        username,
+        password,
+        account_type: targetAccountType || pendingGoogleData.value.account_type || 'business'
+      }
+
+      const res = await api.post('/api/auth/register-google', payload)
+
+      if (res.success && res.user) {
+        const u = res.user
+        currentUser.value = u
+        isAuthenticated.value = true
+        accountType.value = u.account_type || payload.account_type
+
+        if (accountType.value === 'business') {
+          const roleKey = u.role || 'owner'
+          setBusinessRole(roleKey)
+          businessUser.value = {
+            name: u.name,
+            email: u.email,
+            username: u.username,
+            companyName: 'Usaha Saya',
+            role: ROLES[roleKey.toUpperCase()]?.title || 'Owner & Direktur Bisnis',
+            currentBranch: u.branch_name || 'Cabang 1 - Malioboro'
+          }
+        } else {
+          personalUser.value = {
+            name: u.name,
+            email: u.email,
+            username: u.username,
+            accountNumber: u.phone || '5420-8819-2041',
+            role: 'Nasabah Pribadi',
+            joinedDate: 'Oktober 2026'
+          }
+        }
+
+        localStorage.setItem('cakue_current_user', JSON.stringify(u))
+        localStorage.setItem('cakue_is_authenticated', 'true')
+        localStorage.setItem('cakue_account_type', accountType.value)
+        localStorage.setItem('cakue_user_name', u.name)
+        localStorage.setItem('cakue_user_email', u.email)
+        if (u.branch_name) {
+          localStorage.setItem('cakue_current_branch', u.branch_name)
+        }
+
+        syncAllStores(u)
+        pendingGoogleData.value = null
+        return { success: true, user: u, message: res.message }
+      } else {
+        return { success: false, message: res.message || 'Gagal mendaftar akun.' }
+      }
+    } catch (err) {
+      return { success: false, message: `Gagal pendaftaran Google: ${err.message}` }
+    }
+  }
+
+  // 12. Kirim Kode OTP via WhatsApp Gateway
+  async function sendOtp(phone) {
+    const uid = currentUser.value?.id || parsedUser?.id
+    if (!uid) {
+      return { success: false, message: 'Sesi akun tidak valid. Silakan login kembali.' }
+    }
+    try {
+      const res = await api.post('/api/auth/send-otp', {
+        user_id: uid,
+        phone
+      })
+      return res
+    } catch (err) {
+      return { success: false, message: `Gagal mengirim OTP: ${err.message}` }
+    }
+  }
+
+  // 13. Verifikasi Kode OTP WhatsApp
+  async function verifyOtp(otp) {
+    const uid = currentUser.value?.id || parsedUser?.id
+    if (!uid) {
+      return { success: false, message: 'Sesi akun tidak valid. Silakan login kembali.' }
+    }
+    try {
+      const res = await api.post('/api/auth/verify-otp', {
+        user_id: uid,
+        otp
+      })
+      if (res.success && res.user) {
+        currentUser.value = { ...currentUser.value, ...res.user }
+        localStorage.setItem('cakue_current_user', JSON.stringify(currentUser.value))
+        return { success: true, user: currentUser.value, message: res.message }
+      }
+      return res
+    } catch (err) {
+      return { success: false, message: `Gagal verifikasi OTP: ${err.message}` }
+    }
+  }
+
+  // 14. Update Foto Profil & Nama Lengkap
+  async function updateProfile({ name, avatar_url, username }) {
+    const uid = currentUser.value?.id || parsedUser?.id
+    if (!uid) {
+      return { success: false, message: 'Sesi akun tidak valid.' }
+    }
+    try {
+      const res = await api.put('/api/auth/update-profile', {
+        user_id: uid,
+        name,
+        avatar_url,
+        username
+      })
+      if (res.success && res.user) {
+        currentUser.value = { ...currentUser.value, ...res.user }
+        if (accountType.value === 'personal') {
+          personalUser.value.name = res.user.name
+        } else {
+          businessUser.value.name = res.user.name
+        }
+        localStorage.setItem('cakue_current_user', JSON.stringify(currentUser.value))
+        localStorage.setItem('cakue_user_name', res.user.name)
+        return { success: true, user: currentUser.value, message: res.message }
+      }
+      return res
+    } catch (err) {
+      return { success: false, message: `Gagal memperbarui profil: ${err.message}` }
+    }
   }
 
   function loginAs(type) {
@@ -952,6 +1110,10 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   return {
+    currentUser,
+    pendingGoogleData,
+    isPhoneVerified,
+    isProfileComplete,
     isAuthenticated,
     showOnboarding,
     accountType,
@@ -1001,6 +1163,10 @@ export const useAuthStore = defineStore('auth', () => {
     setAppMode,
     login,
     loginWithGoogle,
+    registerWithGoogle,
+    sendOtp,
+    verifyOtp,
+    updateProfile,
     loginAs,
     switchToAccount,
     register,

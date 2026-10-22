@@ -74,9 +74,14 @@ CREATE TABLE IF NOT EXISTS journal_lines (
 -- 6. USER SESSIONS & HAK AKSES (RBAC)
 CREATE TABLE IF NOT EXISTS users (
     id VARCHAR(50) PRIMARY KEY,
+    username VARCHAR(50) UNIQUE,
     email VARCHAR(100) UNIQUE NOT NULL,
     name VARCHAR(100) NOT NULL,
     phone VARCHAR(30),
+    phone_verified BOOLEAN DEFAULT FALSE,
+    otp_code VARCHAR(10),
+    otp_expires_at TIMESTAMP,
+    is_profile_complete BOOLEAN DEFAULT FALSE,
     password_hash VARCHAR(255),
     account_type VARCHAR(20) NOT NULL CHECK (account_type IN ('personal', 'business')),
     role VARCHAR(30) NOT NULL CHECK (role IN ('superadmin', 'owner', 'manager', 'cashier', 'warehouse', 'personal')),
