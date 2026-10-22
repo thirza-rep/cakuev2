@@ -230,6 +230,26 @@
       <polyline points="12 6 12 12 16 14"/>
     </template>
 
+    <!-- Upload -->
+    <template v-else-if="name === 'upload'">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="17 8 12 3 7 8"/>
+      <line x1="12" y1="3" x2="12" y2="15"/>
+    </template>
+
+    <!-- Shield Check -->
+    <template v-else-if="name === 'shield-check'">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      <polyline points="9 12 11 14 15 10"/>
+    </template>
+
+    <!-- Image -->
+    <template v-else-if="name === 'image'">
+      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+      <circle cx="8.5" cy="8.5" r="1.5"/>
+      <polyline points="21 15 16 10 5 21"/>
+    </template>
+
     <!-- Calculator (Depresiasi / Akuntansi) -->
     <template v-else-if="name === 'calculator'">
       <rect x="4" y="2" width="16" height="20" rx="2"/>

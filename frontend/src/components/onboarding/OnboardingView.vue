@@ -57,7 +57,12 @@
         <!-- ============================================== -->
         <!-- SLIDE 2: FITUR UTAMA 1 - DUA PORTAL TERPISAH -->
         <!-- ============================================== -->
-        <div v-else-if="currentSlide === 1" class="my-auto space-y-6 animate-fade-in">
+        <div v-else-if="currentSlide === 1" class="my-auto space-y-5 animate-fade-in">
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold mx-auto">
+            <img src="/logo.png" alt="CAKUE" class="w-4 h-4 object-contain" />
+            <span>CAKUE</span>
+          </div>
+
           <div class="flex items-center justify-center gap-4">
             <div class="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 shadow-xs">
               <Icon name="wallet" custom-class="w-8 h-8" />
@@ -84,7 +89,12 @@
         <!-- ============================================== -->
         <!-- SLIDE 3: FITUR UTAMA 2 - KASIR POS & STRUK WA -->
         <!-- ============================================== -->
-        <div v-else-if="currentSlide === 2" class="my-auto space-y-6 animate-fade-in">
+        <div v-else-if="currentSlide === 2" class="my-auto space-y-5 animate-fade-in">
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold mx-auto">
+            <img src="/logo.png" alt="CAKUE" class="w-4 h-4 object-contain" />
+            <span>CAKUE</span>
+          </div>
+
           <div class="flex items-center justify-center gap-4">
             <div class="w-16 h-16 rounded-2xl bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-700 shadow-xs">
               <Icon name="receipt" custom-class="w-8 h-8" />
@@ -114,9 +124,16 @@
         <div v-else-if="currentSlide === 3" class="my-auto space-y-5 animate-fade-in text-left">
           
           <div class="text-center space-y-1">
-            <span class="text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
-              Langkah 1: Tentukan Dunia Akses Anda
-            </span>
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold mx-auto mb-1">
+              <img src="/logo.png" alt="CAKUE" class="w-4 h-4 object-contain" />
+              <span>CAKUE</span>
+            </div>
+
+            <div>
+              <span class="text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                Langkah 1: Tentukan Dunia Akses Anda
+              </span>
+            </div>
             <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
               Pilih Jenis Penggunaan
             </h2>

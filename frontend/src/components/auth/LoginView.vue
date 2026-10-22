@@ -14,8 +14,8 @@
           <Icon name="chevron-left" custom-class="w-3.5 h-3.5" />
           <span>Kembali ke Beranda Utama</span>
         </button>
-        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-700 text-white font-extrabold text-xl shadow-sm mb-1">
-          CK
+        <div class="relative w-12 h-12 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex items-center justify-center p-2 mx-auto mb-1">
+          <img src="/logo.png" alt="CAKUE Logo" class="w-full h-full object-contain" />
         </div>
         <h2 class="text-2xl font-bold tracking-tight text-slate-900">Masuk ke CAKUE</h2>
         <p class="text-xs text-slate-500">Catatan Keuangan Gue — Terpercaya, Bebas Biaya & Aman</p>
