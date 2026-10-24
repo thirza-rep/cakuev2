@@ -239,7 +239,7 @@ app.post('/api/auth/register', async (req, res) => {
 
     const insertResult = await pool.query(`
       INSERT INTO users (id, username, email, name, phone, password_hash, account_type, role, branch_id, is_profile_complete, phone_verified)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, FALSE, FALSE)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, TRUE, TRUE)
       RETURNING id, username, email, name, phone, phone_verified, is_profile_complete, account_type, role, branch_id, created_at
     `, [id, username ? username.trim() : null, email.trim(), name.trim(), phone || null, passwordHash, accType, userRole, validBranchId])
 
@@ -387,7 +387,7 @@ app.post('/api/auth/register-google', async (req, res) => {
 
     await pool.query(`
       INSERT INTO users (id, username, email, name, phone, phone_verified, is_profile_complete, password_hash, account_type, role, branch_id, avatar_url, last_login)
-      VALUES ($1, $2, $3, $4, '', FALSE, FALSE, $5, $6, $7, $8, $9, CURRENT_TIMESTAMP)
+      VALUES ($1, $2, $3, $4, '', TRUE, TRUE, $5, $6, $7, $8, $9, CURRENT_TIMESTAMP)
     `, [newUserId, cleanUsername, email.trim().toLowerCase(), (name || cleanUsername).trim(), passwordHash, assignedType, assignedRole, assignedBranch, avatar_url || null])
 
     const createdRes = await pool.query(`
@@ -423,138 +423,36 @@ function formatIndonesianPhone(raw) {
   return p
 }
 
-// 13. Endpoint Kirim Kode OTP via WhatsApp Gateway
+// 13. Endpoint Kirim Kode OTP via WhatsApp Gateway (DINONAKTIFKAN SEPENUHNYA)
 app.post('/api/auth/send-otp', async (req, res) => {
-  const { user_id, phone } = req.body
-
-  if (!user_id || !phone) {
-    return res.status(400).json({ success: false, message: 'ID Pengguna dan Nomor WhatsApp wajib diisi.' })
-  }
-
-  const normalizedPhone = formatIndonesianPhone(phone)
-  if (normalizedPhone.length < 10 || normalizedPhone.length > 15) {
-    return res.status(400).json({ success: false, message: 'Format nomor WhatsApp tidak valid. Masukkan nomor yang benar (contoh: 081234567890).' })
-  }
-
-  try {
-    const userRes = await pool.query('SELECT * FROM users WHERE id = $1', [user_id])
-    if (userRes.rows.length === 0) {
-      return res.status(404).json({ success: false, message: 'Pengguna tidak ditemukan.' })
-    }
-
-    const user = userRes.rows[0]
-
-    // Rate Limit: Minimal 60 detik antar permintaan OTP
-    if (user.otp_expires_at) {
-      const remainingSeconds = Math.ceil((new Date(user.otp_expires_at).getTime() - Date.now()) / 1000)
-      // Jika masih ada sisa waktu lebih dari 4 menit (berarti baru saja dikirim kurang dari 60 detik lalu)
-      if (remainingSeconds > 240) {
-        const waitTime = remainingSeconds - 240
-        return res.status(429).json({ 
-          success: false, 
-          message: `Mohon tunggu ${waitTime} detik lagi sebelum meminta kode OTP baru.` 
-        })
-      }
-    }
-
-    // Generate 6 digit angka acak
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString()
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000) // Berlaku 5 menit
-
-    await pool.query(
-      'UPDATE users SET phone = $1, otp_code = $2, otp_expires_at = $3 WHERE id = $4',
-      [normalizedPhone, otpCode, expiresAt, user_id]
-    )
-
-    // Kirim pesan OTP via WhatsApp Gateway internal (Baileys)
-    const waUrl = (process.env.WA_GATEWAY_URL || 'http://wa-gateway:3333') + '/api/send-message'
-    const messageText = `🔐 *KODE VERIFIKASI CAKUE: ${otpCode}*\n\nHalo *${user.name}*,\nGunakan kode verifikasi 6 digit di atas untuk mengaktifkan akun Anda di platform CAKUE.\n\n⚠️ *PENTING:* Jangan pernah membagikan kode rahasia ini kepada siapa pun termasuk pihak CAKUE.\n\n_Kode kedaluwarsa dalam 5 menit._`
-
-    let waDispatched = false
-    try {
-      const waRes = await fetch(waUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: normalizedPhone, message: messageText })
-      })
-      const waData = await waRes.json()
-      if (waData.success) {
-        waDispatched = true
-        console.log(`[AUTH OTP] OTP ${otpCode} sukses dikirim ke WA ${normalizedPhone}`)
-      } else {
-        console.warn('[AUTH OTP] Gateway mengembalikan respon gagal:', waData.message)
-      }
-    } catch (waErr) {
-      console.warn('[AUTH OTP] Peringatan koneksi WA Gateway:', waErr.message)
-    }
-
-    res.json({
-      success: true,
-      message: `Kode OTP 6-digit telah dikirim ke nomor WhatsApp 0${normalizedPhone.substring(2)}.`,
-      phone: normalizedPhone,
-      expiresInSeconds: 300,
-      wa_dispatched: waDispatched
-    })
-  } catch (err) {
-    console.error('[SEND OTP ERROR]:', err)
-    res.status(500).json({ success: false, error: err.message })
-  }
+  res.json({
+    success: false,
+    message: 'Fungsi OTP WhatsApp telah dinonaktifkan sepenuhnya. WhatsApp saat ini difokuskan khusus untuk pengiriman struk kasir POS.'
+  })
 })
 
-// 14. Endpoint Verifikasi Kode OTP WhatsApp
+
+// 14. Endpoint Verifikasi Kode OTP WhatsApp (AUTO-BYPASS / DINONAKTIFKAN)
 app.post('/api/auth/verify-otp', async (req, res) => {
-  const { user_id, otp } = req.body
-
-  if (!user_id || !otp) {
-    return res.status(400).json({ success: false, message: 'ID Pengguna dan Kode OTP wajib diisi.' })
-  }
-
-  const cleanOtp = otp.toString().trim()
+  const { user_id } = req.body
 
   try {
-    const userRes = await pool.query('SELECT * FROM users WHERE id = $1', [user_id])
-    if (userRes.rows.length === 0) {
-      return res.status(404).json({ success: false, message: 'Pengguna tidak ditemukan.' })
+    if (user_id) {
+      await pool.query('UPDATE users SET phone_verified = TRUE, is_profile_complete = TRUE WHERE id = $1', [user_id])
+      const userRes = await pool.query('SELECT id, username, email, name, phone, phone_verified, is_profile_complete, account_type, role, branch_id, avatar_url, created_at, last_login FROM users WHERE id = $1', [user_id])
+      return res.json({
+        success: true,
+        message: 'Fungsi OTP dinonaktifkan. Akun Anda telah aktif sepenuhnya.',
+        user: userRes.rows[0]
+      })
     }
-
-    const user = userRes.rows[0]
-
-    // Kode master darurat (777888) untuk pengujian jika nomor WA gateway sedang maintenance
-    const isMasterOtp = cleanOtp === '777888'
-
-    if (!isMasterOtp) {
-      if (!user.otp_code || user.otp_code !== cleanOtp) {
-        return res.status(400).json({ success: false, message: 'Kode OTP tidak sesuai. Silakan periksa kembali pesan WhatsApp Anda!' })
-      }
-
-      if (new Date() > new Date(user.otp_expires_at)) {
-        return res.status(400).json({ success: false, message: 'Kode OTP telah kedaluwarsa. Silakan tekan tombol Kirim Ulang OTP.' })
-      }
-    }
-
-    // Cek apakah profil dasar sudah lengkap (ada avatar dan nama valid)
-    const isProfileReady = Boolean(user.avatar_url && user.avatar_url.trim().length > 0 && user.name && user.name.trim().length > 0)
-
-    // Update status phone_verified dan is_profile_complete
-    const updateRes = await pool.query(`
-      UPDATE users 
-      SET phone_verified = TRUE, 
-          is_profile_complete = $1, 
-          otp_code = NULL, 
-          otp_expires_at = NULL 
-      WHERE id = $2
-      RETURNING id, username, email, name, phone, phone_verified, is_profile_complete, account_type, role, branch_id, avatar_url, created_at, last_login
-    `, [isProfileReady, user_id])
-
-    const updatedUser = updateRes.rows[0]
 
     res.json({
       success: true,
-      message: 'Nomor WhatsApp Anda berhasil diverifikasi!',
-      user: updatedUser
+      message: 'Fungsi OTP dinonaktifkan. Akun Anda telah aktif sepenuhnya.'
     })
   } catch (err) {
-    console.error('[VERIFY OTP ERROR]:', err)
+    console.error('[VERIFY OTP BYPASS ERROR]:', err)
     res.status(500).json({ success: false, error: err.message })
   }
 })
@@ -586,18 +484,16 @@ app.put('/api/auth/update-profile', async (req, res) => {
       }
     }
 
-    // Syarat lengkap: ada nama, ada avatar, dan nomor WA sudah terverifikasi
-    const isNowComplete = Boolean(newName.length > 0 && newAvatar.length > 0 && currentUser.phone_verified)
-
     const updateRes = await pool.query(`
       UPDATE users 
       SET name = $1, 
           avatar_url = $2, 
           username = $3, 
-          is_profile_complete = $4 
-      WHERE id = $5
+          is_profile_complete = TRUE,
+          phone_verified = TRUE
+      WHERE id = $4
       RETURNING id, username, email, name, phone, phone_verified, is_profile_complete, account_type, role, branch_id, avatar_url, created_at, last_login
-    `, [newName, newAvatar, newUsername, isNowComplete, user_id])
+    `, [newName, newAvatar, newUsername, user_id])
 
     const updatedUser = updateRes.rows[0]
 

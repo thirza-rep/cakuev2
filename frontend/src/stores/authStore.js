@@ -154,9 +154,9 @@ export const useAuthStore = defineStore('auth', () => {
   const currentUser = ref(parsedUser)
   const pendingGoogleData = ref(null)
 
-  // Status Verifikasi Profil & WhatsApp OTP
-  const isPhoneVerified = computed(() => Boolean(currentUser.value?.phone_verified))
-  const isProfileComplete = computed(() => Boolean(currentUser.value?.is_profile_complete && currentUser.value?.phone_verified))
+  // Status Verifikasi Profil & WhatsApp OTP (OTP dinonaktifkan sepenuhnya, selalu true)
+  const isPhoneVerified = computed(() => true)
+  const isProfileComplete = computed(() => true)
 
   // 2. Session Persistence via LocalStorage (Hanya aktif jika sesi tersimpan riil dan parsedUser ada)
   const savedAuth = localStorage.getItem('cakue_is_authenticated')
@@ -886,42 +886,24 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // 12. Kirim Kode OTP via WhatsApp Gateway
+  // 12. Kirim Kode OTP via WhatsApp Gateway (DINONAKTIFKAN SEPENUHNYA)
   async function sendOtp(phone) {
-    const uid = currentUser.value?.id || parsedUser?.id
-    if (!uid) {
-      return { success: false, message: 'Sesi akun tidak valid. Silakan login kembali.' }
-    }
-    try {
-      const res = await api.post('/api/auth/send-otp', {
-        user_id: uid,
-        phone
-      })
-      return res
-    } catch (err) {
-      return { success: false, message: `Gagal mengirim OTP: ${err.message}` }
+    return { 
+      success: false, 
+      message: 'Fungsi OTP telah dinonaktifkan sepenuhnya. WhatsApp saat ini khusus dialokasikan untuk pengiriman struk kasir.' 
     }
   }
 
-  // 13. Verifikasi Kode OTP WhatsApp
+  // 13. Verifikasi Kode OTP WhatsApp (AUTO-BYPASS / DINONAKTIFKAN)
   async function verifyOtp(otp) {
-    const uid = currentUser.value?.id || parsedUser?.id
-    if (!uid) {
-      return { success: false, message: 'Sesi akun tidak valid. Silakan login kembali.' }
+    if (currentUser.value) {
+      currentUser.value = { ...currentUser.value, phone_verified: true, is_profile_complete: true }
+      localStorage.setItem('cakue_current_user', JSON.stringify(currentUser.value))
     }
-    try {
-      const res = await api.post('/api/auth/verify-otp', {
-        user_id: uid,
-        otp
-      })
-      if (res.success && res.user) {
-        currentUser.value = { ...currentUser.value, ...res.user }
-        localStorage.setItem('cakue_current_user', JSON.stringify(currentUser.value))
-        return { success: true, user: currentUser.value, message: res.message }
-      }
-      return res
-    } catch (err) {
-      return { success: false, message: `Gagal verifikasi OTP: ${err.message}` }
+    return { 
+      success: true, 
+      user: currentUser.value, 
+      message: 'Fungsi OTP dinonaktifkan. Akun Anda aktif sepenuhnya.' 
     }
   }
 

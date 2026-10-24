@@ -432,10 +432,8 @@ import Icon from '../common/Icon.vue'
 
 const authStore = useAuthStore()
 
-// Modal otomatis aktif jika user terautentikasi namun belum melengkapi profil & OTP
-const isOpen = computed(() => {
-  return Boolean(authStore.isAuthenticated && !authStore.isProfileComplete)
-})
+// Modal dinonaktifkan sepenuhnya karena alur OTP ditiadakan
+const isOpen = computed(() => false)
 
 // Fase Onboarding Terpisah:
 // 1 = Foto Profil

@@ -40,7 +40,6 @@
 
       <!-- Modals & Drawers -->
       <OnboardingModal />
-      <ActivationGateModal />
       <AiCopilotDrawer :is-open="isAiDrawerOpen" @close="isAiDrawerOpen = false" />
     </template>
   </div>
@@ -53,7 +52,6 @@ import OnboardingView from './components/onboarding/OnboardingView.vue'
 import LoginView from './components/auth/LoginView.vue'
 import RegisterView from './components/auth/RegisterView.vue'
 import OnboardingModal from './components/onboarding/OnboardingModal.vue'
-import ActivationGateModal from './components/auth/ActivationGateModal.vue'
 import PersonalPortal from './components/personal/PersonalPortal.vue'
 import BusinessPortal from './components/business/BusinessPortal.vue'
 import AiCopilotDrawer from './components/ai/AiCopilotDrawer.vue'
