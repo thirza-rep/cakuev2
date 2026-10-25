@@ -70,8 +70,11 @@ export async function apiFetch(path, options = {}) {
   }
   const url = `${base}${cleanPath}`
 
+  const token = typeof window !== 'undefined' ? localStorage.getItem('cakue_auth_token') : null
+
   const headers = {
     'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
     ...(options.headers || {})
   }
 

@@ -588,6 +588,9 @@ export const useAuthStore = defineStore('auth', () => {
       const res = await api.post('/api/auth/login', { email: email.trim(), password })
       if (res.success && res.user) {
         const u = res.user
+        if (res.token) {
+          localStorage.setItem('cakue_auth_token', res.token)
+        }
         isAuthenticated.value = true
         accountType.value = u.account_type || 'business'
         localStorage.setItem('cakue_is_authenticated', 'true')
@@ -731,6 +734,9 @@ export const useAuthStore = defineStore('auth', () => {
             }
           }
 
+          if (res.token) {
+            localStorage.setItem('cakue_auth_token', res.token)
+          }
           localStorage.setItem('cakue_current_user', JSON.stringify(u))
           localStorage.setItem('cakue_is_authenticated', 'true')
           localStorage.setItem('cakue_account_type', accountType.value)
@@ -866,6 +872,9 @@ export const useAuthStore = defineStore('auth', () => {
           }
         }
 
+        if (res.token) {
+          localStorage.setItem('cakue_auth_token', res.token)
+        }
         localStorage.setItem('cakue_current_user', JSON.stringify(u))
         localStorage.setItem('cakue_is_authenticated', 'true')
         localStorage.setItem('cakue_account_type', accountType.value)
@@ -962,6 +971,9 @@ export const useAuthStore = defineStore('auth', () => {
 
       if (res.success && res.user) {
         const u = res.user
+        if (res.token) {
+          localStorage.setItem('cakue_auth_token', res.token)
+        }
         isAuthenticated.value = true
         accountType.value = type
         localStorage.setItem('cakue_is_authenticated', 'true')
@@ -1088,6 +1100,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
     localStorage.removeItem('cakue_is_authenticated')
     localStorage.removeItem('cakue_current_user')
+    localStorage.removeItem('cakue_auth_token')
     syncAllStores(null)
   }
 

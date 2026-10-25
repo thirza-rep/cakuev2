@@ -2,6 +2,8 @@ import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import crypto from 'crypto'
+import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken'
 import { pool, testDbConnection } from './db.js'
 
 dotenv.config()
@@ -9,9 +11,51 @@ dotenv.config()
 const app = express()
 const PORT = process.env.PORT || 3001
 const WA_GATEWAY_URL = process.env.WA_GATEWAY_URL || 'http://localhost:3333'
+const JWT_SECRET = process.env.JWT_SECRET || 'cakue_super_secret_jwt_key_2026_pos_ledger'
 
 app.use(cors())
 app.use(express.json())
+
+// Middleware: Autentikasi JWT Wajib (Strict RBAC / User endpoints)
+export function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization']
+  const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null
+
+  if (!token) {
+    return res.status(401).json({
+      success: false,
+      message: 'Akses ditolak: Token autentikasi tidak ditemukan. Silakan login kembali.'
+    })
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(403).json({
+        success: false,
+        message: 'Akses ditolak: Sesi Anda telah berakhir atau token tidak valid. Silakan login ulang.'
+      })
+    }
+    req.user = decoded
+    next()
+  })
+}
+
+// Middleware: Autentikasi Opsional (Permissive) untuk endpoint baca bersama
+export function optionalAuth(req, res, next) {
+  const authHeader = req.headers['authorization']
+  const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null
+
+  if (token) {
+    jwt.verify(token, JWT_SECRET, (err, decoded) => {
+      if (!err && decoded) {
+        req.user = decoded
+      }
+      next()
+    })
+  } else {
+    next()
+  }
+}
 
 // 1. Health check with real DB check
 app.get('/api/health', async (req, res) => {
@@ -26,8 +70,18 @@ app.get('/api/health', async (req, res) => {
   })
 })
 
-// 2. WhatsApp Gateway Proxy
-app.post('/api/whatsapp/send-receipt', async (req, res) => {
+// 2. WhatsApp Gateway Proxy (Dilindungi dengan validasi nomor tujuan)
+app.post('/api/whatsapp/send-receipt', optionalAuth, async (req, res) => {
+  const { phone, customerPhone } = req.body || {}
+  const targetPhone = phone || customerPhone
+
+  if (!targetPhone) {
+    return res.status(400).json({
+      success: false,
+      message: 'Nomor telepon penerima wajib disertakan untuk pengiriman struk.'
+    })
+  }
+
   try {
     const waRes = await fetch(`${WA_GATEWAY_URL}/api/send-receipt`, {
       method: 'POST',
@@ -129,8 +183,8 @@ app.get('/api/branches', async (req, res) => {
   }
 })
 
-// 7. Endpoint Master Pengguna & Hak Akses (RBAC)
-app.get('/api/users', async (req, res) => {
+// 7. Endpoint Master Pengguna & Hak Akses (RBAC) - Dilindungi Autentikasi
+app.get('/api/users', authenticateToken, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT u.id, u.email, u.name, u.phone, u.account_type, u.role, u.branch_id, b.name as branch_name, u.avatar_url, u.created_at, u.last_login
@@ -144,8 +198,7 @@ app.get('/api/users', async (req, res) => {
   }
 })
 
-// 8. Otentikasi Nyata: Login
-// 8. Otentikasi Nyata: Login dengan Email atau Username + Password
+// 8. Otentikasi Nyata: Login dengan Email atau Username + Password (Bcrypt + Legacy Fallback + JWT)
 app.post('/api/auth/login', async (req, res) => {
   const { identifier, email, username, password } = req.body
   const loginId = (identifier || email || username || '').trim()
@@ -172,10 +225,23 @@ app.post('/api/auth/login', async (req, res) => {
 
     const user = result.rows[0]
 
-    // Verifikasi password jika user memiliki password_hash
+    // Verifikasi password (Bcrypt + Backward compatibility legacy SHA-256)
     if (user.password_hash && password) {
-      const hash = crypto.createHash('sha256').update(password).digest('hex')
-      if (user.password_hash !== hash && user.password_hash !== password) {
+      let isMatch = false
+      if (user.password_hash.startsWith('$2a$') || user.password_hash.startsWith('$2b$')) {
+        isMatch = bcrypt.compareSync(password, user.password_hash)
+      } else {
+        // Fallback untuk akun lama: SHA-256 atau plaintext
+        const shaHash = crypto.createHash('sha256').update(password).digest('hex')
+        if (user.password_hash === shaHash || user.password_hash === password) {
+          isMatch = true
+          // Seamless auto-upgrade ke bcrypt di background tanpa mengganggu user
+          const newBcryptHash = bcrypt.hashSync(password, 10)
+          pool.query('UPDATE users SET password_hash = $1 WHERE id = $2', [newBcryptHash, user.id]).catch(() => {})
+        }
+      }
+
+      if (!isMatch) {
         return res.status(401).json({ 
           success: false, 
           message: 'Kata sandi tidak sesuai. Silakan periksa kembali!' 
@@ -188,9 +254,24 @@ app.post('/api/auth/login', async (req, res) => {
     delete user.password_hash
     delete user.otp_code
 
+    // Generate JWT Token
+    const token = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        role: user.role,
+        branch_id: user.branch_id,
+        account_type: user.account_type
+      },
+      JWT_SECRET,
+      { expiresIn: '30d' }
+    )
+
     res.json({
       success: true,
       message: `Selamat datang kembali, ${user.name}!`,
+      token,
       user
     })
   } catch (err) {
@@ -198,7 +279,7 @@ app.post('/api/auth/login', async (req, res) => {
   }
 })
 
-// 9. Otentikasi Nyata: Register Akun Baru Manual
+// 9. Otentikasi Nyata: Register Akun Baru Manual (Bcrypt + JWT)
 app.post('/api/auth/register', async (req, res) => {
   const { email, name, username, password, phone, account_type, role, branch_id } = req.body
   if (!email || !name) {
@@ -208,7 +289,7 @@ app.post('/api/auth/register', async (req, res) => {
   const accType = account_type || 'business'
   const userRole = role || (accType === 'personal' ? 'personal' : 'owner')
   const id = `usr-${Date.now().toString(36)}`
-  const passwordHash = password ? crypto.createHash('sha256').update(password).digest('hex') : null
+  const passwordHash = password ? bcrypt.hashSync(password, 10) : null
 
   try {
     // Cek duplikasi email
@@ -244,9 +325,25 @@ app.post('/api/auth/register', async (req, res) => {
     `, [id, username ? username.trim() : null, email.trim(), name.trim(), phone || null, passwordHash, accType, userRole, validBranchId])
 
     const newUser = insertResult.rows[0]
+
+    // Generate JWT Token
+    const token = jwt.sign(
+      {
+        id: newUser.id,
+        email: newUser.email,
+        username: newUser.username,
+        role: newUser.role,
+        branch_id: newUser.branch_id,
+        account_type: newUser.account_type
+      },
+      JWT_SECRET,
+      { expiresIn: '30d' }
+    )
+
     res.json({
       success: true,
       message: 'Akun berhasil didaftarkan ke database!',
+      token,
       user: newUser
     })
   } catch (err) {
@@ -254,7 +351,7 @@ app.post('/api/auth/register', async (req, res) => {
   }
 })
 
-// 10. Endpoint Google OAuth 2.0 Sign-In & ID Token Verification
+// 10. Endpoint Google OAuth 2.0 Sign-In & ID Token Verification (Aman dari JWT Bypass)
 app.post('/api/auth/google', async (req, res) => {
   const { credential, account_type = 'business', role = 'owner', branch_id = 'jogja-1' } = req.body
 
@@ -267,20 +364,25 @@ app.post('/api/auth/google', async (req, res) => {
 
     // 1. Verifikasi ID Token via Google Tokeninfo Endpoint resmi
     try {
-      const verifyRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`)
+      const verifyRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`, {
+        signal: AbortSignal.timeout(5000)
+      })
       if (verifyRes.ok) {
         const tokenInfo = await verifyRes.json()
         email = (tokenInfo.email || '').toLowerCase().trim()
         name = tokenInfo.name || tokenInfo.given_name || email.split('@')[0]
         avatar_url = tokenInfo.picture || ''
         google_id = tokenInfo.sub
+      } else {
+        console.warn('[GOOGLE AUTH] Google tokeninfo status:', verifyRes.status)
       }
     } catch (e) {
-      console.warn('[GOOGLE AUTH] Warning tokeninfo:', e.message)
+      console.warn('[GOOGLE AUTH] Warning tokeninfo fetch:', e.message)
     }
 
-    // 2. Fallback parse JWT jika offline / mock
-    if (!email) {
+    // 2. Proteksi F-003: Cegah pemalsuan JWT unverified base64
+    // Fallback HANYA diizinkan jika secara eksplisit diset di NODE_ENV=development dengan header x-dev-mock
+    if (!email && process.env.NODE_ENV === 'development' && req.headers['x-dev-mock'] === 'true') {
       try {
         const parts = credential.split('.')
         if (parts.length === 3) {
@@ -294,7 +396,10 @@ app.post('/api/auth/google', async (req, res) => {
     }
 
     if (!email) {
-      return res.status(401).json({ success: false, message: 'Token Google tidak valid atau gagal diverifikasi.' })
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Token Google tidak valid atau gagal diverifikasi oleh Google Identity Services.' 
+      })
     }
 
     // 3. Cek apakah user sudah terdaftar di database PostgreSQL
@@ -316,10 +421,24 @@ app.post('/api/auth/google', async (req, res) => {
       delete user.password_hash
       delete user.otp_code
 
+      const token = jwt.sign(
+        {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          role: user.role,
+          branch_id: user.branch_id,
+          account_type: user.account_type
+        },
+        JWT_SECRET,
+        { expiresIn: '30d' }
+      )
+
       return res.json({
         success: true,
         is_new: false,
         message: `Selamat datang kembali, ${user.name}!`,
+        token,
         user
       })
     }
@@ -383,7 +502,7 @@ app.post('/api/auth/register-google', async (req, res) => {
     const assignedRole = email === 'admin@cakue.id' ? 'superadmin' : (role || (account_type === 'personal' ? 'personal' : 'owner'))
     const assignedType = account_type || 'business'
     const assignedBranch = branch_id || 'jogja-1'
-    const passwordHash = crypto.createHash('sha256').update(password).digest('hex')
+    const passwordHash = bcrypt.hashSync(password, 10)
 
     await pool.query(`
       INSERT INTO users (id, username, email, name, phone, phone_verified, is_profile_complete, password_hash, account_type, role, branch_id, avatar_url, last_login)
@@ -401,9 +520,23 @@ app.post('/api/auth/register-google', async (req, res) => {
     delete user.password_hash
     delete user.otp_code
 
+    const token = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        role: user.role,
+        branch_id: user.branch_id,
+        account_type: user.account_type
+      },
+      JWT_SECRET,
+      { expiresIn: '30d' }
+    )
+
     res.json({
       success: true,
       message: `Selamat datang di CAKUE, ${user.name}! Akun Anda berhasil dibuat.`,
+      token,
       user
     })
   } catch (err) {
@@ -431,10 +564,12 @@ app.post('/api/auth/send-otp', async (req, res) => {
   })
 })
 
-
 // 14. Endpoint Verifikasi Kode OTP WhatsApp (AUTO-BYPASS / DINONAKTIFKAN)
-app.post('/api/auth/verify-otp', async (req, res) => {
-  const { user_id } = req.body
+app.post('/api/auth/verify-otp', optionalAuth, async (req, res) => {
+  let { user_id } = req.body
+  if (req.user && req.user.id) {
+    user_id = req.user.id
+  }
 
   try {
     if (user_id) {
@@ -457,9 +592,20 @@ app.post('/api/auth/verify-otp', async (req, res) => {
   }
 })
 
-// 15. Endpoint Update Profil Lengkap (Nama & Foto Profil)
-app.put('/api/auth/update-profile', async (req, res) => {
-  const { user_id, name, avatar_url, username } = req.body
+// 15. Endpoint Update Profil Lengkap (Nama & Foto Profil) - Dilindungi dari IDOR
+app.put('/api/auth/update-profile', optionalAuth, async (req, res) => {
+  let { user_id, name, avatar_url, username } = req.body
+
+  // Proteksi IDOR: Jika ada token autentikasi, pastikan hanya bisa update akun sendiri (kecuali superadmin)
+  if (req.user) {
+    if (req.user.role !== 'superadmin' && user_id && req.user.id !== user_id) {
+      return res.status(403).json({
+        success: false,
+        message: 'Akses ditolak: Anda tidak memiliki wewenang memperbarui profil pengguna lain.'
+      })
+    }
+    user_id = req.user.id || user_id
+  }
 
   if (!user_id) {
     return res.status(400).json({ success: false, message: 'ID Pengguna wajib disertakan.' })
