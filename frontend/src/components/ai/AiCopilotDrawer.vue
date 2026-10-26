@@ -102,8 +102,9 @@
                 :key="chip.label"
                 type="button"
                 @click="sendQuickPrompt(chip.query)"
-                class="px-2.5 py-1 text-[11px] bg-white hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-300 border border-slate-200 rounded-lg text-slate-700 font-medium transition-all shadow-2xs cursor-pointer flex items-center gap-1"
+                class="px-2.5 py-1 text-[11px] bg-white hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-300 border border-slate-200 rounded-lg text-slate-700 font-medium transition-all shadow-2xs cursor-pointer flex items-center gap-1.5 group active:scale-95"
               >
+                <Icon :name="chip.icon" custom-class="w-3.5 h-3.5 text-slate-500 group-hover:text-emerald-600 transition-colors" />
                 <span>{{ chip.label }}</span>
               </button>
             </div>
@@ -179,10 +180,10 @@ const isTyping = ref(false)
 const chatContainer = ref(null)
 
 const quickChips = [
-  { label: '📊 Omset & Laba', query: 'Bagaimana analisis omset dan laba bersih bulan ini?' },
-  { label: '📦 Stok Cabang', query: 'Cek kesehatan stok cabang Surabaya dan kebutuhan restock' },
-  { label: '💳 Kas & Utang', query: 'Berapa total kas likuid dan sisa kewajiban utang jatuh tempo?' },
-  { label: '⚡ Ringkasan Cepat', query: 'Berikan ringkasan performa finansial keseluruhan saat ini' }
+  { label: 'Omset & Laba', icon: 'chart-bar', query: 'Bagaimana analisis omset dan laba bersih bulan ini?' },
+  { label: 'Stok Cabang', icon: 'box', query: 'Cek kesehatan stok cabang Surabaya dan kebutuhan restock' },
+  { label: 'Kas & Utang', icon: 'credit-card', query: 'Berapa total kas likuid dan sisa kewajiban utang jatuh tempo?' },
+  { label: 'Ringkasan Cepat', icon: 'zap', query: 'Berikan ringkasan performa finansial keseluruhan saat ini' }
 ]
 
 const chatHistory = ref([

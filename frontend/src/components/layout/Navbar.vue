@@ -22,7 +22,7 @@
             @click="authStore.setModule('cakue-ku')"
             :class="['px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5', authStore.currentModule === 'cakue-ku' ? 'bg-emerald-500 text-slate-950 font-bold shadow-md' : 'text-slate-400 hover:text-white']"
           >
-            <span>💳</span>
+            <Icon name="credit-card" custom-class="w-3.5 h-3.5" />
             <span>Cakue Ku</span>
           </button>
 
@@ -30,7 +30,7 @@
             @click="authStore.setModule('cakue-pos')"
             :class="['px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5', authStore.currentModule === 'cakue-pos' ? 'bg-teal-500 text-slate-950 font-bold shadow-md' : 'text-slate-400 hover:text-white']"
           >
-            <span>🛒</span>
+            <Icon name="store" custom-class="w-3.5 h-3.5" />
             <span>CAKUE Pos</span>
           </button>
 
@@ -38,7 +38,7 @@
             @click="authStore.setModule('cakue-manage')"
             :class="['px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5', authStore.currentModule === 'cakue-manage' ? 'bg-sky-500 text-slate-950 font-bold shadow-md' : 'text-slate-400 hover:text-white']"
           >
-            <span>🏢</span>
+            <Icon name="building" custom-class="w-3.5 h-3.5" />
             <span>Cakue Manage</span>
           </button>
         </nav>
@@ -61,9 +61,9 @@
         <!-- AI Advisor Drawer Trigger -->
         <button 
           @click="$emit('toggle-ai')"
-          class="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-950/60 to-teal-950/60 hover:from-emerald-900/60 hover:to-teal-900/60 border border-emerald-500/40 rounded-lg text-xs font-semibold text-emerald-400 shadow-sm transition-all"
+          class="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-950/60 to-teal-950/60 hover:from-emerald-900/60 hover:to-teal-900/60 border border-emerald-500/40 rounded-lg text-xs font-semibold text-emerald-400 shadow-sm transition-all cursor-pointer"
         >
-          <span class="animate-pulse">✨</span>
+          <Icon name="sparkles" custom-class="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
           <span class="hidden sm:inline">AI Copilot</span>
         </button>
 
@@ -101,6 +101,7 @@
 
 <script setup>
 import { useAuthStore } from '../../stores/authStore'
+import Icon from '../common/Icon.vue'
 
 defineEmits(['toggle-ai'])
 const authStore = useAuthStore()

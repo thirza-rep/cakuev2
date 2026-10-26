@@ -291,6 +291,16 @@
       <line x1="16" y1="14" x2="16" y2="18"/>
       <path d="M16 10h.01M12 10h.01M8 10h.01M12 14h.01M8 14h.01M12 18h.01M8 18h.01"/>
     </template>
+
+    <!-- Zap / Lightning (Ringkasan Cepat) -->
+    <polygon v-else-if="name === 'zap'" points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+
+    <!-- Chart Bar / Bar Chart (Omset & Laba) -->
+    <template v-else-if="name === 'chart-bar' || name === 'bar-chart'">
+      <line x1="12" y1="20" x2="12" y2="10"/>
+      <line x1="18" y1="20" x2="18" y2="4"/>
+      <line x1="6" y1="20" x2="6" y2="16"/>
+    </template>
   </svg>
 </template>
 
