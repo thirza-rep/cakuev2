@@ -53,6 +53,19 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
       <!-- Left: Product Catalog (Col 7 / 12) -->
       <div class="lg:col-span-7 space-y-4 sm:space-y-5">
+        <!-- Stock Notice Toast / Non-intrusive alert -->
+        <transition enter-active-class="transition duration-200 ease-out" enter-from-class="transform -translate-y-2 opacity-0" enter-to-class="transform translate-y-0 opacity-100" leave-active-class="transition duration-150 ease-in" leave-from-class="opacity-100" leave-to-class="opacity-0">
+          <div v-if="stockNotice" class="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between text-xs text-amber-900 shadow-xs">
+            <div class="flex items-center gap-2">
+              <Icon name="alert-circle" custom-class="w-4 h-4 text-amber-600 shrink-0" />
+              <span class="font-medium">{{ stockNotice }}</span>
+            </div>
+            <button @click="stockNotice = ''" class="text-amber-500 hover:text-amber-800 font-bold p-1 cursor-pointer">
+              <Icon name="close" custom-class="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </transition>
+
         <!-- Search & Category Filters -->
         <div class="saas-card p-3.5 sm:p-5 flex flex-wrap items-center justify-between gap-2.5 sm:gap-3">
           <div class="relative flex-1 min-w-0 w-full sm:w-auto">
@@ -63,7 +76,7 @@
               v-model="searchQuery"
               type="text" 
               placeholder="Cari produk, SKU, barcode..." 
-              class="w-full pl-9 sm:pl-10 pr-3 py-2 sm:py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 font-medium"
+              class="w-full pl-9 sm:pl-10 pr-3 py-2 sm:py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:bg-white font-medium transition-all"
             />
           </div>
 
@@ -88,13 +101,23 @@
             v-for="p in filteredProducts" 
             :key="p.id"
             @click="handleAddToCart(p)"
-            class="saas-card p-3.5 sm:p-5 hover:border-emerald-500 hover:shadow-md cursor-pointer transition-all flex flex-col justify-between group"
+            :class="[
+              'saas-card p-3.5 sm:p-5 transition-all flex flex-col justify-between group select-none',
+              getBranchStock(p.id) <= 0 
+                ? 'opacity-65 bg-slate-50/80 border-dashed border-slate-200 cursor-not-allowed hover:border-slate-300' 
+                : 'hover:border-emerald-500 hover:shadow-md cursor-pointer active:scale-[0.99]'
+            ]"
           >
             <div>
               <div class="flex items-center justify-between text-[11px] font-mono text-slate-500 mb-1">
                 <span class="font-bold truncate mr-1">{{ p.sku }}</span>
-                <span :class="['px-1.5 py-0.5 rounded font-bold text-[10px] shrink-0', getBranchStock(p.id) <= 5 ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-700']">
-                  Stok: {{ getBranchStock(p.id) }}
+                <span :class="[
+                  'px-1.5 py-0.5 rounded font-bold text-[10px] shrink-0', 
+                  getBranchStock(p.id) <= 0 
+                    ? 'bg-rose-100 text-rose-700' 
+                    : (getBranchStock(p.id) <= 5 ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700')
+                ]">
+                  {{ getBranchStock(p.id) <= 0 ? 'Habis' : 'Stok: ' + getBranchStock(p.id) }}
                 </span>
               </div>
               <h4 class="font-bold text-xs sm:text-sm text-slate-900 group-hover:text-emerald-700 transition-colors line-clamp-2">
@@ -106,8 +129,13 @@
               <span class="font-mono text-xs sm:text-sm font-extrabold text-slate-900">
                 Rp {{ formatNumber(p.price) }}
               </span>
-              <span class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-slate-100 group-hover:bg-emerald-600 group-hover:text-white text-slate-700 flex items-center justify-center transition-all shadow-xs shrink-0">
-                <Icon name="plus" custom-class="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span :class="[
+                'w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center transition-all shadow-xs shrink-0',
+                getBranchStock(p.id) <= 0
+                  ? 'bg-slate-100 text-slate-300'
+                  : 'bg-slate-100 group-hover:bg-emerald-600 group-hover:text-white text-slate-700'
+              ]">
+                <Icon :name="getBranchStock(p.id) <= 0 ? 'close' : 'plus'" custom-class="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </span>
             </div>
           </div>
@@ -154,7 +182,7 @@
               v-model="posStore.customerName" 
               type="text" 
               placeholder="Pelanggan Umum" 
-              class="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:border-emerald-500 font-medium"
+              class="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:bg-white font-medium transition-all"
             />
           </div>
           <div>
@@ -163,39 +191,46 @@
               v-model="posStore.customerPhone" 
               type="tel" 
               placeholder="0812xxxxxxx" 
-              class="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:border-emerald-500 font-medium"
+              class="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:bg-white font-medium transition-all"
             />
           </div>
         </div>
 
         <!-- Cart Items List -->
         <div class="space-y-2.5 max-h-[260px] overflow-y-auto pr-1">
-          <div v-if="posStore.cart.length === 0" class="text-center py-10 text-slate-400 text-sm">
-            Keranjang belanja masih kosong.<br>Klik item produk di sebelah kiri untuk menambahkan.
+          <div v-if="posStore.cart.length === 0" class="text-center py-8 px-4 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 space-y-2">
+            <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+              <Icon name="bag" custom-class="w-5 h-5" />
+            </div>
+            <div class="text-xs text-slate-500">
+              Keranjang kasir masih kosong.<br>Klik produk di sebelah kiri untuk menambahkan pesanan.
+            </div>
           </div>
 
           <div 
             v-for="item in posStore.cart" 
             :key="item.id"
-            class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center justify-between text-sm font-mono"
+            class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center justify-between text-sm font-mono shadow-2xs"
           >
             <div class="flex-1 pr-2">
               <div class="font-bold text-slate-900 line-clamp-1 font-sans text-sm">{{ item.name }}</div>
               <div class="text-xs text-slate-500">@ Rp {{ formatNumber(item.price) }}</div>
             </div>
 
-            <!-- Qty Stepper -->
-            <div class="flex items-center gap-2">
+            <!-- Qty Stepper (Fitts's Law Touch Target >= 36px) -->
+            <div class="flex items-center gap-1.5 sm:gap-2">
               <button 
                 @click="posStore.updateQty(item.id, -1)"
-                class="w-7 h-7 rounded-lg bg-white hover:bg-slate-200 border border-slate-300 text-slate-700 flex items-center justify-center font-bold cursor-pointer transition-colors"
+                class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white hover:bg-slate-200 active:scale-95 border border-slate-300 text-slate-800 flex items-center justify-center font-bold text-base cursor-pointer transition-all shadow-2xs"
+                title="Kurangi kuantitas"
               >
                 -
               </button>
-              <span class="w-6 text-center font-bold text-slate-900 text-sm">{{ item.qty }}</span>
+              <span class="w-7 text-center font-bold text-slate-900 text-sm font-mono">{{ item.qty }}</span>
               <button 
                 @click="posStore.updateQty(item.id, 1)"
-                class="w-7 h-7 rounded-lg bg-white hover:bg-slate-200 border border-slate-300 text-slate-700 flex items-center justify-center font-bold cursor-pointer transition-colors"
+                class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white hover:bg-emerald-50 hover:border-emerald-400 hover:text-emerald-700 active:scale-95 border border-slate-300 text-slate-800 flex items-center justify-center font-bold text-base cursor-pointer transition-all shadow-2xs"
+                title="Tambah kuantitas"
               >
                 +
               </button>
@@ -226,34 +261,51 @@
 
         <!-- Cash Details -->
         <div v-if="posStore.paymentMethod === 'CASH'" class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5 text-sm font-mono">
-          <div class="flex items-center justify-between">
-            <span class="text-slate-700 font-sans font-medium">Uang Diterima:</span>
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-1.5 min-w-0">
+              <span class="text-slate-700 font-sans font-medium text-xs sm:text-sm">Uang Diterima:</span>
+              <span v-if="posStore.cashGiven > 0" class="text-[10px] sm:text-[11px] font-bold text-emerald-800 bg-emerald-100/70 px-2 py-0.5 rounded-md border border-emerald-200 truncate">
+                Rp {{ formatNumber(posStore.cashGiven) }}
+              </span>
+            </div>
             <input 
               v-model.number="posStore.cashGiven" 
               type="number" 
-              class="w-36 px-3 py-1.5 text-right bg-white border border-slate-300 rounded-lg font-bold text-slate-900 text-sm focus:outline-none"
+              placeholder="0"
+              class="w-36 px-3 py-1.5 text-right bg-white border border-slate-300 rounded-lg font-bold text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:bg-white transition-all"
             />
           </div>
-          <!-- Cash Shortcuts -->
-          <div class="flex gap-2 pt-1">
+
+          <!-- Cash Shortage Warning (Heuristic #5 Error Prevention) -->
+          <div v-if="posStore.cashGiven > 0 && posStore.cashGiven < posStore.grandTotal" class="flex items-center justify-between px-3 py-2 rounded-lg bg-rose-50 border border-rose-200 text-xs font-bold text-rose-700">
+            <span class="flex items-center gap-1.5">
+              <Icon name="alert-circle" custom-class="w-4 h-4 text-rose-500 shrink-0" />
+              <span>Uang tunai kurang:</span>
+            </span>
+            <span class="font-mono text-rose-800">Rp {{ formatNumber(posStore.grandTotal - posStore.cashGiven) }}</span>
+          </div>
+
+          <!-- Cash Shortcuts (Recognition over Recall & Fast Cashiering) -->
+          <div class="flex flex-wrap gap-1.5 pt-1">
             <button 
               @click="posStore.cashGiven = posStore.grandTotal"
-              class="flex-1 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-xs text-slate-800 font-bold cursor-pointer"
+              class="flex-1 min-w-[70px] py-1.5 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-xs text-slate-800 font-bold cursor-pointer transition-colors active:scale-95 shadow-2xs"
             >
               Uang Pas
             </button>
             <button 
-              v-for="amt in [50000, 100000, 200000]" 
+              v-for="amt in cashPresetList" 
               :key="amt"
               @click="posStore.cashGiven = amt"
-              class="flex-1 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-xs text-slate-800 font-bold cursor-pointer"
+              class="flex-1 min-w-[50px] py-1.5 bg-white hover:bg-emerald-50 hover:border-emerald-300 border border-slate-200 rounded-lg text-xs text-slate-800 font-bold cursor-pointer transition-colors active:scale-95 shadow-2xs"
             >
-              {{ amt / 1000 }}rb
+              {{ amt >= 1000 ? (amt / 1000) + 'rb' : amt }}
             </button>
           </div>
+
           <div class="flex justify-between pt-1.5 border-t border-slate-200 font-bold font-sans">
             <span class="text-slate-600">Kembalian:</span>
-            <span class="text-emerald-700 font-mono text-base">
+            <span class="text-emerald-700 font-mono text-base font-extrabold">
               Rp {{ formatNumber(posStore.changeDue) }}
             </span>
           </div>
@@ -305,11 +357,17 @@
         <!-- Checkout Action Button -->
         <button 
           @click="handleCheckout"
-          :disabled="posStore.cart.length === 0 || !isBranchOpen"
-          class="w-full py-3.5 bg-emerald-700 hover:bg-emerald-800 disabled:opacity-40 disabled:cursor-not-allowed text-white font-extrabold text-sm sm:text-base rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+          :disabled="posStore.cart.length === 0 || !isBranchOpen || isCashInsufficient"
+          class="w-full py-3.5 bg-emerald-700 hover:bg-emerald-800 disabled:opacity-40 disabled:cursor-not-allowed text-white font-extrabold text-sm sm:text-base rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
         >
           <Icon name="check" custom-class="w-5 h-5" />
-          <span>{{ !isBranchOpen ? 'Toko Tutup (Operasional Libur)' : 'Selesaikan Transaksi & Buat Struk' }}</span>
+          <span>
+            {{ 
+              isCashInsufficient 
+                ? 'Uang Tunai Belum Cukup' 
+                : (!isBranchOpen ? 'Toko Tutup (Operasional Libur)' : 'Selesaikan Transaksi & Buat Struk') 
+            }}
+          </span>
         </button>
       </div>
     </div>
@@ -342,6 +400,7 @@ const categories = ['Semua', 'Bahan Baku', 'Sirup', 'Packaging', 'Makanan Jadi']
 
 const showReceiptModal = ref(false)
 const completedOrder = ref(null)
+const stockNotice = ref('')
 
 const currentBranchName = computed(() => {
   return authStore.businessUser?.currentBranch || 'Cabang 1 - Malioboro'
@@ -381,13 +440,27 @@ function getBranchStock(productId) {
 function handleAddToCart(product) {
   const stock = getBranchStock(product.id)
   if (stock <= 0) {
-    alert(`Stok produk "${product.name}" habis di ${currentBranchName.value}! Silakan lakukan transfer dari Stok Pusat.`)
+    stockNotice.value = `Stok produk "${product.name}" habis di ${currentBranchName.value}! Silakan lakukan transfer dari Stok Pusat.`
+    setTimeout(() => { stockNotice.value = '' }, 4000)
     return
   }
   posStore.addToCart(product)
 }
 
+const cashPresetList = computed(() => {
+  const base = [50000, 100000, 200000]
+  if (posStore.grandTotal > 200000) {
+    return [100000, 200000, 500000]
+  }
+  return base
+})
+
+const isCashInsufficient = computed(() => {
+  return posStore.paymentMethod === 'CASH' && (posStore.cashGiven < posStore.grandTotal)
+})
+
 function handleCheckout() {
+  if (isCashInsufficient.value) return
   const result = posStore.checkout(
     currentBranchId.value,
     currentBranchName.value,

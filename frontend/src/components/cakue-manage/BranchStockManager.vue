@@ -116,7 +116,7 @@
           v-model="searchQuery" 
           type="text" 
           placeholder="Cari SKU atau nama barang..."
-          class="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-emerald-500 font-medium"
+          class="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:bg-white font-medium transition-all"
         />
       </div>
 
@@ -516,7 +516,7 @@
           <!-- Pilih Produk -->
           <div>
             <label class="block font-bold text-slate-700 mb-1">Pilih Produk / Bahan</label>
-            <select v-model="adjustForm.productId" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:border-emerald-500">
+            <select v-model="adjustForm.productId" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:bg-white transition-all">
               <option v-for="p in stockStore.products" :key="p.id" :value="p.id">
                 {{ p.name }} (Pusat: {{ p.centralStock }} pcs)
               </option>
@@ -534,7 +534,7 @@
             <select 
               v-model="adjustForm.location" 
               :disabled="authStore.isWarehouse"
-              class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:border-emerald-500 disabled:opacity-75 disabled:cursor-not-allowed"
+              class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:bg-white disabled:opacity-75 disabled:cursor-not-allowed transition-all"
             >
               <option value="central">Gudang Pusat (Central Hub)</option>
               <option v-for="b in authStore.branches" :key="b.id" :value="b.id">
@@ -552,13 +552,13 @@
                 type="number" 
                 min="1" 
                 placeholder="1"
-                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-mono font-bold focus:outline-none focus:border-emerald-500 text-base"
+                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:bg-white text-base transition-all"
               />
             </div>
 
             <div>
               <label class="block font-bold text-slate-700 mb-1">Alasan Penyesuaian</label>
-              <select v-model="adjustForm.reason" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:border-emerald-500">
+              <select v-model="adjustForm.reason" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:bg-white transition-all">
                 <template v-if="adjustForm.type === 'in'">
                   <option value="Restock Pembelian Supplier">Restock Pembelian Supplier</option>
                   <option value="Hasil Produksi Dapur Pusat">Hasil Produksi Dapur Pusat</option>
@@ -588,17 +588,22 @@
                 
                 <div v-if="adjustForm.syncFinance" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 animate-fade-in">
                   <div>
-                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Total Biaya Beli (Rp)</label>
+                    <div class="flex items-center justify-between mb-1">
+                      <label class="block text-[11px] font-bold text-slate-600">Total Biaya Beli (Rp)</label>
+                      <span v-if="adjustForm.cost > 0" class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+                        Rp {{ (adjustForm.cost || 0).toLocaleString('id-ID') }}
+                      </span>
+                    </div>
                     <input 
                       v-model.number="adjustForm.cost" 
                       type="number" 
                       placeholder="0"
-                      class="w-full px-2.5 py-2 text-xs bg-white border border-slate-200 rounded-lg text-slate-900 font-mono font-bold"
+                      class="w-full px-2.5 py-2 text-xs bg-white border border-slate-200 rounded-lg text-slate-900 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all"
                     />
                   </div>
                   <div>
                     <label class="block text-[11px] font-bold text-slate-600 mb-1">Rekening Sumber Kas</label>
-                    <select v-model="adjustForm.accountName" class="w-full px-2.5 py-2 text-xs bg-white border border-slate-200 rounded-lg text-slate-900 font-medium">
+                    <select v-model="adjustForm.accountName" class="w-full px-2.5 py-2 text-xs bg-white border border-slate-200 rounded-lg text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all">
                       <option v-for="acc in financeStore.accounts" :key="acc.id" :value="acc.name">
                         {{ acc.name }}
                       </option>
@@ -626,7 +631,7 @@
           <button 
             @click="handleSaveStockAdjustment" 
             type="button" 
-            class="px-5 py-2.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl cursor-pointer shadow-xs transition-all"
+            class="px-5 py-2.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl cursor-pointer shadow-xs transition-all active:scale-95"
           >
             Simpan Mutasi Stok
           </button>
@@ -663,7 +668,7 @@
               v-model="newProductForm.name" 
               type="text" 
               placeholder="Misal: Cokelat Meises Premium 1kg"
-              class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:border-emerald-500"
+              class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:bg-white transition-all"
             />
           </div>
 
@@ -674,12 +679,12 @@
                 v-model="newProductForm.sku" 
                 type="text" 
                 placeholder="CKU-COK-07"
-                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-mono font-bold focus:outline-none focus:border-emerald-500"
+                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:bg-white transition-all"
               />
             </div>
             <div>
               <label class="block font-bold text-slate-700 mb-1">Kategori</label>
-              <select v-model="newProductForm.category" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:border-emerald-500">
+              <select v-model="newProductForm.category" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:bg-white transition-all">
                 <option value="Bahan Baku">Bahan Baku</option>
                 <option value="Sirup">Sirup</option>
                 <option value="Packaging">Packaging</option>
@@ -691,23 +696,42 @@
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block font-bold text-slate-700 mb-1">HPP Modal (Rp)</label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="block font-bold text-slate-700">HPP Modal (Rp)</label>
+                <span v-if="newProductForm.hpp > 0" class="text-[10px] font-bold text-slate-600 font-mono">
+                  Rp {{ (newProductForm.hpp || 0).toLocaleString('id-ID') }}
+                </span>
+              </div>
               <input 
                 v-model.number="newProductForm.hpp" 
                 type="number" 
                 placeholder="25000"
-                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-mono font-bold focus:outline-none focus:border-emerald-500"
+                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:bg-white transition-all"
               />
             </div>
             <div>
-              <label class="block font-bold text-slate-700 mb-1">Harga Jual (Rp)</label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="block font-bold text-slate-700">Harga Jual (Rp)</label>
+                <span v-if="newProductForm.price > 0" class="text-[10px] font-bold text-emerald-700 font-mono">
+                  Rp {{ (newProductForm.price || 0).toLocaleString('id-ID') }}
+                </span>
+              </div>
               <input 
                 v-model.number="newProductForm.price" 
                 type="number" 
                 placeholder="40000"
-                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-mono font-bold focus:outline-none focus:border-emerald-500"
+                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:bg-white transition-all"
               />
             </div>
+          </div>
+
+          <!-- Live Margin Calculation Feedback -->
+          <div v-if="newProductForm.price > 0 && newProductForm.hpp > 0" class="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-200 flex items-center justify-between text-xs">
+            <span class="text-emerald-900 font-medium">Estimasi Margin Laba:</span>
+            <span class="font-bold text-emerald-800 font-mono">
+              Rp {{ (newProductForm.price - newProductForm.hpp).toLocaleString('id-ID') }}
+              ({{ Math.round(((newProductForm.price - newProductForm.hpp) / newProductForm.hpp) * 100) }}%)
+            </span>
           </div>
 
           <div class="grid grid-cols-2 gap-3">
@@ -717,7 +741,7 @@
                 v-model.number="newProductForm.centralStock" 
                 type="number" 
                 placeholder="50"
-                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-mono font-bold focus:outline-none focus:border-emerald-500"
+                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:bg-white transition-all"
               />
             </div>
             <div>
@@ -726,7 +750,7 @@
                 v-model.number="newProductForm.minAlert" 
                 type="number" 
                 placeholder="15"
-                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-mono font-bold focus:outline-none focus:border-emerald-500"
+                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:bg-white transition-all"
               />
             </div>
           </div>
@@ -738,7 +762,7 @@
             @click="handleSaveNewProduct" 
             :disabled="!newProductForm.name"
             type="button" 
-            class="px-5 py-2.5 text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl cursor-pointer shadow-xs disabled:opacity-50"
+            class="px-5 py-2.5 text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl cursor-pointer shadow-xs disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95"
           >
             Daftarkan Produk
           </button>
@@ -771,7 +795,7 @@
         <div class="space-y-3 text-xs sm:text-sm">
           <div>
             <label class="block font-bold text-slate-700 mb-1">Pilih Cabang Tujuan</label>
-            <select v-model="selectedBranch" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:border-emerald-500">
+            <select v-model="selectedBranch" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:bg-white transition-all">
               <option v-for="b in authStore.branches" :key="b.id" :value="b.id">
                 {{ b.name }} ({{ b.code }})
               </option>
@@ -780,7 +804,7 @@
 
           <div>
             <label class="block font-bold text-slate-700 mb-1">Pilih Produk</label>
-            <select v-model="selectedProduct" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:border-emerald-500">
+            <select v-model="selectedProduct" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:bg-white transition-all">
               <option v-for="p in stockStore.products" :key="p.id" :value="p">
                 {{ p.name }} (Stok Gudang: {{ p.centralStock }} pcs)
               </option>
@@ -789,13 +813,16 @@
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block font-bold text-slate-700 mb-1">Jumlah Transfer (Qty)</label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="block font-bold text-slate-700">Jumlah Transfer (Qty)</label>
+                <span class="text-[10px] text-slate-500 font-medium">Maks: {{ selectedProduct?.centralStock || 0 }} pcs</span>
+              </div>
               <input 
                 v-model.number="transferQty" 
                 type="number" 
                 min="1" 
                 :max="selectedProduct?.centralStock || 100"
-                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-mono font-bold focus:outline-none focus:border-emerald-500" 
+                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:bg-white transition-all" 
               />
             </div>
             <div>
@@ -804,9 +831,15 @@
                 v-model="driverName" 
                 type="text" 
                 placeholder="Armada Truk 02" 
-                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-emerald-500 font-medium" 
+                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:bg-white font-medium transition-all" 
               />
             </div>
+          </div>
+
+          <!-- Warning jika transfer melebihi stok gudang -->
+          <div v-if="selectedProduct && transferQty > selectedProduct.centralStock" class="p-2.5 rounded-xl bg-rose-50 border border-rose-200 flex items-center gap-2 text-xs font-bold text-rose-700">
+            <Icon name="alert-circle" custom-class="w-4 h-4 text-rose-500 shrink-0" />
+            <span>Kuantitas melebihi stok tersedia di Gudang Pusat ({{ selectedProduct.centralStock }} pcs).</span>
           </div>
         </div>
 
@@ -816,7 +849,7 @@
             @click="handleCreateTransfer" 
             :disabled="!selectedProduct || transferQty <= 0 || transferQty > (selectedProduct?.centralStock || 0)"
             type="button" 
-            class="px-5 py-2.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl cursor-pointer shadow-xs disabled:opacity-50"
+            class="px-5 py-2.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl cursor-pointer shadow-xs disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95"
           >
             Kirimkan Stok (Buat SJ)
           </button>

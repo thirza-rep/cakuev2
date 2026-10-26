@@ -253,7 +253,12 @@
 
         <form @submit.prevent="saveTransaction" class="space-y-3">
           <div>
-            <label class="block text-xs font-medium text-slate-600 mb-1">Nominal (Rupiah)</label>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-xs font-bold text-slate-700">Nominal (Rupiah)</label>
+              <span v-if="formAmount > 0" class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 font-mono">
+                Rp {{ (formAmount || 0).toLocaleString('id-ID') }}
+              </span>
+            </div>
             <div class="relative">
               <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-xs font-bold text-slate-400 font-mono">Rp</span>
               <input 
@@ -262,26 +267,26 @@
                 min="1000"
                 required
                 placeholder="50000" 
-                class="w-full pl-10 pr-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg text-slate-900 font-mono font-bold focus:outline-none focus:border-emerald-500"
+                class="w-full pl-10 pr-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:bg-white transition-all"
               />
             </div>
           </div>
 
           <div>
-            <label class="block text-xs font-medium text-slate-600 mb-1">Keterangan</label>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Keterangan Transaksi</label>
             <input 
               v-model="formDesc" 
               type="text" 
               required
               placeholder="Contoh: Makan Siang, Bensin, Gaji" 
-              class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:border-emerald-500"
+              class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:bg-white transition-all font-medium"
             />
           </div>
 
-          <div class="grid grid-cols-2 gap-2">
+          <div class="grid grid-cols-2 gap-2.5">
             <div>
-              <label class="block text-xs font-medium text-slate-600 mb-1">Kategori</label>
-              <select v-model="formCategory" class="w-full px-2.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800">
+              <label class="block text-xs font-bold text-slate-700 mb-1">Kategori</label>
+              <select v-model="formCategory" class="w-full px-2.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:bg-white transition-all">
                 <option value="Makan & Minum">Makan & Minum</option>
                 <option value="Transportasi">Transportasi</option>
                 <option value="Tagihan & Utilitas">Tagihan & Utilitas</option>
@@ -292,8 +297,8 @@
             </div>
 
             <div>
-              <label class="block text-xs font-medium text-slate-600 mb-1">Pilih Rekening</label>
-              <select v-model="formAccount" class="w-full px-2.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800">
+              <label class="block text-xs font-bold text-slate-700 mb-1">Pilih Rekening</label>
+              <select v-model="formAccount" class="w-full px-2.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:bg-white transition-all">
                 <option v-for="acc in financeStore.accounts" :key="acc.id" :value="acc.name">
                   {{ acc.name }}
                 </option>
@@ -302,10 +307,10 @@
           </div>
 
           <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-            <button type="button" @click="showModal = false" class="px-4 py-2 text-xs text-slate-500 hover:text-slate-800 font-medium">Batal</button>
+            <button type="button" @click="showModal = false" class="px-4 py-2 text-xs text-slate-500 hover:text-slate-800 font-semibold cursor-pointer">Batal</button>
             <button 
               type="submit" 
-              class="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm"
+              class="px-5 py-2 text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl shadow-xs transition-all active:scale-95 cursor-pointer"
             >
               Simpan Transaksi
             </button>

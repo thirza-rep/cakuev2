@@ -184,14 +184,19 @@
           <!-- Form Detail Pengeluaran -->
           <div class="space-y-3">
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">Nominal Pengeluaran (Rp)</label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="block text-xs font-bold text-slate-700">Nominal Pengeluaran</label>
+                <span v-if="expenseForm.amount > 0" class="text-xs font-mono font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200 animate-fade-in">
+                  Rp {{ formatNumber(expenseForm.amount) }}
+                </span>
+              </div>
               <div class="relative">
                 <span class="absolute left-3.5 top-2.5 text-xs font-bold text-slate-400">Rp</span>
                 <input 
                   v-model.number="expenseForm.amount"
                   type="number"
                   placeholder="0"
-                  class="w-full pl-10 pr-3 py-2.5 text-base font-extrabold tracking-tight bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-rose-500 font-sans"
+                  class="w-full pl-10 pr-3 py-2.5 text-base font-extrabold tracking-tight bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-rose-600 focus:ring-2 focus:ring-rose-500/20 focus:bg-white font-sans transition-all shadow-2xs"
                 />
               </div>
             </div>
@@ -202,7 +207,7 @@
                 v-model="expenseForm.desc"
                 type="text"
                 placeholder="Misal: Makan Siang, Beli Bensin, Belanja Supermarket"
-                class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-rose-500 font-medium"
+                class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-rose-600 focus:ring-2 focus:ring-rose-500/20 focus:bg-white font-medium transition-all shadow-2xs"
               />
             </div>
 
@@ -211,7 +216,7 @@
                 <label class="block text-xs font-bold text-slate-700 mb-1">Kategori Pengeluaran</label>
                 <select 
                   v-model="expenseForm.category"
-                  class="w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-medium focus:outline-none focus:border-rose-500"
+                  class="w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-medium focus:outline-none focus:border-rose-600 focus:ring-2 focus:ring-rose-500/20 focus:bg-white transition-all shadow-2xs cursor-pointer"
                 >
                   <option value="Makan & Minum">Makan & Minum</option>
                   <option value="Transportasi">Transportasi</option>
@@ -233,7 +238,7 @@
                 </div>
                 <select 
                   v-model="expenseForm.account"
-                  class="w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-medium focus:outline-none focus:border-rose-500"
+                  class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-medium focus:outline-none focus:border-rose-600 focus:ring-2 focus:ring-rose-500/20 focus:bg-white transition-all shadow-2xs cursor-pointer"
                 >
                   <option v-for="acc in financeStore.accounts" :key="acc.id" :value="acc.name">
                     {{ acc.name }}
@@ -299,14 +304,19 @@
           <!-- Form Detail Pemasukan -->
           <div class="space-y-3">
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">Nominal Pemasukan (Rp)</label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="block text-xs font-bold text-slate-700">Nominal Pemasukan</label>
+                <span v-if="incomeForm.amount > 0" class="text-xs font-mono font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 animate-fade-in">
+                  Rp {{ formatNumber(incomeForm.amount) }}
+                </span>
+              </div>
               <div class="relative">
                 <span class="absolute left-3.5 top-2.5 text-xs font-bold text-slate-400">Rp</span>
                 <input 
                   v-model.number="incomeForm.amount"
                   type="number"
                   placeholder="0"
-                  class="w-full pl-10 pr-3 py-2.5 text-base font-extrabold tracking-tight bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-emerald-500 font-sans"
+                  class="w-full pl-10 pr-3 py-2.5 text-base font-extrabold tracking-tight bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 focus:bg-white font-sans transition-all shadow-2xs"
                 />
               </div>
             </div>
@@ -317,7 +327,7 @@
                 v-model="incomeForm.desc"
                 type="text"
                 placeholder="Misal: Gaji Bulanan, Bonus Proyek, Transfer Masuk"
-                class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-emerald-500 font-medium"
+                class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 focus:bg-white font-medium transition-all shadow-2xs placeholder:text-slate-400"
               />
             </div>
 
@@ -326,7 +336,7 @@
                 <label class="block text-xs font-bold text-slate-700 mb-1">Kategori Pemasukan</label>
                 <select 
                   v-model="incomeForm.category"
-                  class="w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-medium focus:outline-none focus:border-emerald-500"
+                  class="w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-medium focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 focus:bg-white transition-all shadow-2xs cursor-pointer"
                 >
                   <option value="Gaji & Upah">Gaji & Upah</option>
                   <option value="Penjualan Bisnis">Penjualan Bisnis</option>
@@ -346,7 +356,7 @@
                 </div>
                 <select 
                   v-model="incomeForm.account"
-                  class="w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-medium focus:outline-none focus:border-emerald-500"
+                  class="w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-medium focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 focus:bg-white transition-all shadow-2xs cursor-pointer"
                 >
                   <option v-for="acc in financeStore.accounts" :key="acc.id" :value="acc.name">
                     {{ acc.name }}
@@ -392,7 +402,7 @@
               </div>
               <select 
                 v-model="transferForm.fromAccount" 
-                class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-medium focus:outline-none focus:border-blue-500"
+                class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-medium focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all shadow-2xs cursor-pointer"
               >
                 <option v-for="acc in financeStore.accounts" :key="acc.id" :value="acc.name">
                   {{ acc.name }}
@@ -416,7 +426,7 @@
               </div>
               <select 
                 v-model="transferForm.toAccount" 
-                class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-medium focus:outline-none focus:border-blue-500"
+                class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-medium focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all shadow-2xs cursor-pointer"
               >
                 <option 
                   v-for="acc in financeStore.accounts.filter(a => a.name !== transferForm.fromAccount)" 
@@ -429,13 +439,21 @@
             </div>
 
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">Nominal yang Dipindahkan (Rp)</label>
-              <input 
-                v-model.number="transferForm.amount" 
-                type="number" 
-                placeholder="0" 
-                class="w-full px-3.5 py-2.5 text-base font-extrabold tracking-tight bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-blue-500 font-sans"
-              />
+              <div class="flex items-center justify-between mb-1">
+                <label class="block text-xs font-bold text-slate-700">Nominal yang Dipindahkan</label>
+                <span v-if="transferForm.amount > 0" class="text-xs font-mono font-bold text-blue-800 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200 animate-fade-in">
+                  Rp {{ formatNumber(transferForm.amount) }}
+                </span>
+              </div>
+              <div class="relative">
+                <span class="absolute left-3.5 top-2.5 text-xs font-bold text-slate-400">Rp</span>
+                <input 
+                  v-model.number="transferForm.amount" 
+                  type="number" 
+                  placeholder="0" 
+                  class="w-full pl-10 pr-3 py-2.5 text-base font-extrabold tracking-tight bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 focus:bg-white font-sans transition-all shadow-2xs"
+                />
+              </div>
             </div>
 
             <div>
@@ -444,7 +462,7 @@
                 v-model="transferForm.note" 
                 type="text" 
                 placeholder="Misal: Tarik tunai untuk belanja pasar" 
-                class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-blue-500 font-medium"
+                class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 focus:bg-white font-medium transition-all shadow-2xs placeholder:text-slate-400"
               />
             </div>
           </div>
@@ -454,7 +472,7 @@
             @click="handleTransferFunds" 
             :disabled="!transferForm.amount || transferForm.amount <= 0 || transferForm.amount > transferFromBalance" 
             type="button" 
-            class="w-full py-3.5 rounded-2xl bg-blue-700 hover:bg-blue-800 text-white font-extrabold text-sm transition-all shadow-xs hover:shadow-md disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+            class="w-full py-3.5 rounded-2xl bg-blue-700 hover:bg-blue-800 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-extrabold text-sm transition-all shadow-xs hover:shadow-md cursor-pointer flex items-center justify-center gap-2"
           >
             <Icon name="check" custom-class="w-5 h-5 text-white" />
             <span>Pindahkan Saldo Sekarang</span>

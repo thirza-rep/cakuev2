@@ -79,57 +79,111 @@
         <span>{{ errorMessage }}</span>
       </div>
 
-      <form @submit.prevent="handleRegister" class="space-y-3.5">
+      <form @submit.prevent="handleRegister" class="space-y-4">
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Lengkap</label>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">Nama Lengkap</label>
           <input 
             v-model="name" 
             type="text" 
             required
             placeholder="Contoh: Dimas Pratama" 
-            class="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:border-emerald-500"
+            class="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 focus:bg-white transition-all shadow-2xs placeholder:text-slate-400"
           />
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Alamat Email</label>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">Alamat Email</label>
           <input 
             v-model="email" 
             type="email" 
             required
             placeholder="dimas@gmail.com" 
-            class="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:border-emerald-500"
+            class="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 focus:bg-white transition-all shadow-2xs placeholder:text-slate-400"
           />
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Kata Sandi</label>
-            <input 
-              v-model="password" 
-              type="password" 
-              required
-              placeholder="••••••••" 
-              class="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:border-emerald-500"
-            />
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="block text-xs font-bold text-slate-700">Kata Sandi</label>
+              <button 
+                type="button" 
+                @click="showPassword = !showPassword" 
+                class="text-[11px] text-emerald-700 hover:text-emerald-800 font-semibold cursor-pointer flex items-center gap-1"
+                :title="showPassword ? 'Sembunyikan sandi' : 'Tampilkan sandi'"
+              >
+                <Icon :name="showPassword ? 'eye-off' : 'eye'" custom-class="w-3.5 h-3.5" />
+                <span>{{ showPassword ? 'Tutup' : 'Lihat' }}</span>
+              </button>
+            </div>
+            <div class="relative">
+              <input 
+                v-model="password" 
+                :type="showPassword ? 'text' : 'password'" 
+                required
+                placeholder="Minimal 6 karakter" 
+                class="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 focus:bg-white transition-all shadow-2xs placeholder:text-slate-400"
+              />
+            </div>
           </div>
+
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Konfirmasi Sandi</label>
-            <input 
-              v-model="confirmPassword" 
-              type="password" 
-              required
-              placeholder="••••••••" 
-              class="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:border-emerald-500"
-            />
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="block text-xs font-bold text-slate-700">Konfirmasi Sandi</label>
+              <button 
+                type="button" 
+                @click="showConfirmPassword = !showConfirmPassword" 
+                class="text-[11px] text-emerald-700 hover:text-emerald-800 font-semibold cursor-pointer flex items-center gap-1"
+                :title="showConfirmPassword ? 'Sembunyikan konfirmasi' : 'Tampilkan konfirmasi'"
+              >
+                <Icon :name="showConfirmPassword ? 'eye-off' : 'eye'" custom-class="w-3.5 h-3.5" />
+                <span>{{ showConfirmPassword ? 'Tutup' : 'Lihat' }}</span>
+              </button>
+            </div>
+            <div class="relative">
+              <input 
+                v-model="confirmPassword" 
+                :type="showConfirmPassword ? 'text' : 'password'" 
+                required
+                placeholder="Ulangi kata sandi" 
+                class="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 focus:bg-white transition-all shadow-2xs placeholder:text-slate-400"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Real-Time Password Requirements Checklist (Heuristic #5 Error Prevention & #6 Recognition over Recall) -->
+        <div v-if="password.length > 0 || confirmPassword.length > 0" class="p-3 bg-slate-50/90 rounded-xl border border-slate-200 space-y-1.5 text-[11px] transition-all">
+          <div class="font-bold text-slate-700 mb-1">Standar Keamanan Kata Sandi:</div>
+          <div class="grid grid-cols-2 gap-1.5">
+            <div class="flex items-center gap-1.5" :class="isLengthValid ? 'text-emerald-700 font-bold' : 'text-slate-400'">
+              <Icon :name="isLengthValid ? 'check' : 'circle'" custom-class="w-3.5 h-3.5 shrink-0" />
+              <span>Min. 6 karakter</span>
+            </div>
+            <div class="flex items-center gap-1.5" :class="hasLetter ? 'text-emerald-700 font-bold' : 'text-slate-400'">
+              <Icon :name="hasLetter ? 'check' : 'circle'" custom-class="w-3.5 h-3.5 shrink-0" />
+              <span>Ada huruf (a-z)</span>
+            </div>
+            <div class="flex items-center gap-1.5" :class="hasNumber ? 'text-emerald-700 font-bold' : 'text-slate-400'">
+              <Icon :name="hasNumber ? 'check' : 'circle'" custom-class="w-3.5 h-3.5 shrink-0" />
+              <span>Ada angka (0-9)</span>
+            </div>
+            <div class="flex items-center gap-1.5" :class="isMatched ? 'text-emerald-700 font-bold' : 'text-slate-400'">
+              <Icon :name="isMatched ? 'check' : 'circle'" custom-class="w-3.5 h-3.5 shrink-0" />
+              <span>Sandi cocok</span>
+            </div>
           </div>
         </div>
 
         <button 
           type="submit" 
-          :disabled="isLoading"
-          class="w-full py-2.5 px-4 bg-emerald-700 hover:bg-emerald-800 disabled:bg-emerald-400 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer flex items-center justify-center gap-2"
+          :disabled="isLoading || (password && !isFormValid)"
+          class="w-full py-2.5 px-4 bg-emerald-700 hover:bg-emerald-800 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-bold text-xs rounded-xl shadow-xs hover:shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
         >
+          <svg v-if="isLoading" class="animate-spin w-4 h-4 text-white" viewBox="0 0 24 24" fill="none">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
           <span v-if="isLoading">Mendaftarkan ke Database...</span>
           <span v-else>Daftar Akun Baru</span>
         </button>
@@ -234,7 +288,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '../../stores/authStore'
 import Icon from '../common/Icon.vue'
 import GoogleCredentialModal from './GoogleCredentialModal.vue'
@@ -247,6 +301,8 @@ const name = ref('')
 const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
+const showPassword = ref(false)
+const showConfirmPassword = ref(false)
 const errorMessage = ref('')
 const isLoading = ref(false)
 const isGoogleLoading = ref(false)
@@ -255,6 +311,22 @@ const showCredentialModal = ref(false)
 const pendingGoogleData = ref(null)
 const detectedOrigin = ref(typeof window !== 'undefined' ? window.location.origin : 'http://192.168.1.13:5173')
 const copiedOrigin = ref(false)
+
+// Real-Time Validation Rules (Nielsen Heuristic #5 Error Prevention)
+const isLengthValid = computed(() => password.value.length >= 6)
+const hasLetter = computed(() => /[a-zA-Z]/.test(password.value))
+const hasNumber = computed(() => /[0-9]/.test(password.value))
+const isMatched = computed(() => password.value.length > 0 && password.value === confirmPassword.value)
+const isFormValid = computed(() => {
+  return (
+    name.value.trim().length >= 2 &&
+    email.value.includes('@') &&
+    isLengthValid.value &&
+    hasLetter.value &&
+    hasNumber.value &&
+    isMatched.value
+  )
+})
 
 onMounted(() => {
   if (typeof window !== 'undefined') {

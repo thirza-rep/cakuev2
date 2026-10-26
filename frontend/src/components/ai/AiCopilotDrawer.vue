@@ -85,14 +85,53 @@
 
         <!-- Chat Conversation with Copilot -->
         <div class="pt-2 border-t border-slate-100 space-y-3">
-          <div class="text-[11px] font-semibold text-slate-500 uppercase">Konsultasi Analis Finansial:</div>
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Konsultasi Analis Finansial:</span>
+            <span class="text-[10px] text-emerald-700 font-bold flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              Aktif
+            </span>
+          </div>
+
+          <!-- Quick Prompt Suggestions (Heuristic #6 Recognition over Recall) -->
+          <div class="space-y-1.5">
+            <div class="text-[10px] text-slate-400 font-medium">Saran Pertanyaan Cepat:</div>
+            <div class="flex flex-wrap gap-1.5">
+              <button 
+                v-for="chip in quickChips" 
+                :key="chip.label"
+                type="button"
+                @click="sendQuickPrompt(chip.query)"
+                class="px-2.5 py-1 text-[11px] bg-white hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-300 border border-slate-200 rounded-lg text-slate-700 font-medium transition-all shadow-2xs cursor-pointer flex items-center gap-1"
+              >
+                <span>{{ chip.label }}</span>
+              </button>
+            </div>
+          </div>
           
-          <div class="space-y-2">
-            <div v-for="(msg, i) in chatHistory" :key="i" :class="['p-3 rounded-xl text-xs space-y-1', msg.sender === 'user' ? 'bg-slate-900 text-white ml-6' : 'bg-slate-100 text-slate-800 mr-6']">
-              <div class="text-[9px] font-bold" :class="msg.sender === 'user' ? 'text-slate-300' : 'text-emerald-700'">
+          <div ref="chatContainer" class="space-y-2 pt-1 max-h-60 overflow-y-auto pr-1">
+            <div 
+              v-for="(msg, i) in chatHistory" 
+              :key="i" 
+              :class="['p-3 rounded-2xl text-xs space-y-1 shadow-2xs transition-all', msg.sender === 'user' ? 'bg-slate-900 text-white ml-6 rounded-tr-xs' : 'bg-slate-100 text-slate-800 mr-6 rounded-tl-xs border border-slate-200/80']"
+            >
+              <div class="text-[9px] font-bold uppercase tracking-wider" :class="msg.sender === 'user' ? 'text-slate-300' : 'text-emerald-800'">
                 {{ msg.sender === 'user' ? 'Anda' : 'CAKUE AI Copilot' }}
               </div>
               <div class="leading-relaxed">{{ msg.text }}</div>
+            </div>
+
+            <!-- Typing Indicator (Heuristic #1 Visibility of System Status) -->
+            <div v-if="isTyping" class="p-3 bg-slate-100 border border-slate-200/80 rounded-2xl rounded-tl-xs mr-6 space-y-1 animate-fade-in shadow-2xs">
+              <div class="text-[9px] font-bold text-emerald-800 uppercase tracking-wider">CAKUE AI Copilot</div>
+              <div class="flex items-center gap-1.5 text-xs text-slate-500">
+                <span class="inline-flex gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-bounce [animation-delay:0ms]"></span>
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-bounce [animation-delay:150ms]"></span>
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-bounce [animation-delay:300ms]"></span>
+                </span>
+                <span class="text-[11px] italic">Menganalisis ledger & data mutasi...</span>
+              </div>
             </div>
           </div>
         </div>
@@ -105,14 +144,15 @@
             v-model="queryInput"
             type="text" 
             placeholder="Tanyakan analisis stok atau laba rugi..." 
-            class="flex-1 px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500"
+            class="flex-1 px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 focus:bg-white transition-all shadow-2xs"
           />
           <button 
             type="submit"
-            :disabled="!queryInput"
-            class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 disabled:opacity-40 text-white font-bold text-xs rounded-lg transition-colors cursor-pointer"
+            :disabled="!queryInput || isTyping"
+            class="px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-bold text-xs rounded-xl shadow-xs hover:shadow-md transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
           >
-            Kirim
+            <span>Kirim</span>
+            <Icon name="send" custom-class="w-3.5 h-3.5" />
           </button>
         </form>
       </div>
@@ -121,7 +161,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, nextTick } from 'vue'
 import { useFinanceStore } from '../../stores/financeStore'
 import { useStockStore } from '../../stores/stockStore'
 import Icon from '../common/Icon.vue'
@@ -135,6 +175,16 @@ const financeStore = useFinanceStore()
 const stockStore = useStockStore()
 
 const queryInput = ref('')
+const isTyping = ref(false)
+const chatContainer = ref(null)
+
+const quickChips = [
+  { label: '📊 Omset & Laba', query: 'Bagaimana analisis omset dan laba bersih bulan ini?' },
+  { label: '📦 Stok Cabang', query: 'Cek kesehatan stok cabang Surabaya dan kebutuhan restock' },
+  { label: '💳 Kas & Utang', query: 'Berapa total kas likuid dan sisa kewajiban utang jatuh tempo?' },
+  { label: '⚡ Ringkasan Cepat', query: 'Berikan ringkasan performa finansial keseluruhan saat ini' }
+]
+
 const chatHistory = ref([
   {
     sender: 'ai',
@@ -146,11 +196,26 @@ function formatNumber(num) {
   return (num || 0).toLocaleString('id-ID')
 }
 
+function scrollToBottom() {
+  nextTick(() => {
+    if (chatContainer.value) {
+      chatContainer.value.scrollTop = chatContainer.value.scrollHeight
+    }
+  })
+}
+
+function sendQuickPrompt(promptText) {
+  queryInput.value = promptText
+  handleSendMessage()
+}
+
 function handleSendMessage() {
-  if (!queryInput.value) return
+  if (!queryInput.value || isTyping.value) return
   const q = queryInput.value
   chatHistory.value.push({ sender: 'user', text: q })
   queryInput.value = ''
+  isTyping.value = true
+  scrollToBottom()
 
   setTimeout(() => {
     let reply = 'Berdasarkan data ledger terkini, semua pencatatan berada dalam kondisi sinkron dan seimbang. Tidak ditemukan selisih transaksi.'
@@ -158,8 +223,12 @@ function handleSendMessage() {
       reply = 'Analisis Stok: Cabang Surabaya Gubeng memiliki stok Kopi dan Sirup di bawah rata-rata penjualan mingguan. Surat jalan terbaru SJ-2026-008 saat ini berstatus IN-TRANSIT menuju Surabaya. Mohon konfirmasi terima barang begitu kurir tiba.'
     } else if (q.toLowerCase().includes('laba') || q.toLowerCase().includes('omset')) {
       reply = `Perhitungan Finansial Presisi: Total omset masuk bulan berjalan tercatat Rp ${formatNumber(financeStore.totalIncome)}, dengan total pengeluaran operasional Rp ${formatNumber(financeStore.totalExpense)}. Laba bersih surplus tercatat Rp ${formatNumber(financeStore.netSavings)}.`
+    } else if (q.toLowerCase().includes('utang') || q.toLowerCase().includes('kas')) {
+      reply = `Arus Kas Likuid: Total kas likuid aktif tercatat Rp ${formatNumber(financeStore.totalBalance)}. Total kewajiban utang aktif Rp ${formatNumber(financeStore.totalUtang)}. Rasio likuiditas Anda sehat untuk operasional bulan ini.`
     }
     chatHistory.value.push({ sender: 'ai', text: reply })
-  }, 400)
+    isTyping.value = false
+    scrollToBottom()
+  }, 500)
 }
 </script>
