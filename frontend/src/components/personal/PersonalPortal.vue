@@ -345,14 +345,24 @@
 
                 <div class="border-t border-slate-100 my-1"></div>
 
-                <!-- Menu 3: Beralih ke Portal Usaha (ERP) -->
+                <!-- Menu 3: Beralih atau Daftarkan Usaha (ERP) -->
                 <button 
+                  v-if="authStore.currentUser?.account_type === 'business'"
                   @click="authStore.setAppMode('business'); isProfileMenuOpen = false"
                   type="button"
                   class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition-colors cursor-pointer font-bold text-left"
                 >
                   <Icon name="building" custom-class="w-4 h-4 text-slate-600" />
                   <span>Beralih ke Portal Usaha (ERP)</span>
+                </button>
+                <button 
+                  v-else
+                  @click="showUpgradeModal = true; isProfileMenuOpen = false"
+                  type="button"
+                  class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-emerald-800 hover:bg-emerald-50 transition-colors cursor-pointer font-bold text-left"
+                >
+                  <Icon name="store" custom-class="w-4 h-4 text-emerald-600" />
+                  <span>Daftarkan Usaha (Buka Portal ERP)</span>
                 </button>
 
                 <!-- Menu 4: Tentang Aplikasi & Panduan -->
@@ -464,7 +474,7 @@
                 </div>
                 <div class="text-[10px] sm:text-[11px] text-emerald-700 font-semibold flex items-center gap-1 truncate">
                   <Icon name="check" custom-class="w-3.5 h-3.5 shrink-0" />
-                  <span class="truncate">Rasio Sehat (39.9%)</span>
+                  <span class="truncate">{{ financeStore.totalIncome > 0 ? `Rasio Tabungan (${savingsRate}%)` : 'Status Bersih (Rp 0)' }}</span>
                 </div>
               </div>
 
@@ -620,24 +630,34 @@
             </div>
           </div>
 
-          <!-- 3 Analytical Cards -->
+          <!-- 3 Analytical Cards Dinamis -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-5">
             <div class="saas-card p-5 sm:p-6 space-y-2 min-w-0">
               <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Rasio Tabungan (Savings Rate)</div>
-              <div class="text-2xl sm:text-3xl font-extrabold text-emerald-700 tracking-tight tabular-nums">39.9%</div>
-              <p class="text-xs text-slate-500">Persentase surplus yang berhasil disisihkan dari total penghasilan</p>
+              <div class="text-2xl sm:text-3xl font-extrabold text-emerald-700 tracking-tight tabular-nums">
+                {{ savingsRate }}%
+              </div>
+              <p class="text-xs text-slate-500">
+                {{ financeStore.totalIncome > 0 ? 'Persentase surplus yang berhasil disisihkan dari total penghasilan' : 'Belum ada pemasukan tercatat bulan ini' }}
+              </p>
             </div>
 
             <div class="saas-card p-5 sm:p-6 space-y-2 min-w-0">
               <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Rata-rata Pengeluaran Harian</div>
-              <div class="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">Rp {{ formatNumber(92600) }}</div>
-              <p class="text-xs text-slate-500">Estimasi konsumsi harian untuk kebutuhan primer</p>
+              <div class="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-ellipsis">
+                Rp {{ formatNumber(dailyAverageExpense) }}
+              </div>
+              <p class="text-xs text-slate-500">
+                {{ financeStore.totalExpense > 0 ? `Rata-rata konsumsi per hari (${currentDayOfMonth} hari berjalan)` : 'Belum ada pengeluaran yang dicatat' }}
+              </p>
             </div>
 
             <div class="saas-card p-5 sm:p-6 space-y-2 min-w-0">
               <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Kesehatan Finansial</div>
-              <div class="text-2xl sm:text-3xl font-extrabold text-teal-700 tracking-tight">PRIMA (A+)</div>
-              <p class="text-xs text-slate-500">Bebas dari defisit dan utang konsumtif yang berlebihan</p>
+              <div :class="['text-2xl sm:text-3xl font-extrabold tracking-tight', financialHealth.color]">
+                {{ financialHealth.grade }}
+              </div>
+              <p class="text-xs text-slate-500">{{ financialHealth.description }}</p>
             </div>
           </div>
 
@@ -648,47 +668,43 @@
                 <h3 class="text-base font-bold text-slate-900">Breakdown Kategori Pengeluaran</h3>
                 <span class="text-xs text-slate-500">Bulan Ini</span>
               </div>
-              <div class="space-y-4">
-                <div>
+
+              <!-- Jika ada transaksi pengeluaran -->
+              <div v-if="expenseBreakdown.length > 0" class="space-y-4">
+                <div v-for="cat in expenseBreakdown" :key="cat.name">
                   <div class="flex justify-between text-xs font-bold text-slate-700 mb-1">
-                    <span>Makan & Minum</span>
-                    <span class="font-mono">45% (Rp 1.250.000)</span>
+                    <span>{{ cat.name }}</span>
+                    <span class="font-mono">{{ cat.percentage }}% (Rp {{ formatNumber(cat.amount) }})</span>
                   </div>
                   <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                    <div class="h-full bg-emerald-600 rounded-full" style="width: 45%"></div>
-                  </div>
-                </div>
-                <div>
-                  <div class="flex justify-between text-xs font-bold text-slate-700 mb-1">
-                    <span>Belanja Kebutuhan Harian</span>
-                    <span class="font-mono">30% (Rp 834.000)</span>
-                  </div>
-                  <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                    <div class="h-full bg-blue-500 rounded-full" style="width: 30%"></div>
-                  </div>
-                </div>
-                <div>
-                  <div class="flex justify-between text-xs font-bold text-slate-700 mb-1">
-                    <span>Tagihan Listrik & Utilitas</span>
-                    <span class="font-mono">15% (Rp 417.000)</span>
-                  </div>
-                  <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                    <div class="h-full bg-amber-500 rounded-full" style="width: 15%"></div>
-                  </div>
-                </div>
-                <div>
-                  <div class="flex justify-between text-xs font-bold text-slate-700 mb-1">
-                    <span>Transportasi & Bensin</span>
-                    <span class="font-mono">10% (Rp 279.000)</span>
-                  </div>
-                  <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                    <div class="h-full bg-rose-500 rounded-full" style="width: 10%"></div>
+                    <div :class="['h-full rounded-full transition-all duration-500', cat.color]" :style="{ width: `${cat.percentage}%` }"></div>
                   </div>
                 </div>
               </div>
+
+              <!-- Jika belum ada pengeluaran (Clean Empty State) -->
+              <div v-else class="py-10 text-center space-y-3">
+                <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+                  <Icon name="receipt" custom-class="w-6 h-6 text-slate-400" />
+                </div>
+                <div class="space-y-1">
+                  <div class="text-sm font-bold text-slate-800">Belum Ada Pengeluaran Bulan Ini</div>
+                  <p class="text-xs text-slate-500 max-w-sm mx-auto">
+                    Kategori pengeluaran akan otomatis dikelompokkan dan dianalisis persentasenya setelah Anda mencatat transaksi.
+                  </p>
+                </div>
+                <button 
+                  @click="openTransactionModal('expense')"
+                  type="button"
+                  class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-colors cursor-pointer"
+                >
+                  <Icon name="plus" custom-class="w-3.5 h-3.5" />
+                  <span>Catat Pengeluaran Pertama</span>
+                </button>
+              </div>
             </div>
 
-            <!-- Rekomendasi Finansial Pintar -->
+            <!-- Rekomendasi Finansial Pintar Dinamis -->
             <div class="saas-card p-6 space-y-4 flex flex-col justify-between">
               <div>
                 <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
@@ -696,13 +712,13 @@
                   <h3 class="text-base font-bold text-slate-900">Insight Asisten Finansial Pintar</h3>
                 </div>
                 <div class="mt-4 space-y-3 text-xs sm:text-sm text-slate-600 leading-relaxed">
-                  <div class="p-3 bg-emerald-50/60 border border-emerald-200/80 rounded-xl">
-                    <strong class="text-emerald-950 block font-bold mb-1">Pola Tabungan Sangat Sehat</strong>
-                    Anda telah menyisihkan 39.9% dari total pendapatan bulan ini ke tabungan. Pertahankan ritme ini untuk dana darurat 6 bulan.
-                  </div>
-                  <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
-                    <strong class="text-slate-900 block font-bold mb-1">Pengingat Utang Jatuh Tempo</strong>
-                    Terdapat 1 kewajiban utang jatuh tempo dalam 2 minggu ke depan. Saldo di rekening Mandiri mencukupi untuk pelunasan.
+                  <div 
+                    v-for="(insight, idx) in dynamicAiInsights" 
+                    :key="idx"
+                    :class="['p-3 rounded-xl border', insight.bgClass]"
+                  >
+                    <strong :class="['block font-bold mb-1', insight.titleClass]">{{ insight.title }}</strong>
+                    <span>{{ insight.content }}</span>
                   </div>
                 </div>
               </div>
@@ -1872,6 +1888,13 @@
       :is-open="showAboutModal" 
       @close="showAboutModal = false" 
     />
+
+    <!-- Modal Upgrade Resmi ke Portal Usaha ERP (RBAC Safe) -->
+    <UpgradeBusinessModal 
+      :is-open="showUpgradeModal"
+      @close="showUpgradeModal = false"
+      @success="handleUpgradeSuccess"
+    />
   </div>
 </template>
 
@@ -1886,6 +1909,7 @@ import AppSettingsView from '../settings/AppSettingsView.vue'
 import QrisActionModal from './QrisActionModal.vue'
 import ExcelMutationReportModal from './ExcelMutationReportModal.vue'
 import AboutModal from '../about/AboutModal.vue'
+import UpgradeBusinessModal from './UpgradeBusinessModal.vue'
 
 defineEmits(['toggle-ai'])
 
@@ -1898,8 +1922,162 @@ const isProfileMenuOpen = ref(false)
 const showQrisModal = ref(false)
 const showExcelReportModal = ref(false)
 const showAboutModal = ref(false)
+const showUpgradeModal = ref(false)
 const activeTab = ref('overview')
 const filterType = ref('all')
+
+function handleUpgradeSuccess() {
+  showUpgradeModal.value = false
+}
+
+// ----------------------------------------------------
+// ANALISIS FINANSIAL REAKTIF (Zero-Hallucination & Anti-Leak)
+// ----------------------------------------------------
+const currentDayOfMonth = computed(() => Math.max(1, new Date().getDate()))
+
+const savingsRate = computed(() => {
+  if (!financeStore.totalIncome || financeStore.totalIncome <= 0) return 0
+  const rate = ((financeStore.totalIncome - financeStore.totalExpense) / financeStore.totalIncome) * 100
+  return Math.max(0, Math.round(rate * 10) / 10)
+})
+
+const dailyAverageExpense = computed(() => {
+  if (!financeStore.totalExpense || financeStore.totalExpense <= 0) return 0
+  return Math.round(financeStore.totalExpense / currentDayOfMonth.value)
+})
+
+const financialHealth = computed(() => {
+  if (financeStore.transactions.length === 0) {
+    return {
+      grade: 'BERSIH (BARU)',
+      color: 'text-emerald-700',
+      description: 'Akun baru aktif dengan pembukuan bersih. Siap dialokasikan.'
+    }
+  }
+  if (financeStore.totalExpense > financeStore.totalIncome) {
+    return {
+      grade: 'DEFISIT (C)',
+      color: 'text-rose-600',
+      description: 'Pengeluaran melebihi total pemasukan bulan ini.'
+    }
+  }
+  if (savingsRate.value >= 30) {
+    return {
+      grade: 'PRIMA (A+)',
+      color: 'text-emerald-700',
+      description: 'Pola tabungan sangat prima dan terbebas dari defisit.'
+    }
+  }
+  if (savingsRate.value >= 10) {
+    return {
+      grade: 'SEHAT (A)',
+      color: 'text-teal-700',
+      description: 'Kondisi finansial stabil dengan rasio tabungan memadai.'
+    }
+  }
+  return {
+    grade: 'CUKUP (B)',
+    color: 'text-amber-700',
+    description: 'Pengeluaran mendekati pemasukan. Pertahankan penghematan.'
+  }
+})
+
+const CATEGORY_COLORS = [
+  'bg-emerald-600',
+  'bg-blue-500',
+  'bg-amber-500',
+  'bg-rose-500',
+  'bg-purple-500',
+  'bg-teal-500'
+]
+
+const expenseBreakdown = computed(() => {
+  const expenses = financeStore.transactions.filter(t => t.type === 'expense')
+  if (expenses.length === 0 || financeStore.totalExpense <= 0) return []
+
+  const groupMap = {}
+  expenses.forEach(t => {
+    const cat = t.category || 'Lainnya'
+    groupMap[cat] = (groupMap[cat] || 0) + Number(t.amount || 0)
+  })
+
+  return Object.entries(groupMap)
+    .map(([name, amount], index) => {
+      const percentage = Math.round((amount / financeStore.totalExpense) * 100)
+      return {
+        name,
+        amount,
+        percentage,
+        color: CATEGORY_COLORS[index % CATEGORY_COLORS.length]
+      }
+    })
+    .sort((a, b) => b.amount - a.amount)
+})
+
+const dynamicAiInsights = computed(() => {
+  if (financeStore.transactions.length === 0) {
+    return [
+      {
+        title: 'Status Pembukuan Bersih (Rp 0)',
+        content: 'Selamat datang di CAKUE Pribadi! Akun dompet Anda siap digunakan. Silakan mulai catat pemasukan dan pengeluaran harian.',
+        bgClass: 'bg-emerald-50/70 border-emerald-200',
+        titleClass: 'text-emerald-950'
+      },
+      {
+        title: 'Pencatatan Cepat & Instan',
+        content: 'Gunakan tombol shortcut Catat Cepat di dashboard untuk input transaksi kilat dengan sinkronisasi buku kas real-time.',
+        bgClass: 'bg-slate-50 border-slate-200',
+        titleClass: 'text-slate-900'
+      }
+    ]
+  }
+
+  const insights = []
+  if (savingsRate.value >= 20) {
+    insights.push({
+      title: 'Pola Tabungan Sehat',
+      content: `Anda berhasil menyisihkan ${savingsRate.value}% dari total pemasukan bulan ini ke tabungan. Pertahankan ritme ini.`,
+      bgClass: 'bg-emerald-50/70 border-emerald-200',
+      titleClass: 'text-emerald-950'
+    })
+  } else if (financeStore.totalExpense > financeStore.totalIncome) {
+    insights.push({
+      title: 'Peringatan Defisit Pengeluaran',
+      content: 'Pengeluaran bulan ini telah melampaui total pemasukan. Tinjau kembali kategori pengeluaran terbesar Anda.',
+      bgClass: 'bg-rose-50 border-rose-200',
+      titleClass: 'text-rose-900'
+    })
+  } else {
+    insights.push({
+      title: 'Arus Kas Terkendali',
+      content: 'Pengeluaran masih dalam batas pemasukan. Tingkatkan alokasi ke tabungan untuk memperkuat dana darurat.',
+      bgClass: 'bg-teal-50/70 border-teal-200',
+      titleClass: 'text-teal-950'
+    })
+  }
+
+  // Cek utang piutang aktif
+  const activeDebts = financeStore.debts.filter(d => d.type === 'utang' && (d.total - d.paid) > 0)
+  if (activeDebts.length > 0) {
+    const first = activeDebts[0]
+    const remaining = first.total - first.paid
+    insights.push({
+      title: 'Pengingat Kewajiban Utang',
+      content: `Terdapat kewajiban kepada ${first.contact} sebesar Rp ${formatNumber(remaining)} (Jatuh tempo: ${first.dueDate || '-'}).`,
+      bgClass: 'bg-amber-50/70 border-amber-200',
+      titleClass: 'text-amber-950'
+    })
+  } else {
+    insights.push({
+      title: 'Kewajiban Utang Terkelola Baik',
+      content: 'Tidak ada kewajiban utang jatuh tempo yang menumpuk. Rekam kewajiban di Buku Utang & Piutang jika ada pinjaman.',
+      bgClass: 'bg-slate-50 border-slate-200',
+      titleClass: 'text-slate-900'
+    })
+  }
+
+  return insights
+})
 
 // State Buka-Tutup Sidebar Personal (Persisten di LocalStorage)
 const isSidebarCollapsed = ref(localStorage.getItem('cakue_personal_sidebar_collapsed') === 'true')

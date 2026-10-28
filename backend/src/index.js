@@ -309,8 +309,8 @@ app.post('/api/auth/register', async (req, res) => {
       }
     }
 
-    // Validasi branch_id jika ada
-    let validBranchId = branch_id || (accType === 'business' ? 'jogja-1' : null)
+    // Validasi branch_id jika ada (Akun personal murni tidak terikat ke cabang toko)
+    let validBranchId = accType === 'personal' ? null : (branch_id || 'jogja-1')
     if (validBranchId) {
       const branchCheck = await pool.query('SELECT id FROM branches WHERE id = $1', [validBranchId])
       if (branchCheck.rows.length === 0) {
@@ -499,9 +499,11 @@ app.post('/api/auth/register-google', async (req, res) => {
     }
 
     const newUserId = `usr-g-${Date.now().toString(36)}`
-    const assignedRole = email === 'admin@cakue.id' ? 'superadmin' : (role || (account_type === 'personal' ? 'personal' : 'owner'))
     const assignedType = account_type || 'business'
-    const assignedBranch = branch_id || 'jogja-1'
+    const assignedRole = email === 'admin@cakue.id' 
+      ? 'superadmin' 
+      : (assignedType === 'personal' ? 'personal' : (role || 'owner'))
+    const assignedBranch = assignedType === 'personal' ? null : (branch_id || 'jogja-1')
     const passwordHash = bcrypt.hashSync(password, 10)
 
     await pool.query(`
@@ -541,6 +543,73 @@ app.post('/api/auth/register-google', async (req, res) => {
     })
   } catch (err) {
     console.error('[REGISTER GOOGLE ERROR]:', err)
+    res.status(500).json({ success: false, error: err.message })
+  }
+})
+
+// 12. Endpoint Upgrade Akun Pribadi ke Akun Usaha (ERP) Resmi (RBAC-Safe)
+app.post('/api/auth/upgrade-business', authenticateToken, async (req, res) => {
+  const userId = req.user.id
+  const { companyName, branchName, city, address, phone } = req.body
+
+  if (!companyName || !companyName.trim()) {
+    return res.status(400).json({ success: false, message: 'Nama usaha / bisnis wajib diisi!' })
+  }
+
+  try {
+    const userCheck = await pool.query('SELECT * FROM users WHERE id = $1', [userId])
+    if (userCheck.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Pengguna tidak ditemukan.' })
+    }
+
+    const branchId = `br-${Date.now().toString(36)}`
+    const finalBranchName = (branchName || `Cabang Utama - ${companyName}`).trim()
+    const finalAddress = (address || (city ? `Kawasan Bisnis, ${city}` : 'Pusat Operasional')).trim()
+
+    // 1. Daftarkan cabang baru untuk tenant usaha ini
+    await pool.query(`
+      INSERT INTO branches (id, name, type, address)
+      VALUES ($1, $2, 'branch', $3)
+      ON CONFLICT (id) DO NOTHING
+    `, [branchId, finalBranchName, finalAddress])
+
+    // 2. Perbarui hak akses user menjadi Owner Usaha
+    const updateRes = await pool.query(`
+      UPDATE users 
+      SET account_type = 'business',
+          role = 'owner',
+          branch_id = $1,
+          phone = COALESCE(NULLIF($2, ''), phone)
+      WHERE id = $3
+      RETURNING id, username, email, name, phone, phone_verified, is_profile_complete, account_type, role, branch_id, avatar_url, created_at, last_login
+    `, [branchId, phone || null, userId])
+
+    const updatedUser = updateRes.rows[0]
+    updatedUser.branch_name = finalBranchName
+    updatedUser.companyName = companyName.trim()
+
+    // 3. Terbitkan token baru dengan claim business owner
+    const token = jwt.sign(
+      {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        username: updatedUser.username,
+        role: updatedUser.role,
+        branch_id: updatedUser.branch_id,
+        account_type: updatedUser.account_type
+      },
+      JWT_SECRET,
+      { expiresIn: '30d' }
+    )
+
+    res.json({
+      success: true,
+      message: `Selamat! Akun Anda berhasil di-upgrade ke Portal Usaha (${companyName}).`,
+      token,
+      user: updatedUser
+    })
+  } catch (err) {
+    console.error('[UPGRADE BUSINESS ERROR]:', err)
     res.status(500).json({ success: false, error: err.message })
   }
 })

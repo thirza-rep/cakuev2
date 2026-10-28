@@ -180,11 +180,23 @@ export const useAuthStore = defineStore('auth', () => {
     }
   })
 
+  // Helper ID akun personal / rekening nasabah unik (Cegah kebocoran dummy rekening)
+  function formatAccountNumber(u) {
+    if (u?.phone && String(u.phone).trim().length > 4) {
+      return String(u.phone).trim()
+    }
+    if (u?.id) {
+      const cleanId = String(u.id).replace(/^usr(-g)?-/, '').toUpperCase().slice(0, 8)
+      return `CKP-${cleanId}`
+    }
+    return 'CKP-PRIBADI'
+  }
+
   // Data Pengguna Sesuai Jenis Akun
   const personalUser = ref({
     name: parsedUser?.account_type === 'personal' ? parsedUser.name : 'Pengguna Personal',
     email: parsedUser?.account_type === 'personal' ? parsedUser.email : '',
-    accountNumber: parsedUser?.phone || '5420-8819-2041',
+    accountNumber: formatAccountNumber(parsedUser),
     role: 'Nasabah Pribadi',
     joinedDate: 'Oktober 2026'
   })
@@ -342,19 +354,58 @@ export const useAuthStore = defineStore('auth', () => {
   watch(branches, (val) => localStorage.setItem('cakue_branches', JSON.stringify(val)), { deep: true })
 
   // RBAC Helpers & Getters
+  const isPersonalUser = computed(() => {
+    return accountType.value === 'personal' || currentUser.value?.account_type === 'personal'
+  })
+
   const currentRoleConfig = computed(() => {
-    return ROLES[activeBusinessRole.value.toUpperCase()] || ROLES.SUPERADMIN
+    if (isPersonalUser.value) {
+      return {
+        id: 'personal',
+        title: 'Nasabah Pribadi',
+        badge: 'Personal User',
+        color: 'bg-emerald-100 text-emerald-800 border-emerald-300 font-bold',
+        allowedModules: ['overview', 'quick-record', 'analytics', 'mutations', 'excel-report', 'pockets', 'debts', 'profile'],
+        defaultModule: 'overview',
+        canSwitchBranch: false,
+        canExportReports: false,
+        canViewFinancialAudit: false,
+        canManageStock: false,
+        canAddProduct: false,
+        canEditProductPrice: false,
+        canSyncStockToFinance: false,
+        canDeleteProduct: false,
+        canManageStaff: false,
+        canManageBranches: false,
+        canDeleteBranch: false,
+        canEditAppBranding: false,
+        canEditFinancialSettings: false,
+        canManageAssets: false,
+        canDeleteAsset: false,
+        canRunDepreciation: false,
+        canManageOwners: false,
+        canSuperviseTenant: false,
+        description: 'Pengguna catatan keuangan dompet pribadi'
+      }
+    }
+    const roleKey = (activeBusinessRole.value || '').toUpperCase()
+    return ROLES[roleKey] || ROLES.CASHIER
   })
 
   const isSuperAdmin = computed(() => {
+    if (isPersonalUser.value) return false
     return activeBusinessRole.value === 'superadmin' || 
            businessUser.value?.email === 'admin@cakue.id' ||
-           Boolean(currentRoleConfig.value?.canManageOwners)
+           currentUser.value?.email === 'admin@cakue.id' ||
+           currentUser.value?.role === 'superadmin'
   })
-  const isOwner = computed(() => activeBusinessRole.value === 'owner' || isSuperAdmin.value)
-  const isManager = computed(() => activeBusinessRole.value === 'manager')
-  const isCashier = computed(() => activeBusinessRole.value === 'cashier')
-  const isWarehouse = computed(() => activeBusinessRole.value === 'warehouse')
+  const isOwner = computed(() => {
+    if (isPersonalUser.value) return false
+    return activeBusinessRole.value === 'owner' || currentUser.value?.role === 'owner' || isSuperAdmin.value
+  })
+  const isManager = computed(() => !isPersonalUser.value && (activeBusinessRole.value === 'manager' || currentUser.value?.role === 'manager'))
+  const isCashier = computed(() => !isPersonalUser.value && (activeBusinessRole.value === 'cashier' || currentUser.value?.role === 'cashier'))
+  const isWarehouse = computed(() => !isPersonalUser.value && (activeBusinessRole.value === 'warehouse' || currentUser.value?.role === 'warehouse'))
 
   const canExportReports = computed(() => Boolean(currentRoleConfig.value.canExportReports))
   const canViewFinancialAudit = computed(() => Boolean(currentRoleConfig.value.canViewFinancialAudit))
@@ -550,8 +601,12 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function setAppMode(type) {
+    if (type === 'business' && currentUser.value?.account_type === 'personal') {
+      return { allowed: false, message: 'Akun Anda adalah akun Nasabah Pribadi. Silakan gunakan formulir Daftarkan Usaha untuk upgrade resmi.' }
+    }
     accountType.value = type
     localStorage.setItem('cakue_account_type', type)
+    return { allowed: true }
   }
 
   async function loadBranchesFromServer() {
@@ -602,7 +657,7 @@ export const useAuthStore = defineStore('auth', () => {
             id: u.id,
             name: u.name,
             email: u.email,
-            accountNumber: u.phone || '5420-8819-2041',
+            accountNumber: formatAccountNumber(u),
             role: 'Nasabah Pribadi',
             joinedDate: 'Oktober 2026'
           }
@@ -728,7 +783,7 @@ export const useAuthStore = defineStore('auth', () => {
               name: u.name,
               email: u.email,
               username: u.username,
-              accountNumber: u.phone || '5420-8819-2041',
+              accountNumber: formatAccountNumber(u),
               role: 'Nasabah Pribadi',
               joinedDate: 'Oktober 2026'
             }
@@ -866,7 +921,7 @@ export const useAuthStore = defineStore('auth', () => {
             name: u.name,
             email: u.email,
             username: u.username,
-            accountNumber: u.phone || '5420-8819-2041',
+            accountNumber: formatAccountNumber(u),
             role: 'Nasabah Pribadi',
             joinedDate: 'Oktober 2026'
           }
@@ -985,7 +1040,7 @@ export const useAuthStore = defineStore('auth', () => {
             id: u.id,
             name: u.name,
             email: u.email,
-            accountNumber: u.phone || '5420-8819-2041',
+            accountNumber: formatAccountNumber(u),
             role: 'Nasabah Pribadi',
             joinedDate: 'Oktober 2026'
           }
@@ -1104,6 +1159,48 @@ export const useAuthStore = defineStore('auth', () => {
     syncAllStores(null)
   }
 
+  async function upgradeToBusiness({ companyName, branchName, city, address, phone }) {
+    try {
+      const res = await api.post('/api/auth/upgrade-business', {
+        companyName,
+        branchName,
+        city,
+        address,
+        phone
+      })
+
+      if (res.success && res.user) {
+        const u = res.user
+        currentUser.value = u
+        accountType.value = 'business'
+        setBusinessRole('owner')
+        businessUser.value = {
+          id: u.id,
+          name: u.name,
+          email: u.email,
+          username: u.username,
+          companyName: u.companyName || companyName,
+          role: 'Owner & Direktur Bisnis',
+          currentBranch: u.branch_name || 'Cabang Utama'
+        }
+
+        if (res.token) {
+          localStorage.setItem('cakue_auth_token', res.token)
+        }
+        localStorage.setItem('cakue_current_user', JSON.stringify(u))
+        localStorage.setItem('cakue_account_type', 'business')
+        localStorage.setItem('cakue_current_branch', u.branch_name || 'Cabang Utama')
+
+        syncAllStores(u)
+        return { success: true, message: res.message, user: u }
+      } else {
+        return { success: false, message: res.message || 'Gagal upgrade ke akun bisnis.' }
+      }
+    } catch (err) {
+      return { success: false, message: `Gagal upgrade ke akun bisnis: ${err.message}` }
+    }
+  }
+
   return {
     currentUser,
     pendingGoogleData,
@@ -1166,6 +1263,8 @@ export const useAuthStore = defineStore('auth', () => {
     switchToAccount,
     register,
     logout,
-    loadBranchesFromServer
+    loadBranchesFromServer,
+    upgradeToBusiness,
+    formatAccountNumber
   }
 })
