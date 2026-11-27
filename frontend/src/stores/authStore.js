@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
+import { Capacitor } from '@capacitor/core'
 import { api } from '../api/client.js'
 import { useFinanceStore } from './financeStore'
 import { useStockStore } from './stockStore'
@@ -844,11 +845,25 @@ export const useAuthStore = defineStore('auth', () => {
               if (notification.isNotDisplayed()) {
                 const reason = notification.getNotDisplayedReason()
                 console.warn('[GSI] Prompt not displayed:', reason)
+
+                const isNative = Capacitor.isNativePlatform()
+                const currentOrigin = isNative ? 'https://cakue.codevits.site' : (window.location.origin || 'https://cakue.codevits.site')
+
+                if (isNative || reason === 'browser_not_supported') {
+                  resolve({
+                    success: false,
+                    isNativeWebView: true,
+                    origin: currentOrigin,
+                    message: 'Google Sign-In One-Tap dibatasi di WebView Android oleh Google. Silakan masuk menggunakan Email & Kata Sandi, atau buka cakue.codevits.site di browser Chrome.'
+                  })
+                  return
+                }
+
                 resolve({ 
                   success: false, 
                   needsOriginWhitelist: true,
-                  origin: window.location.origin,
-                  message: `Origin ${window.location.origin} belum didaftarkan di Authorized JavaScript origins Google Cloud Console (Client ID: ${clientId}).` 
+                  origin: currentOrigin,
+                  message: `Origin ${currentOrigin} belum didaftarkan di Authorized JavaScript origins Google Cloud Console (Client ID: ${clientId}).` 
                 })
               } else if (notification.isSkippedMoment()) {
                 resolve({ success: false, message: 'Login Google dibatalkan oleh pengguna.' })

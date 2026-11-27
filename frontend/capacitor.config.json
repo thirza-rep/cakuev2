@@ -3,6 +3,7 @@
   "appName": "CAKUE",
   "webDir": "dist",
   "server": {
+    "hostname": "cakue.codevits.site",
     "androidScheme": "https",
     "cleartext": true
   }

@@ -253,6 +253,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { Capacitor } from '@capacitor/core'
 import { useAuthStore } from '../../stores/authStore'
 import { getServerUrl, setServerUrl, checkServerHealth } from '../../api/client.js'
 import Icon from '../common/Icon.vue'
@@ -276,7 +277,7 @@ const showServerConfig = ref(false)
 const currentServerUrl = ref('')
 const customServerUrl = ref('')
 const isServerOnline = ref(false)
-const detectedOrigin = ref(typeof window !== 'undefined' ? window.location.origin : 'http://192.168.1.13:5173')
+const detectedOrigin = ref(typeof window !== 'undefined' ? (Capacitor.isNativePlatform() ? 'https://cakue.codevits.site' : window.location.origin) : 'https://cakue.codevits.site')
 const copiedOrigin = ref(false)
 
 onMounted(async () => {
@@ -285,7 +286,7 @@ onMounted(async () => {
   const health = await checkServerHealth()
   isServerOnline.value = health.ok
   if (typeof window !== 'undefined') {
-    detectedOrigin.value = window.location.origin
+    detectedOrigin.value = Capacitor.isNativePlatform() ? 'https://cakue.codevits.site' : window.location.origin
   }
 })
 
@@ -304,7 +305,9 @@ async function handleGoogleLogin() {
         showCredentialModal.value = true
       }
     } else {
-      if (res.needsOriginWhitelist) {
+      if (res.isNativeWebView) {
+        errorMessage.value = res.message
+      } else if (res.needsOriginWhitelist) {
         showOriginModal.value = true
       } else {
         errorMessage.value = res.message || 'Login dengan Google dibatalkan atau gagal.'

@@ -289,6 +289,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { Capacitor } from '@capacitor/core'
 import { useAuthStore } from '../../stores/authStore'
 import Icon from '../common/Icon.vue'
 import GoogleCredentialModal from './GoogleCredentialModal.vue'
@@ -309,7 +310,7 @@ const isGoogleLoading = ref(false)
 const showOriginModal = ref(false)
 const showCredentialModal = ref(false)
 const pendingGoogleData = ref(null)
-const detectedOrigin = ref(typeof window !== 'undefined' ? window.location.origin : 'http://192.168.1.13:5173')
+const detectedOrigin = ref(typeof window !== 'undefined' ? (Capacitor.isNativePlatform() ? 'https://cakue.codevits.site' : window.location.origin) : 'https://cakue.codevits.site')
 const copiedOrigin = ref(false)
 
 // Real-Time Validation Rules (Nielsen Heuristic #5 Error Prevention)
@@ -330,7 +331,7 @@ const isFormValid = computed(() => {
 
 onMounted(() => {
   if (typeof window !== 'undefined') {
-    detectedOrigin.value = window.location.origin
+    detectedOrigin.value = Capacitor.isNativePlatform() ? 'https://cakue.codevits.site' : window.location.origin
   }
 })
 
@@ -350,7 +351,9 @@ async function handleGoogleRegister() {
         showCredentialModal.value = true
       }
     } else {
-      if (res.needsOriginWhitelist) {
+      if (res.isNativeWebView) {
+        errorMessage.value = res.message
+      } else if (res.needsOriginWhitelist) {
         showOriginModal.value = true
       } else {
         errorMessage.value = res.message || 'Pendaftaran via Google dibatalkan atau gagal.'
