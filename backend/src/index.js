@@ -374,10 +374,31 @@ app.post('/api/auth/google', async (req, res) => {
         avatar_url = tokenInfo.picture || ''
         google_id = tokenInfo.sub
       } else {
-        console.warn('[GOOGLE AUTH] Google tokeninfo status:', verifyRes.status)
+        console.warn('[GOOGLE AUTH] Google id_token tokeninfo status:', verifyRes.status)
       }
     } catch (e) {
-      console.warn('[GOOGLE AUTH] Warning tokeninfo fetch:', e.message)
+      console.warn('[GOOGLE AUTH] Warning id_token tokeninfo fetch:', e.message)
+    }
+
+    // 2. Verifikasi Access Token via Google OAuth2 UserInfo Endpoint resmi (Popup Token Flow)
+    if (!email) {
+      try {
+        const userinfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${credential}` },
+          signal: AbortSignal.timeout(5000)
+        })
+        if (userinfoRes.ok) {
+          const userinfo = await userinfoRes.json()
+          email = (userinfo.email || '').toLowerCase().trim()
+          name = userinfo.name || userinfo.given_name || email.split('@')[0]
+          avatar_url = userinfo.picture || ''
+          google_id = userinfo.sub
+        } else {
+          console.warn('[GOOGLE AUTH] Google access_token userinfo status:', userinfoRes.status)
+        }
+      } catch (e) {
+        console.warn('[GOOGLE AUTH] Warning access_token userinfo fetch:', e.message)
+      }
     }
 
     // 2. Proteksi F-003: Cegah pemalsuan JWT unverified base64

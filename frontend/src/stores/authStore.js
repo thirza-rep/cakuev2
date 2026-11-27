@@ -832,6 +832,40 @@ export const useAuthStore = defineStore('auth', () => {
       }
 
       const launchGsi = () => {
+        // PRIORITAS 1: Google OAuth2 Token Client Popup Resmi
+        // Langsung membuka popup akun Google resmi tanpa terblokir FedCM atau passive One-Tap suppression
+        if (window.google?.accounts?.oauth2?.initTokenClient) {
+          try {
+            const tokenClient = window.google.accounts.oauth2.initTokenClient({
+              client_id: clientId,
+              scope: 'openid email profile',
+              callback: async (tokenResponse) => {
+                if (tokenResponse && tokenResponse.access_token) {
+                  const result = await loginWithGoogle(tokenResponse.access_token, options)
+                  resolve(result)
+                } else if (tokenResponse?.error) {
+                  resolve({ success: false, message: `Otorisasi Google gagal: ${tokenResponse.error}` })
+                } else {
+                  resolve({ success: false, message: 'Google tidak mengembalikan token otorisasi.' })
+                }
+              },
+              error_callback: (err) => {
+                console.warn('[GSI OAuth2 Error]', err)
+                resolve({ 
+                  success: false, 
+                  message: `Login Google dibatalkan atau ditutup: ${err.message || err.type || 'Akses ditutup'}` 
+                })
+              }
+            })
+
+            tokenClient.requestAccessToken({ prompt: 'select_account' })
+            return
+          } catch (e) {
+            console.warn('[GSI] initTokenClient gagal, fallback ke id.prompt:', e)
+          }
+        }
+
+        // PRIORITAS 2 (Fallback): Google One Tap prompt
         if (window.google?.accounts?.id) {
           try {
             window.google.accounts.id.initialize({
