@@ -16,6 +16,10 @@
   <a href="https://cakue.codevits.site"><img src="https://img.shields.io/badge/Live%20Web-cakue.codevits.site-emerald" alt="Live Web App" /></a>
 </p>
 
+<p align="center">
+  <img src="mockups/cakue_hero_showcase.jpg" width="100%" style="border-radius: 12px;" alt="CAKUE 3D Product Showcase Mockup" />
+</p>
+
 ---
 
 > [!NOTE]
