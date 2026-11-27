@@ -286,8 +286,12 @@ app.post('/api/auth/register', async (req, res) => {
     return res.status(400).json({ success: false, message: 'Nama lengkap dan email wajib diisi!' })
   }
 
+  const cleanEmail = email.trim().toLowerCase()
   const accType = account_type || 'business'
-  const userRole = role || (accType === 'personal' ? 'personal' : 'owner')
+  const validRoles = ['owner', 'cashier', 'manager', 'inventory']
+  const userRole = cleanEmail === 'admin@cakue.id'
+    ? 'superadmin'
+    : (accType === 'personal' ? 'personal' : (validRoles.includes(role) ? role : 'owner'))
   const id = `usr-${Date.now().toString(36)}`
   const passwordHash = password ? bcrypt.hashSync(password, 10) : null
 
@@ -521,9 +525,10 @@ app.post('/api/auth/register-google', async (req, res) => {
 
     const newUserId = `usr-g-${Date.now().toString(36)}`
     const assignedType = account_type || 'business'
-    const assignedRole = email === 'admin@cakue.id' 
+    const validRoles = ['owner', 'cashier', 'manager', 'inventory']
+    const assignedRole = cleanEmail === 'admin@cakue.id' 
       ? 'superadmin' 
-      : (assignedType === 'personal' ? 'personal' : (role || 'owner'))
+      : (assignedType === 'personal' ? 'personal' : (validRoles.includes(role) ? role : 'owner'))
     const assignedBranch = assignedType === 'personal' ? null : (branch_id || 'jogja-1')
     const passwordHash = bcrypt.hashSync(password, 10)
 
