@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  <img src="mockups/cakue_hero_showcase.jpg" width="100%" style="border-radius: 12px;" alt="CAKUE 3D Product Showcase Mockup" />
+  <img src="mockups/cakue_authentic_pos_showcase.png" width="100%" style="border-radius: 12px;" alt="CAKUE Authentic 3D Product Showcase Mockup" />
 </p>
 
 ---
