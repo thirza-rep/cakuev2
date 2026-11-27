@@ -112,8 +112,8 @@ function getActiveEmail() {
 }
 
 function isDemoUser(email) {
-  const e = (email || getActiveEmail()).toLowerCase()
-  return e === 'budi.santoso@cakue.id' || e.includes('budi')
+  const e = (email || getActiveEmail()).toLowerCase().trim()
+  return e === 'budi.santoso@cakue.id' || e === 'demo@cakue.id'
 }
 
 function getStockStorageKey(email) {

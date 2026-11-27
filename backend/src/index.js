@@ -136,7 +136,7 @@ app.get('/api/transactions', async (req, res) => {
 // 5. AI Data Aggregator Endpoint (Deterministic aggregates passed to LLM)
 app.get('/api/ai/metrics-summary', (req, res) => {
   const email = (req.query.email || '').toLowerCase().trim()
-  const isDemo = email === 'budi.santoso@cakue.id' || email.includes('budi')
+  const isDemo = email === 'budi.santoso@cakue.id' || email === 'demo@cakue.id'
 
   if (!isDemo && email) {
     return res.json({

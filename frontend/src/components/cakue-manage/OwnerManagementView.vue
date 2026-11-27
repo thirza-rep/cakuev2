@@ -197,7 +197,7 @@
                   <div>
                     <div class="font-black text-slate-900 flex items-center gap-1.5">
                       <span>{{ owner.name }}</span>
-                      <span v-if="owner.email.includes('budi')" class="text-[9px] font-mono px-1.5 py-0.2 rounded-sm bg-purple-100 text-purple-800 font-bold">
+                      <span v-if="owner.email === 'budi.santoso@cakue.id' || owner.email.startsWith('demo@')" class="text-[9px] font-mono px-1.5 py-0.2 rounded-sm bg-purple-100 text-purple-800 font-bold">
                         Demo
                       </span>
                     </div>

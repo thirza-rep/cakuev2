@@ -2172,8 +2172,8 @@ const DUMMY_RD_PROJECTS = [
 ]
 
 const isDemoAccount = computed(() => {
-  const email = (authStore.user?.email || '').toLowerCase()
-  return email === 'budi.santoso@cakue.id' || email.includes('budi')
+  const email = (authStore.user?.email || '').toLowerCase().trim()
+  return email === 'budi.santoso@cakue.id' || email === 'demo@cakue.id'
 })
 
 const rdProjects = computed(() => {
